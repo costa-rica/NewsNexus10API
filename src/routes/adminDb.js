@@ -25,6 +25,7 @@ const {
   WebsiteDomain,
   ArticleEntityWhoCategorizedArticleContract,
   ArticleEntityWhoCategorizedArticleContracts02,
+  ArticlesApproved02,
 } = require("newsnexus10db");
 
 const models = {
@@ -52,6 +53,7 @@ const models = {
   WebsiteDomain,
   ArticleEntityWhoCategorizedArticleContract,
   ArticleEntityWhoCategorizedArticleContracts02,
+  ArticlesApproved02,
 };
 
 const fs = require("fs");
