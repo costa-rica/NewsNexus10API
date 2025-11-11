@@ -1,6 +1,6 @@
-# API Reference - News Nexus API 09 Articles
+# API Reference - News Nexus 10 API Articles
 
-This document provides comprehensive documentation for all article management endpoints in the News Nexus API 09 service.
+This document provides comprehensive documentation for all article management endpoints in the News Nexus 10 API service.
 
 ## Articles Endpoints
 
@@ -28,10 +28,10 @@ Retrieves a filtered list of articles based on optional query parameters. Return
 
 **Request Body Fields:**
 
-| Field                              | Type    | Required | Description                                              |
-| ---------------------------------- | ------- | -------- | -------------------------------------------------------- |
-| returnOnlyThisPublishedDateOrAfter | string  | No       | ISO 8601 date - only return articles published on or after this date |
-| returnOnlyIsNotApproved            | boolean | No       | If true, only return articles that have NOT been approved |
+| Field                              | Type    | Required | Description                                                                                     |
+| ---------------------------------- | ------- | -------- | ----------------------------------------------------------------------------------------------- |
+| returnOnlyThisPublishedDateOrAfter | string  | No       | ISO 8601 date - only return articles published on or after this date                            |
+| returnOnlyIsNotApproved            | boolean | No       | If true, only return articles that have NOT been approved                                       |
 | returnOnlyIsRelevant               | boolean | No       | If true, only return articles marked as relevant (excludes articles in ArticleIsRelevant table) |
 
 **Description:**
@@ -154,19 +154,19 @@ curl -X POST http://localhost:8001/articles \
 
 **Article Object Fields:**
 
-| Field                        | Type    | Description                                                     |
-| ---------------------------- | ------- | --------------------------------------------------------------- |
-| id                           | number  | Unique article identifier                                       |
-| title                        | string  | Article headline                                                |
-| description                  | string  | Article summary or excerpt                                      |
-| publishedDate                | string  | ISO 8601 timestamp when article was published                   |
-| url                          | string  | Full URL to the article source                                  |
-| States                       | array   | Array of state objects associated with this article             |
-| statesStringCommaSeparated   | string  | Comma-separated state abbreviations (e.g., "CA, NY")            |
-| ArticleIsRelevant            | boolean | true if article is relevant (false if in ArticleIsRelevant table) |
-| articleIsApproved            | boolean | true if article has ANY row in ArticleApproveds table           |
-| keyword                      | string  | Formatted search keywords used to find this article             |
-| NewsApiRequest               | object  | Original search parameters (andString, orString, notString)     |
+| Field                      | Type    | Description                                                       |
+| -------------------------- | ------- | ----------------------------------------------------------------- |
+| id                         | number  | Unique article identifier                                         |
+| title                      | string  | Article headline                                                  |
+| description                | string  | Article summary or excerpt                                        |
+| publishedDate              | string  | ISO 8601 timestamp when article was published                     |
+| url                        | string  | Full URL to the article source                                    |
+| States                     | array   | Array of state objects associated with this article               |
+| statesStringCommaSeparated | string  | Comma-separated state abbreviations (e.g., "CA, NY")              |
+| ArticleIsRelevant          | boolean | true if article is relevant (false if in ArticleIsRelevant table) |
+| articleIsApproved          | boolean | true if article has ANY row in ArticleApproveds table             |
+| keyword                    | string  | Formatted search keywords used to find this article               |
+| NewsApiRequest             | object  | Original search parameters (andString, orString, notString)       |
 
 **Filter Behavior:**
 
@@ -344,29 +344,31 @@ curl -X GET http://localhost:8001/articles/approved \
 
 **Article Object Fields:**
 
-| Field                      | Type    | Description                                                  |
-| -------------------------- | ------- | ------------------------------------------------------------ |
-| id                         | number  | Unique article identifier                                    |
-| title                      | string  | Article headline                                             |
-| description                | string  | Article summary or excerpt                                   |
-| url                        | string  | Full URL to the article source                               |
-| urlToImage                 | string  | URL to article's featured image (may be null)                |
-| publishedDate              | string  | ISO 8601 timestamp when article was published                |
-| createdAt                  | string  | ISO 8601 timestamp when article was added to database        |
-| updatedAt                  | string  | ISO 8601 timestamp of last update                            |
-| States                     | array   | Array of state objects associated with this article          |
-| stateAbbreviation          | string  | Comma-separated state abbreviations (e.g., "CA, NY")         |
-| ArticleApproveds           | array   | Array of approval records (only includes isApproved=true)    |
-| ArticleReportContracts     | array   | Array of report associations                                 |
-| isSubmitted                | string  | "Yes" if in any report, "No" otherwise                       |
-| articleHasBeenAcceptedByAll| boolean | true if all associated reports accepted by CPSC              |
+| Field                       | Type    | Description                                               |
+| --------------------------- | ------- | --------------------------------------------------------- |
+| id                          | number  | Unique article identifier                                 |
+| title                       | string  | Article headline                                          |
+| description                 | string  | Article summary or excerpt                                |
+| url                         | string  | Full URL to the article source                            |
+| urlToImage                  | string  | URL to article's featured image (may be null)             |
+| publishedDate               | string  | ISO 8601 timestamp when article was published             |
+| createdAt                   | string  | ISO 8601 timestamp when article was added to database     |
+| updatedAt                   | string  | ISO 8601 timestamp of last update                         |
+| States                      | array   | Array of state objects associated with this article       |
+| stateAbbreviation           | string  | Comma-separated state abbreviations (e.g., "CA, NY")      |
+| ArticleApproveds            | array   | Array of approval records (only includes isApproved=true) |
+| ArticleReportContracts      | array   | Array of report associations                              |
+| isSubmitted                 | string  | "Yes" if in any report, "No" otherwise                    |
+| articleHasBeenAcceptedByAll | boolean | true if all associated reports accepted by CPSC           |
 
 **Approval Filtering Logic:**
 
 The endpoint uses this filter to ensure only approved articles are returned:
 
 ```javascript
-article.ArticleApproveds?.some((entry) => entry.isApproved === true || entry.isApproved === 1)
+article.ArticleApproveds?.some(
+  (entry) => entry.isApproved === true || entry.isApproved === 1
+);
 ```
 
 **Key Points:**
@@ -413,20 +415,22 @@ article.ArticleApproveds?.some((entry) => entry.isApproved === true || entry.isA
 Portal applications typically use this endpoint to populate article dashboards:
 
 ```javascript
-const response = await fetch('http://localhost:8001/articles/approved', {
-  headers: { 'Authorization': `Bearer ${token}` }
+const response = await fetch("http://localhost:8001/articles/approved", {
+  headers: { Authorization: `Bearer ${token}` },
 });
 
-const { articlesArray, timeToRenderResponseFromApiInSeconds } = await response.json();
+const { articlesArray, timeToRenderResponseFromApiInSeconds } =
+  await response.json();
 
 // Filter for unsubmitted approved articles
 const unsubmittedArticles = articlesArray.filter(
-  article => article.isSubmitted === "No"
+  (article) => article.isSubmitted === "No"
 );
 
 // Filter for articles pending CPSC acceptance
 const pendingAcceptance = articlesArray.filter(
-  article => article.isSubmitted === "Yes" && !article.articleHasBeenAcceptedByAll
+  (article) =>
+    article.isSubmitted === "Yes" && !article.articleHasBeenAcceptedByAll
 );
 ```
 
@@ -529,10 +533,10 @@ curl -X POST http://localhost:8001/articles/user-toggle-is-not-relevant/12345 \
 
 **Relevance State Logic:**
 
-| Current State | ArticleIsRelevant Record | Action           | New State       | Record After |
-| ------------- | ------------------------ | ---------------- | --------------- | ------------ |
-| Relevant      | No record                | Toggle           | NOT Relevant    | Record created with isRelevant=false |
-| NOT Relevant  | Record exists            | Toggle           | Relevant        | Record deleted |
+| Current State | ArticleIsRelevant Record | Action | New State    | Record After                         |
+| ------------- | ------------------------ | ------ | ------------ | ------------------------------------ |
+| Relevant      | No record                | Toggle | NOT Relevant | Record created with isRelevant=false |
+| NOT Relevant  | Record exists            | Toggle | Relevant     | Record deleted                       |
 
 **Important Notes:**
 
@@ -564,12 +568,12 @@ const toggleRelevance = async (articleId) => {
   const response = await fetch(
     `http://localhost:8001/articles/user-toggle-is-not-relevant/${articleId}`,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({})
+      body: JSON.stringify({}),
     }
   );
 
@@ -600,8 +604,8 @@ Retrieves approval information for a specific article, including the article dat
 
 **URL Parameters:**
 
-| Parameter | Type   | Required | Description                          |
-| --------- | ------ | -------- | ------------------------------------ |
+| Parameter | Type   | Required | Description                           |
+| --------- | ------ | -------- | ------------------------------------- |
 | articleId | number | Yes      | ID of the article to get approval for |
 
 **Request Body:** None
@@ -690,12 +694,12 @@ curl -X GET http://localhost:8001/articles/get-approved/12345 \
 
 **Response Fields:**
 
-| Field             | Type    | Description                                             |
-| ----------------- | ------- | ------------------------------------------------------- |
+| Field             | Type    | Description                                                      |
+| ----------------- | ------- | ---------------------------------------------------------------- |
 | articleIsApproved | boolean | true only if ArticleApproveds record exists with isApproved=true |
-| article           | object  | Complete article data with States and ArticleIsRelevants |
-| content           | string  | Text prepared for PDF reports (textForPdfReport field)  |
-| States            | array   | Duplicate of article.States for convenience             |
+| article           | object  | Complete article data with States and ArticleIsRelevants         |
+| content           | string  | Text prepared for PDF reports (textForPdfReport field)           |
+| States            | array   | Duplicate of article.States for convenience                      |
 
 **Approval Checking Logic:**
 
@@ -715,6 +719,7 @@ res.json({ articleIsApproved: true, ... });
 ```
 
 **This ensures:**
+
 - ✅ Articles with `isApproved=false` return `articleIsApproved=false`
 - ✅ Aligns with the new approval workflow
 - ✅ Consistent with `GET /articles/approved` endpoint behavior
@@ -735,18 +740,18 @@ const getApprovalInfo = async (articleId) => {
   const response = await fetch(
     `http://localhost:8001/articles/get-approved/${articleId}`,
     {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     }
   );
 
   const { articleIsApproved, article, content, States } = await response.json();
 
   if (articleIsApproved) {
-    console.log('Article is approved');
-    console.log('PDF Report Text:', content);
-    console.log('States:', States.map(s => s.abbreviation).join(', '));
+    console.log("Article is approved");
+    console.log("PDF Report Text:", content);
+    console.log("States:", States.map((s) => s.abbreviation).join(", "));
   } else {
-    console.log('Article is not approved');
+    console.log("Article is not approved");
   }
 
   return { articleIsApproved, article, content, States };
@@ -774,8 +779,8 @@ Approves or unapproves an article by creating or updating a record in the Articl
 
 **URL Parameters:**
 
-| Parameter | Type   | Required | Description                      |
-| --------- | ------ | -------- | -------------------------------- |
+| Parameter | Type   | Required | Description                            |
+| --------- | ------ | -------- | -------------------------------------- |
 | articleId | number | Yes      | ID of the article to approve/unapprove |
 
 **Request Body:**
@@ -793,14 +798,14 @@ Approves or unapproves an article by creating or updating a record in the Articl
 
 **Request Body Fields:**
 
-| Field                         | Type   | Required | Description                                           |
-| ----------------------------- | ------ | -------- | ----------------------------------------------------- |
-| approvedStatus                | string | Yes      | "Approve" or "Un-approve"                             |
-| headlineForPdfReport          | string | No       | Headline to use in PDF reports                        |
-| publicationNameForPdfReport   | string | No       | Publication name for PDF reports                      |
-| publicationDateForPdfReport   | string | No       | Publication date for PDF reports                      |
-| textForPdfReport              | string | No       | Article text/summary for PDF reports                  |
-| urlForPdfReport               | string | No       | Article URL for PDF reports                           |
+| Field                       | Type   | Required | Description                          |
+| --------------------------- | ------ | -------- | ------------------------------------ |
+| approvedStatus              | string | Yes      | "Approve" or "Un-approve"            |
+| headlineForPdfReport        | string | No       | Headline to use in PDF reports       |
+| publicationNameForPdfReport | string | No       | Publication name for PDF reports     |
+| publicationDateForPdfReport | string | No       | Publication date for PDF reports     |
+| textForPdfReport            | string | No       | Article text/summary for PDF reports |
+| urlForPdfReport             | string | No       | Article URL for PDF reports          |
 
 **Description:**
 
@@ -894,12 +899,12 @@ curl -X POST http://localhost:8001/articles/approve/12345 \
 
 **Database Behavior:**
 
-| Action     | Record Exists | Operation                                           | Fields Updated                          |
-| ---------- | ------------- | --------------------------------------------------- | --------------------------------------- |
-| Approve    | No            | Create new record                                   | isApproved=true, userId, all PDF fields |
-| Approve    | Yes           | Update existing record                              | isApproved=true, userId, all PDF fields |
-| Un-approve | Yes           | Update existing record (preserves history)          | isApproved=false, userId                |
-| Un-approve | No            | No operation (logs warning)                         | None                                    |
+| Action     | Record Exists | Operation                                  | Fields Updated                          |
+| ---------- | ------------- | ------------------------------------------ | --------------------------------------- |
+| Approve    | No            | Create new record                          | isApproved=true, userId, all PDF fields |
+| Approve    | Yes           | Update existing record                     | isApproved=true, userId, all PDF fields |
+| Un-approve | Yes           | Update existing record (preserves history) | isApproved=false, userId                |
+| Un-approve | No            | No operation (logs warning)                | None                                    |
 
 **Important Workflow Changes:**
 
@@ -948,37 +953,43 @@ Portal applications typically use this endpoint after manual article review:
 ```javascript
 // Approve article after user review
 const approveArticle = async (articleId, articleData) => {
-  const response = await fetch(`http://localhost:8001/articles/approve/${articleId}`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      approvedStatus: 'Approve',
-      headlineForPdfReport: articleData.title,
-      textForPdfReport: articleData.summary,
-      urlForPdfReport: articleData.url,
-      publicationNameForPdfReport: articleData.source,
-      publicationDateForPdfReport: articleData.publishedDate
-    })
-  });
+  const response = await fetch(
+    `http://localhost:8001/articles/approve/${articleId}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        approvedStatus: "Approve",
+        headlineForPdfReport: articleData.title,
+        textForPdfReport: articleData.summary,
+        urlForPdfReport: articleData.url,
+        publicationNameForPdfReport: articleData.source,
+        publicationDateForPdfReport: articleData.publishedDate,
+      }),
+    }
+  );
 
   return response.json();
 };
 
 // Unapprove article if needed
 const unapproveArticle = async (articleId) => {
-  const response = await fetch(`http://localhost:8001/articles/approve/${articleId}`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      approvedStatus: 'Un-approve'
-    })
-  });
+  const response = await fetch(
+    `http://localhost:8001/articles/approve/${articleId}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        approvedStatus: "Un-approve",
+      }),
+    }
+  );
 
   return response.json();
 };
@@ -1067,13 +1078,13 @@ curl -X GET http://localhost:8001/articles/summary-statistics \
 
 **Response Fields:**
 
-| Field                         | Type   | Description                                                |
-| ----------------------------- | ------ | ---------------------------------------------------------- |
-| articlesCount                 | number | Total number of articles in the database                   |
-| articlesSinceLastThursday20hEst | number | Articles added since last Thursday at 8 PM Eastern Time  |
-| articleHasStateCount          | number | Unique articles with at least one state association        |
-| articleIsApprovedCount        | number | Unique articles with isApproved=true                       |
-| approvedButNotInReportCount   | number | Approved articles not yet submitted to any report          |
+| Field                           | Type   | Description                                             |
+| ------------------------------- | ------ | ------------------------------------------------------- |
+| articlesCount                   | number | Total number of articles in the database                |
+| articlesSinceLastThursday20hEst | number | Articles added since last Thursday at 8 PM Eastern Time |
+| articleHasStateCount            | number | Unique articles with at least one state association     |
+| articleIsApprovedCount          | number | Unique articles with isApproved=true                    |
+| approvedButNotInReportCount     | number | Approved articles not yet submitted to any report       |
 
 **Approval Counting Logic:**
 
@@ -1088,6 +1099,7 @@ ORDER BY a.id;
 ```
 
 **This ensures:**
+
 - ✅ `articleIsApprovedCount` only includes articles with `isApproved=true`
 - ✅ `approvedButNotInReportCount` excludes unapproved articles
 - ✅ Aligns with the new approval workflow
@@ -1097,25 +1109,30 @@ ORDER BY a.id;
 **Calculation Details:**
 
 ### articlesCount
+
 - Simple count of all articles returned by `sqlQueryArticles({})`
 - Represents total articles in database
 
 ### articlesSinceLastThursday20hEst
+
 - Filters articles where `createdAt >= lastThursday20hEst`
 - Uses `getLastThursdayAt20hInNyTimeZone()` helper function
 - Useful for weekly reporting cycles
 
 ### articleHasStateCount
+
 - Counts unique articleIds from `sqlQueryArticlesWithStates()`
 - Only includes articles with at least one state association
 - Uses Set to deduplicate article IDs
 
 ### articleIsApprovedCount
+
 - Counts unique articleIds from `sqlQueryArticlesApproved()`
 - Filters by `isApproved=true` to exclude unapproved articles
 - Uses Set to deduplicate article IDs
 
 ### approvedButNotInReportCount
+
 - Takes approved articles and filters out those in `ArticleReportContracts`
 - Counts articles that are approved but not yet submitted to reports
 - Properly excludes articles with `isApproved=false`
@@ -1134,9 +1151,9 @@ ORDER BY a.id;
 // Fetch summary statistics for dashboard
 const getSummaryStats = async () => {
   const response = await fetch(
-    'http://localhost:8001/articles/summary-statistics',
+    "http://localhost:8001/articles/summary-statistics",
     {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     }
   );
 
@@ -1144,10 +1161,14 @@ const getSummaryStats = async () => {
 
   // Display on dashboard
   console.log(`Total Articles: ${summaryStatistics.articlesCount}`);
-  console.log(`This Week: ${summaryStatistics.articlesSinceLastThursday20hEst}`);
+  console.log(
+    `This Week: ${summaryStatistics.articlesSinceLastThursday20hEst}`
+  );
   console.log(`With States: ${summaryStatistics.articleHasStateCount}`);
   console.log(`Approved: ${summaryStatistics.articleIsApprovedCount}`);
-  console.log(`Pending Report: ${summaryStatistics.approvedButNotInReportCount}`);
+  console.log(
+    `Pending Report: ${summaryStatistics.approvedButNotInReportCount}`
+  );
 
   return summaryStatistics;
 };

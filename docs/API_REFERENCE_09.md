@@ -1,6 +1,6 @@
-# API Reference - News Nexus API 09
+# API Reference - News Nexus 10 API
 
-This document provides comprehensive documentation for API endpoints in the News Nexus API 09 service.
+This document provides comprehensive documentation for API endpoints in the News Nexus 10 API service.
 
 ## Main Routes
 

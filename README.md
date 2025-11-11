@@ -12,8 +12,8 @@ npm install
 
 ## Documentation
 
-- [News Nexus 09 Overview](./docs/NEWS_NEXUS_09.md)
-- [API Reference - News Nexus API 09](./docs/API_REFERENCE_09.md)
+- [News Nexus 10 Overview](./docs/NEWS_NEXUS_10.md)
+- [API Reference - News Nexus 10 API](./docs/API_REFERENCE_10.md)
 - [Database documentation](./docs/DATABASE_OVERVIEW.md)
 - [API Reference - News Nexus Python Queuer 01](./docs/API_REFERENCE_PYTHON_QUEUER_01.md)
 
@@ -24,7 +24,7 @@ npm install
 ```
 APP_NAME=NewsNexus10
 JWT_SECRET=NewsNexus10_SECRET
-NAME_DB=newsnexus09.db
+NAME_DB=newsnexus10.db
 PATH_DATABASE=/home/shared/databases/NewsNexus10/
 PATH_DB_BACKUPS=/home/shared/project_resources/NewsNexus10/db_backups
 PATH_PROJECT_RESOURCES=/home/shared/project_resources/NewsNexus10
@@ -49,7 +49,7 @@ ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES=true
 APP_NAME=NewsNexus10
 PORT=3000
 JWT_SECRET=NewsNexus10_SECRET
-NAME_DB=newsnexus09.db
+NAME_DB=newsnexus10.db
 PATH_DATABASE=/Users/nick/Documents/_databases/NewsNexus10/
 PATH_DB_BACKUPS=/Users/nick/Documents/_project_resources/NewsNexus10/db_backups
 PATH_PROJECT_RESOURCES=/Users/nick/Documents/_project_resources/NewsNexus10
@@ -96,5 +96,5 @@ To add a new Artificial Intelligence entity. This will add to the ArtificialInte
 
 ## References
 
-- [News Nexus 09 Overview](./docs/NEWS_NEXUS_09.md)
+- [News Nexus 10 Overview](./docs/NEWS_NEXUS_10.md)
 - [Database documentation](./docs/DATABASE_OVERVIEW.md)

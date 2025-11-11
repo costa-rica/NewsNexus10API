@@ -1,6 +1,6 @@
-# API Reference - News Nexus API 09 LLM Analysis
+# API Reference - News Nexus 10 API LLM Analysis
 
-This document provides comprehensive documentation for all LLM analysis endpoints in the News Nexus API 09 service.
+This document provides comprehensive documentation for all LLM analysis endpoints in the News Nexus 10 API service.
 
 ## LLM Analysis Endpoints
 

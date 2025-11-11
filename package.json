@@ -1,7 +1,7 @@
 {
   "name": "newsnexus10api",
   "version": "1.0.0",
-  "description": "NewsNexus API v09",
+  "description": "NewsNexus API v10",
   "main": "index.js",
   "directories": {
     "doc": "docs"

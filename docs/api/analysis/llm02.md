@@ -1,6 +1,6 @@
-# API Reference - News Nexus API 09 LLM02 Analysis
+# API Reference - News Nexus 10 API LLM02 Analysis
 
-This document provides comprehensive documentation for the LLM02 analysis endpoints in the News Nexus API 09 service.
+This document provides comprehensive documentation for the LLM02 analysis endpoints in the News Nexus 10 API service.
 
 ## LLM02 Analysis Endpoints
 
@@ -196,8 +196,8 @@ Retrieves the EntityWhoCategorizedArticle ID associated with an AI service by lo
 
 **Request Body Fields:**
 
-| Field | Type   | Required | Description                                          |
-| ----- | ------ | -------- | ---------------------------------------------------- |
+| Field | Type   | Required | Description                                         |
+| ----- | ------ | -------- | --------------------------------------------------- |
 | name  | string | Yes      | Name of the AI service (from NAME_APP env variable) |
 
 **Description:**
@@ -285,11 +285,11 @@ curl -X POST http://localhost:8001/analysis/llm02/service-login \
 
 **Response Fields:**
 
-| Field                   | Type   | Description                                    |
-| ----------------------- | ------ | ---------------------------------------------- |
-| result                  | boolean| Success status of the operation                |
-| name                    | string | Confirmed name of the AI entity from database  |
-| entityWhoCategorizesId  | number | The ID to use when categorizing articles       |
+| Field                  | Type    | Description                                   |
+| ---------------------- | ------- | --------------------------------------------- |
+| result                 | boolean | Success status of the operation               |
+| name                   | string  | Confirmed name of the AI entity from database |
+| entityWhoCategorizesId | number  | The ID to use when categorizing articles      |
 
 **Database Relationship:**
 
@@ -308,14 +308,17 @@ AI services typically use this endpoint during initialization:
 // Service startup - get entity ID
 const serviceName = process.env.NAME_APP; // e.g., "Open AI 4o mini API"
 
-const response = await fetch('http://localhost:8001/analysis/llm02/service-login', {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({ name: serviceName })
-});
+const response = await fetch(
+  "http://localhost:8001/analysis/llm02/service-login",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name: serviceName }),
+  }
+);
 
 const { entityWhoCategorizesId } = await response.json();
 
@@ -393,13 +396,13 @@ Updates the approval status of an article based on AI service analysis. Creates 
 
 **Request Body Fields:**
 
-| Field                           | Type    | Required | Description                                                  |
-| ------------------------------- | ------- | -------- | ------------------------------------------------------------ |
-| articleId                       | number  | Yes      | ID of the article being approved/rejected                    |
-| isApproved                      | boolean | Yes      | Whether the article is approved (true) or rejected (false)   |
-| entityWhoCategorizesId          | number  | Yes      | Entity ID from service-login endpoint                        |
-| llmAnalysis                     | object  | Yes      | Analysis results from LLM (see structure below)              |
-| articleApprovedTextForPdfReport | string  | No       | Text to include in PDF reports (can be null)                 |
+| Field                           | Type    | Required | Description                                                                      |
+| ------------------------------- | ------- | -------- | -------------------------------------------------------------------------------- |
+| articleId                       | number  | Yes      | ID of the article being approved/rejected                                        |
+| isApproved                      | boolean | Yes      | Whether the article is approved (true) or rejected (false)                       |
+| entityWhoCategorizesId          | number  | Yes      | Entity ID from service-login endpoint                                            |
+| llmAnalysis                     | object  | Yes      | Analysis results from LLM (see structure below)                                  |
+| articleApprovedTextForPdfReport | string  | No       | Text to include in PDF reports (can be null)                                     |
 | stateId                         | number  | No       | State ID if article relates to a specific US state (required if isApproved=true) |
 
 **llmAnalysis Structure (Success Case):**
@@ -580,15 +583,16 @@ curl -X POST http://localhost:8001/analysis/llm02/update-approved-status \
 
 **Database Tables Updated:**
 
-| Table                                          | When Created                                    | Purpose                                  |
-| ---------------------------------------------- | ----------------------------------------------- | ---------------------------------------- |
-| ArticleApproveds                               | Always (if not duplicate)                       | Tracks article approval status           |
-| ArticleStateContracts                          | Only if isApproved=true AND stateId provided    | Links approved articles to states        |
-| ArticleEntityWhoCategorizedArticleContracts02  | Always (if not duplicate)                       | Stores detailed LLM analysis results     |
+| Table                                         | When Created                                 | Purpose                              |
+| --------------------------------------------- | -------------------------------------------- | ------------------------------------ |
+| ArticleApproveds                              | Always (if not duplicate)                    | Tracks article approval status       |
+| ArticleStateContracts                         | Only if isApproved=true AND stateId provided | Links approved articles to states    |
+| ArticleEntityWhoCategorizedArticleContracts02 | Always (if not duplicate)                    | Stores detailed LLM analysis results |
 
 **ArticleEntityWhoCategorizedArticleContracts02 Records Created:**
 
 For successful LLM analysis:
+
 - `llmResponse` → "success" (valueString)
 - `llmName` → provider name (valueString)
 - `product` → value (valueString)
@@ -598,6 +602,7 @@ For successful LLM analysis:
 - `united_states_score` → value (valueNumber)
 
 For failed LLM analysis:
+
 - `llmResponse` → "failed" (valueString)
 - `llmName` → provider name (valueString)
 
@@ -617,33 +622,40 @@ AI services typically use this endpoint after analyzing an article:
 const analysisResult = await analyzArticleWithLLM(article);
 
 // Determine approval based on scores
-const isApproved = analysisResult.relevance_score >= 7 &&
-                   analysisResult.united_states_score >= 7;
+const isApproved =
+  analysisResult.relevance_score >= 7 &&
+  analysisResult.united_states_score >= 7;
 
 // Get stateId if a state was identified
-const stateId = analysisResult.state !== "No state mentioned"
-  ? await lookupStateId(analysisResult.state)
-  : null;
+const stateId =
+  analysisResult.state !== "No state mentioned"
+    ? await lookupStateId(analysisResult.state)
+    : null;
 
 // Update article approval status
-const response = await fetch('http://localhost:8001/analysis/llm02/update-approved-status', {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    articleId: article.id,
-    isApproved: isApproved,
-    entityWhoCategorizesId: entityId,
-    llmAnalysis: {
-      ...analysisResult,
-      llmName: process.env.LLM_PROVIDER || "Ollama"
+const response = await fetch(
+  "http://localhost:8001/analysis/llm02/update-approved-status",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-    articleApprovedTextForPdfReport: isApproved ? generateReportText(article) : null,
-    stateId: stateId
-  })
-});
+    body: JSON.stringify({
+      articleId: article.id,
+      isApproved: isApproved,
+      entityWhoCategorizesId: entityId,
+      llmAnalysis: {
+        ...analysisResult,
+        llmName: process.env.LLM_PROVIDER || "Ollama",
+      },
+      articleApprovedTextForPdfReport: isApproved
+        ? generateReportText(article)
+        : null,
+      stateId: stateId,
+    }),
+  }
+);
 ```
 
 **Notes:**
