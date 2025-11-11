@@ -19,17 +19,15 @@ var reportsRouter = require("./routes/reports");
 var automationsRouter = require("./routes/newsOrgs/automations");
 var artificialIntelligenceRouter = require("./routes/artificialIntelligence");
 var newsDataIoRouter = require("./routes/newsOrgs/newsDataIo");
-// var analysisRouter = require("./routes/analysis");
-// var deduperRouter = require("./routes/deduper");
 var analysisApprovedArticlesRouter = require("./routes/analysis/approvedArticles");
 var analysisDeduperRouter = require("./routes/analysis/deduper");
 var analysisLlm01Router = require("./routes/analysis/llm01");
 var analysisLlm02Router = require("./routes/analysis/llm02");
 var downloadsRouter = require("./routes/downloads");
+var analysisLlm04Router = require("./routes/analysis/llm04");
 
 var app = express();
 const cors = require("cors");
-// app.use(cors());
 app.use(
   cors({
     credentials: true,
@@ -60,13 +58,12 @@ app.use("/reports", reportsRouter);
 app.use("/automations", automationsRouter);
 app.use("/artificial-intelligence", artificialIntelligenceRouter);
 app.use("/news-data-io", newsDataIoRouter);
-// app.use("/analysis", analysisRouter);
-// app.use("/deduper", deduperRouter);
 app.use("/analysis/approved-articles", analysisApprovedArticlesRouter);
 app.use("/analysis/deduper", analysisDeduperRouter);
 app.use("/analysis/llm01", analysisLlm01Router);
 app.use("/analysis/llm02", analysisLlm02Router);
 app.use("/downloads", downloadsRouter);
+app.use("/analysis/llm04", analysisLlm04Router);
 
 initModels();
 
