@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const { Article, State, ArticleApproved } = require("newsnexusdb09");
+const { Article, State, ArticleApproved } = require("newsnexus10db");
 const { authenticateToken } = require("../../modules/userAuthentication");
 const { getDateOfLastSubmittedReport } = require("../../modules/reports");
 

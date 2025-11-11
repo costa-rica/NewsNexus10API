@@ -1,8 +1,8 @@
 # Database Overview
 
-This document provides a comprehensive overview of the NewsNexusDb09 database schema. All tables use SQLite as the underlying database engine and are managed through Sequelize ORM.
+This document provides a comprehensive overview of the NewsNexus10Db database schema. All tables use SQLite as the underlying database engine and are managed through Sequelize ORM.
 
-## NewsNexusDb09 Description
+## NewsNexus10Db Description
 
 - One class per table (`src/models/<Name>.ts`) with strong typings.
 - Centralized initialization and associations.
@@ -16,7 +16,7 @@ This document provides a comprehensive overview of the NewsNexusDb09 database sc
 ### Project Structure
 
 ```
-NewsNexusDb09/
+NewsNexus10Db/
 ├── src/                          # TypeScript source files
 │   ├── index.ts                  # Main entry point
 │   └── models/                   # Sequelize model definitions
@@ -39,42 +39,42 @@ NewsNexusDb09/
 ```ts
 // src/models/Example.ts
 import {
-	DataTypes,
-	Model,
-	InferAttributes,
-	InferCreationAttributes,
-	CreationOptional,
-	ForeignKey,
-	NonAttribute,
+  DataTypes,
+  Model,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  ForeignKey,
+  NonAttribute,
 } from "sequelize";
 import { sequelize } from "./_connection";
 
 export class Example extends Model<
-	InferAttributes<Example>,
-	InferCreationAttributes<Example>
+  InferAttributes<Example>,
+  InferCreationAttributes<Example>
 > {
-	declare id: CreationOptional<number>;
-	declare name: string;
+  declare id: CreationOptional<number>;
+  declare name: string;
 
-	// FK example:
-	// declare userId: ForeignKey<User["id"]>;
-	// declare user?: NonAttribute<User>;
+  // FK example:
+  // declare userId: ForeignKey<User["id"]>;
+  // declare user?: NonAttribute<User>;
 }
 
 export function initExample() {
-	Example.init(
-		{
-			id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-			name: { type: DataTypes.STRING, allowNull: false },
-			// userId: { type: DataTypes.INTEGER, allowNull: false }
-		},
-		{
-			sequelize,
-			tableName: "examples",
-			timestamps: true,
-		}
-	);
-	return Example;
+  Example.init(
+    {
+      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+      name: { type: DataTypes.STRING, allowNull: false },
+      // userId: { type: DataTypes.INTEGER, allowNull: false }
+    },
+    {
+      sequelize,
+      tableName: "examples",
+      timestamps: true,
+    }
+  );
+  return Example;
 }
 ```
 
@@ -90,13 +90,13 @@ import { applyAssociations } from "./_associations";
 
 /** Initialize all models and associations once per process. */
 export function initModels() {
-	initExample();
-	applyAssociations();
+  initExample();
+  applyAssociations();
 
-	return {
-		sequelize,
-		Example,
-	};
+  return {
+    sequelize,
+    Example,
+  };
 }
 
 // 👇 Export named items for consumers
@@ -229,15 +229,15 @@ API request tracking for news aggregation services.
 
 Full text content storage for articles with web scraping status tracking.
 
-| Field                   | Type    | Constraints                 | Description                                                     |
-| ----------------------- | ------- | --------------------------- | --------------------------------------------------------------- |
-| id                      | INTEGER | PRIMARY KEY, AUTO_INCREMENT | Unique content identifier                                       |
-| articleId               | INTEGER | FK, NOT NULL                | Reference to article                                            |
-| content                 | STRING  | NOT NULL                    | Full article content                                            |
-| scrapeStatusCheerio     | BOOLEAN | NULLABLE, DEFAULT NULL      | Cheerio scraping status (null=not attempted, true=success, false=failed) |
-| scrapeStatusPuppeteer   | BOOLEAN | NULLABLE, DEFAULT NULL      | Puppeteer scraping status (null=not attempted, true=success, false=failed) |
-| createdAt               | DATE    | NOT NULL                    | Timestamp                                                       |
-| updatedAt               | DATE    | NOT NULL                    | Timestamp                                                       |
+| Field                 | Type    | Constraints                 | Description                                                                |
+| --------------------- | ------- | --------------------------- | -------------------------------------------------------------------------- |
+| id                    | INTEGER | PRIMARY KEY, AUTO_INCREMENT | Unique content identifier                                                  |
+| articleId             | INTEGER | FK, NOT NULL                | Reference to article                                                       |
+| content               | STRING  | NOT NULL                    | Full article content                                                       |
+| scrapeStatusCheerio   | BOOLEAN | NULLABLE, DEFAULT NULL      | Cheerio scraping status (null=not attempted, true=success, false=failed)   |
+| scrapeStatusPuppeteer | BOOLEAN | NULLABLE, DEFAULT NULL      | Puppeteer scraping status (null=not attempted, true=success, false=failed) |
+| createdAt             | DATE    | NOT NULL                    | Timestamp                                                                  |
+| updatedAt             | DATE    | NOT NULL                    | Timestamp                                                                  |
 
 ### ArticleApproveds
 
@@ -463,7 +463,7 @@ Links NewsAPI requests to website domains for filtering.
 
 ## Database Relationships
 
-The following relationships are defined in `src/models/_associations.ts` and establish the complete relational structure of the NewsNexusDb09 database:
+The following relationships are defined in `src/models/_associations.ts` and establish the complete relational structure of the NewsNexus10Db database:
 
 ### Core Entity Relationships
 

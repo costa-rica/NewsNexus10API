@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const { User, EntityWhoFoundArticle } = require("newsnexusdb09");
+const { User, EntityWhoFoundArticle } = require("newsnexus10db");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { checkBodyReturnMissing } = require("../modules/common");

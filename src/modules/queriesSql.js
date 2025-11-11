@@ -1,24 +1,24 @@
-const { sequelize } = require("newsnexusdb09");
+const { sequelize } = require("newsnexus10db");
 
 async function sqlQueryArticlesSummaryStatistics() {
-	// ------ NOTE -----------------------------------
-	//  const articlesArray = await Article.findAll({
-	//   include: [
-	//     {
-	//       model: State,
-	//       through: { attributes: [] }, // omit ArticleStateContract from result
-	//     },
-	//     {
-	//       model: ArticleIsRelevant,
-	//     },
-	//     {
-	//       model: ArticleApproved,
-	//     },
-	//   ],
-	// });
-	// -----------------------------------------
+  // ------ NOTE -----------------------------------
+  //  const articlesArray = await Article.findAll({
+  //   include: [
+  //     {
+  //       model: State,
+  //       through: { attributes: [] }, // omit ArticleStateContract from result
+  //     },
+  //     {
+  //       model: ArticleIsRelevant,
+  //     },
+  //     {
+  //       model: ArticleApproved,
+  //     },
+  //   ],
+  // });
+  // -----------------------------------------
 
-	const sql = `
+  const sql = `
   SELECT
     a.id AS "articleId",
     a."createdAt",
@@ -34,15 +34,15 @@ async function sqlQueryArticlesSummaryStatistics() {
   LEFT JOIN "ArticleReportContracts" arc ON arc."articleId" = a.id;
 `;
 
-	const results = await sequelize.query(sql, {
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const results = await sequelize.query(sql, {
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	return results;
+  return results;
 }
 
 async function sqlQueryArticlesApproved() {
-	const sql = `
+  const sql = `
     SELECT
       a.id AS "articleId",
       a.title,
@@ -57,51 +57,51 @@ async function sqlQueryArticlesApproved() {
     ORDER BY a.id;
   `;
 
-	const results = await sequelize.query(sql, {
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const results = await sequelize.query(sql, {
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	return results;
+  return results;
 }
 
 async function sqlQueryRequestsFromApi({
-	dateLimitOnRequestMade,
-	includeIsFromAutomation,
+  dateLimitOnRequestMade,
+  includeIsFromAutomation,
 }) {
-	// ------ NOTE -----------------------------------
-	// const newsApiRequestsArray = await NewsApiRequest.findAll({
-	//   where: whereClause,
-	//   include: [
-	//     {
-	//       model: NewsArticleAggregatorSource,
-	//     },
-	//     {
-	//       model: NewsApiRequestWebsiteDomainContract,
-	//       include: [
-	//         {
-	//           model: WebsiteDomain,
-	//         },
-	//       ],
-	//     },
-	//   ],
-	// });
-	// -----------------------------------------
-	const replacements = {};
-	const whereClauses = [];
+  // ------ NOTE -----------------------------------
+  // const newsApiRequestsArray = await NewsApiRequest.findAll({
+  //   where: whereClause,
+  //   include: [
+  //     {
+  //       model: NewsArticleAggregatorSource,
+  //     },
+  //     {
+  //       model: NewsApiRequestWebsiteDomainContract,
+  //       include: [
+  //         {
+  //           model: WebsiteDomain,
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // });
+  // -----------------------------------------
+  const replacements = {};
+  const whereClauses = [];
 
-	if (dateLimitOnRequestMade) {
-		whereClauses.push(`nar."createdAt" >= :dateLimitOnRequestMade`);
-		replacements.dateLimitOnRequestMade = dateLimitOnRequestMade;
-	}
+  if (dateLimitOnRequestMade) {
+    whereClauses.push(`nar."createdAt" >= :dateLimitOnRequestMade`);
+    replacements.dateLimitOnRequestMade = dateLimitOnRequestMade;
+  }
 
-	if (includeIsFromAutomation !== true) {
-		whereClauses.push(`nar."isFromAutomation" = false`);
-	}
+  if (includeIsFromAutomation !== true) {
+    whereClauses.push(`nar."isFromAutomation" = false`);
+  }
 
-	const whereString =
-		whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+  const whereString =
+    whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
-	const sql = `
+  const sql = `
     SELECT
       nar.id AS "newsApiRequestId",
       nar."createdAt",
@@ -124,47 +124,47 @@ async function sqlQueryRequestsFromApi({
     ORDER BY nar."createdAt" DESC;
   `;
 
-	const results = await sequelize.query(sql, {
-		replacements,
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const results = await sequelize.query(sql, {
+    replacements,
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	return results;
+  return results;
 }
 
 async function sqlQueryArticlesOld({ publishedDate }) {
-	// ------ NOTE -----------------------------------
-	// const articlesArray = await Article.findAll({
-	//   where: whereClause,
-	//   include: [
-	//     {
-	//       model: State,
-	//       through: { attributes: [] },
-	//     },
-	//     {
-	//       model: ArticleIsRelevant,
-	//     },
-	//     {
-	//       model: ArticleApproved,
-	//     },
-	//     {
-	//       model: NewsApiRequest,
-	//     },
-	//   ],
-	// });
-	// -----------------------------------------
-	const replacements = {};
-	const whereClauses = [];
+  // ------ NOTE -----------------------------------
+  // const articlesArray = await Article.findAll({
+  //   where: whereClause,
+  //   include: [
+  //     {
+  //       model: State,
+  //       through: { attributes: [] },
+  //     },
+  //     {
+  //       model: ArticleIsRelevant,
+  //     },
+  //     {
+  //       model: ArticleApproved,
+  //     },
+  //     {
+  //       model: NewsApiRequest,
+  //     },
+  //   ],
+  // });
+  // -----------------------------------------
+  const replacements = {};
+  const whereClauses = [];
 
-	if (publishedDate) {
-		whereClauses.push(`a."publishedDate" >= :publishedDate`);
-		replacements.publishedDate = publishedDate;
-	}
+  if (publishedDate) {
+    whereClauses.push(`a."publishedDate" >= :publishedDate`);
+    replacements.publishedDate = publishedDate;
+  }
 
-	const whereString =
-		whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+  const whereString =
+    whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
-	const sql = `
+  const sql = `
       SELECT
         a.id AS "articleId",
         a.title,
@@ -188,28 +188,28 @@ async function sqlQueryArticlesOld({ publishedDate }) {
       ORDER BY a.id;
     `;
 
-	const results = await sequelize.query(sql, {
-		replacements,
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const results = await sequelize.query(sql, {
+    replacements,
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	return results;
+  return results;
 }
 
 // --- New method of creating SQL query functions
 async function sqlQueryArticles({ publishedDate }) {
-	const replacements = {};
-	const whereClauses = [];
+  const replacements = {};
+  const whereClauses = [];
 
-	if (publishedDate) {
-		whereClauses.push(`a."publishedDate" >= :publishedDate`);
-		replacements.publishedDate = publishedDate;
-	}
+  if (publishedDate) {
+    whereClauses.push(`a."publishedDate" >= :publishedDate`);
+    replacements.publishedDate = publishedDate;
+  }
 
-	const whereString =
-		whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+  const whereString =
+    whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
-	const sql = `
+  const sql = `
       SELECT
         a.id AS "articleId",
         a.title,
@@ -226,16 +226,16 @@ async function sqlQueryArticles({ publishedDate }) {
       ORDER BY a.id;
     `;
 
-	const results = await sequelize.query(sql, {
-		replacements,
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const results = await sequelize.query(sql, {
+    replacements,
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	return results;
+  return results;
 }
 
 async function sqlQueryArticlesWithStates() {
-	const sql = `
+  const sql = `
       SELECT
         a.id AS "articleId",
         a.title,
@@ -251,15 +251,15 @@ async function sqlQueryArticlesWithStates() {
       ORDER BY a.id;
     `;
 
-	const results = await sequelize.query(sql, {
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const results = await sequelize.query(sql, {
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	return results;
+  return results;
 }
 
 async function sqlQueryArticlesWithStatesApprovedReportContract() {
-	const sql = `
+  const sql = `
     SELECT
       a.id AS "articleId",
       a.title,
@@ -299,111 +299,111 @@ async function sqlQueryArticlesWithStatesApprovedReportContract() {
     ORDER BY a.id;
   `;
 
-	const flatResults = await sequelize.query(sql, {
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const flatResults = await sequelize.query(sql, {
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	const articlesMap = new Map();
+  const articlesMap = new Map();
 
-	for (const row of flatResults) {
-		const {
-			articleId,
-			title,
-			description,
-			publishedDate,
-			createdAt,
-			publicationName,
-			url,
-			author,
-			urlToImage,
-			entityWhoFoundArticleId,
-			newsApiRequestId,
-			newsRssRequestId,
-			stateId,
-			stateName,
-			stateAbbreviation,
-			approvedId,
-			approvedByUserId,
-			approvedAt,
-			isApproved,
-			headlineForPdfReport,
-			publicationNameForPdfReport,
-			publicationDateForPdfReport,
-			textForPdfReport,
-			urlForPdfReport,
-			kmNotes,
-			reportContractId,
-			reportId,
-			articleReferenceNumberInReport,
-			articleAcceptedByCpsc,
-			articleRejectionReason,
-		} = row;
+  for (const row of flatResults) {
+    const {
+      articleId,
+      title,
+      description,
+      publishedDate,
+      createdAt,
+      publicationName,
+      url,
+      author,
+      urlToImage,
+      entityWhoFoundArticleId,
+      newsApiRequestId,
+      newsRssRequestId,
+      stateId,
+      stateName,
+      stateAbbreviation,
+      approvedId,
+      approvedByUserId,
+      approvedAt,
+      isApproved,
+      headlineForPdfReport,
+      publicationNameForPdfReport,
+      publicationDateForPdfReport,
+      textForPdfReport,
+      urlForPdfReport,
+      kmNotes,
+      reportContractId,
+      reportId,
+      articleReferenceNumberInReport,
+      articleAcceptedByCpsc,
+      articleRejectionReason,
+    } = row;
 
-		if (!articlesMap.has(articleId)) {
-			articlesMap.set(articleId, {
-				id: articleId,
-				title,
-				description,
-				publishedDate,
-				createdAt,
-				publicationName,
-				url,
-				author,
-				urlToImage,
-				entityWhoFoundArticleId,
-				newsApiRequestId,
-				newsRssRequestId,
-				States: [],
-				ArticleApproveds: [],
-				ArticleReportContracts: [],
-			});
-		}
+    if (!articlesMap.has(articleId)) {
+      articlesMap.set(articleId, {
+        id: articleId,
+        title,
+        description,
+        publishedDate,
+        createdAt,
+        publicationName,
+        url,
+        author,
+        urlToImage,
+        entityWhoFoundArticleId,
+        newsApiRequestId,
+        newsRssRequestId,
+        States: [],
+        ArticleApproveds: [],
+        ArticleReportContracts: [],
+      });
+    }
 
-		if (stateId) {
-			const stateExists = articlesMap
-				.get(articleId)
-				.States.some((s) => s.id === stateId);
-			if (!stateExists) {
-				articlesMap.get(articleId).States.push({
-					id: stateId,
-					name: stateName,
-					abbreviation: stateAbbreviation,
-				});
-			}
-		}
+    if (stateId) {
+      const stateExists = articlesMap
+        .get(articleId)
+        .States.some((s) => s.id === stateId);
+      if (!stateExists) {
+        articlesMap.get(articleId).States.push({
+          id: stateId,
+          name: stateName,
+          abbreviation: stateAbbreviation,
+        });
+      }
+    }
 
-		if (approvedId) {
-			const approvedExists = articlesMap
-				.get(articleId)
-				.ArticleApproveds.some((a) => a.id === approvedId);
-			if (!approvedExists) {
-				articlesMap.get(articleId).ArticleApproveds.push({
-					id: approvedId,
-					userId: approvedByUserId,
-					createdAt: approvedAt,
-					isApproved,
-					headlineForPdfReport,
-					publicationNameForPdfReport,
-					publicationDateForPdfReport,
-					textForPdfReport,
-					urlForPdfReport,
-					kmNotes,
-				});
-			}
-		}
+    if (approvedId) {
+      const approvedExists = articlesMap
+        .get(articleId)
+        .ArticleApproveds.some((a) => a.id === approvedId);
+      if (!approvedExists) {
+        articlesMap.get(articleId).ArticleApproveds.push({
+          id: approvedId,
+          userId: approvedByUserId,
+          createdAt: approvedAt,
+          isApproved,
+          headlineForPdfReport,
+          publicationNameForPdfReport,
+          publicationDateForPdfReport,
+          textForPdfReport,
+          urlForPdfReport,
+          kmNotes,
+        });
+      }
+    }
 
-		if (reportContractId) {
-			articlesMap.get(articleId).ArticleReportContracts.push({
-				id: reportContractId,
-				reportId,
-				articleReferenceNumberInReport,
-				articleAcceptedByCpsc,
-				articleRejectionReason,
-			});
-		}
-	}
+    if (reportContractId) {
+      articlesMap.get(articleId).ArticleReportContracts.push({
+        id: reportContractId,
+        reportId,
+        articleReferenceNumberInReport,
+        articleAcceptedByCpsc,
+        articleRejectionReason,
+      });
+    }
+  }
 
-	return Array.from(articlesMap.values());
+  return Array.from(articlesMap.values());
 }
 
 // async function sqlQueryArticlesForWithRatingsRoute(
@@ -620,29 +620,29 @@ async function sqlQueryArticlesWithStatesApprovedReportContract() {
 
 // async function sqlQueryArticlesForWithRatingsRouteNoAi(
 async function sqlQueryArticlesForWithRatingsRoute(
-	returnOnlyThisCreatedAtDateOrAfter,
-	returnOnlyThisPublishedDateOrAfter
+  returnOnlyThisCreatedAtDateOrAfter,
+  returnOnlyThisPublishedDateOrAfter
 ) {
-	const replacements = {};
-	const whereClauses = [];
+  const replacements = {};
+  const whereClauses = [];
 
-	if (returnOnlyThisCreatedAtDateOrAfter) {
-		whereClauses.push(`a."createdAt" >= :returnOnlyThisCreatedAtDateOrAfter`);
-		replacements.returnOnlyThisCreatedAtDateOrAfter =
-			returnOnlyThisCreatedAtDateOrAfter;
-	}
+  if (returnOnlyThisCreatedAtDateOrAfter) {
+    whereClauses.push(`a."createdAt" >= :returnOnlyThisCreatedAtDateOrAfter`);
+    replacements.returnOnlyThisCreatedAtDateOrAfter =
+      returnOnlyThisCreatedAtDateOrAfter;
+  }
 
-	if (returnOnlyThisPublishedDateOrAfter) {
-		whereClauses.push(
-			`a."publishedDate" >= :returnOnlyThisPublishedDateOrAfter`
-		);
-		replacements.returnOnlyThisPublishedDateOrAfter =
-			returnOnlyThisPublishedDateOrAfter;
-	}
+  if (returnOnlyThisPublishedDateOrAfter) {
+    whereClauses.push(
+      `a."publishedDate" >= :returnOnlyThisPublishedDateOrAfter`
+    );
+    replacements.returnOnlyThisPublishedDateOrAfter =
+      returnOnlyThisPublishedDateOrAfter;
+  }
 
-	const whereClause =
-		whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
-	const sql = `
+  const whereClause =
+    whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+  const sql = `
     SELECT
       a.id,
       a."createdAt",
@@ -698,133 +698,133 @@ async function sqlQueryArticlesForWithRatingsRoute(
     ORDER BY a.id;
   `;
 
-	const rawResults = await sequelize.query(sql, {
-		replacements,
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const rawResults = await sequelize.query(sql, {
+    replacements,
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	const articleMap = {};
+  const articleMap = {};
 
-	for (const row of rawResults) {
-		const {
-			id,
-			createdAt,
-			newsApiRequestId,
-			title,
-			description,
-			publishedDate,
-			url,
-			isRelevant,
-			approvalCreatedAt,
-			publicationName,
+  for (const row of rawResults) {
+    const {
+      id,
+      createdAt,
+      newsApiRequestId,
+      title,
+      description,
+      publishedDate,
+      url,
+      isRelevant,
+      approvalCreatedAt,
+      publicationName,
 
-			// NewsApiRequest
-			"NewsApiRequest.id": narId,
-			"NewsApiRequest.createdAt": narCreatedAt,
-			"NewsApiRequest.andString": andString,
-			"NewsApiRequest.orString": orString,
-			"NewsApiRequest.notString": notString,
+      // NewsApiRequest
+      "NewsApiRequest.id": narId,
+      "NewsApiRequest.createdAt": narCreatedAt,
+      "NewsApiRequest.andString": andString,
+      "NewsApiRequest.orString": orString,
+      "NewsApiRequest.notString": notString,
 
-			// Aggregator
-			"NewsApiRequest.NewsArticleAggregatorSource.id": nasId,
-			"NewsApiRequest.NewsArticleAggregatorSource.nameOfOrg": nasName,
+      // Aggregator
+      "NewsApiRequest.NewsArticleAggregatorSource.id": nasId,
+      "NewsApiRequest.NewsArticleAggregatorSource.nameOfOrg": nasName,
 
-			// State
-			"States.id": stateId,
-			"States.name": stateName,
-			"States.abbreviation": stateAbbr,
-			"States.createdAt": stateCreatedAt,
-			"States.updatedAt": stateUpdatedAt,
-		} = row;
+      // State
+      "States.id": stateId,
+      "States.name": stateName,
+      "States.abbreviation": stateAbbr,
+      "States.createdAt": stateCreatedAt,
+      "States.updatedAt": stateUpdatedAt,
+    } = row;
 
-		if (!articleMap[id]) {
-			articleMap[id] = {
-				id,
-				createdAt,
-				newsApiRequestId,
-				title,
-				description,
-				publishedDate,
-				url,
-				publicationName,
-				isRelevant,
-				approvalCreatedAt,
-				NewsApiRequest: {
-					id: narId,
-					createdAt: narCreatedAt,
-					andString,
-					orString,
-					notString,
-					NewsArticleAggregatorSource: {
-						id: nasId,
-						nameOfOrg: nasName,
-					},
-				},
-				States: [],
-				ArticleIsRelevants: [],
-				ArticleApproveds: [],
-				ArticleRevieweds: [],
-			};
-		}
+    if (!articleMap[id]) {
+      articleMap[id] = {
+        id,
+        createdAt,
+        newsApiRequestId,
+        title,
+        description,
+        publishedDate,
+        url,
+        publicationName,
+        isRelevant,
+        approvalCreatedAt,
+        NewsApiRequest: {
+          id: narId,
+          createdAt: narCreatedAt,
+          andString,
+          orString,
+          notString,
+          NewsArticleAggregatorSource: {
+            id: nasId,
+            nameOfOrg: nasName,
+          },
+        },
+        States: [],
+        ArticleIsRelevants: [],
+        ArticleApproveds: [],
+        ArticleRevieweds: [],
+      };
+    }
 
-		if (stateId && !articleMap[id].States.some((s) => s.id === stateId)) {
-			articleMap[id].States.push({
-				id: stateId,
-				name: stateName,
-				abbreviation: stateAbbr,
-				createdAt: stateCreatedAt,
-				updatedAt: stateUpdatedAt,
-			});
-		}
-		if (
-			!articleMap[id].ArticleIsRelevants.some(
-				(ar) => ar.id === row["ArticleIsRelevant.id"]
-			)
-		) {
-			articleMap[id].ArticleIsRelevants.push({
-				id: row["ArticleIsRelevant.id"],
-				userId: row["ArticleIsRelevant.userId"],
-				articleId: row["ArticleIsRelevant.articleId"],
-				isRelevant: row["ArticleIsRelevant.isRelevant"],
-			});
-		}
-		const approvedId = row["ArticleApproved.id"];
-		if (
-			approvedId !== null &&
-			!articleMap[id].ArticleApproveds.some((aa) => aa.id === approvedId)
-		) {
-			articleMap[id].ArticleApproveds.push({
-				id: approvedId,
-				userId: row["ArticleApproved.userId"],
-				articleId: row["ArticleApproved.articleId"],
-				isApproved: row["ArticleApproved.isApproved"],
-			});
-		}
-		const reviewedId = row["ArticleReviewed.id"];
-		if (
-			reviewedId !== null &&
-			!articleMap[id].ArticleRevieweds.some((r) => r.id === reviewedId)
-		) {
-			articleMap[id].ArticleRevieweds.push({
-				id: reviewedId,
-				userId: row["ArticleReviewed.userId"],
-				articleId: row["ArticleReviewed.articleId"],
-			});
-		}
-	}
+    if (stateId && !articleMap[id].States.some((s) => s.id === stateId)) {
+      articleMap[id].States.push({
+        id: stateId,
+        name: stateName,
+        abbreviation: stateAbbr,
+        createdAt: stateCreatedAt,
+        updatedAt: stateUpdatedAt,
+      });
+    }
+    if (
+      !articleMap[id].ArticleIsRelevants.some(
+        (ar) => ar.id === row["ArticleIsRelevant.id"]
+      )
+    ) {
+      articleMap[id].ArticleIsRelevants.push({
+        id: row["ArticleIsRelevant.id"],
+        userId: row["ArticleIsRelevant.userId"],
+        articleId: row["ArticleIsRelevant.articleId"],
+        isRelevant: row["ArticleIsRelevant.isRelevant"],
+      });
+    }
+    const approvedId = row["ArticleApproved.id"];
+    if (
+      approvedId !== null &&
+      !articleMap[id].ArticleApproveds.some((aa) => aa.id === approvedId)
+    ) {
+      articleMap[id].ArticleApproveds.push({
+        id: approvedId,
+        userId: row["ArticleApproved.userId"],
+        articleId: row["ArticleApproved.articleId"],
+        isApproved: row["ArticleApproved.isApproved"],
+      });
+    }
+    const reviewedId = row["ArticleReviewed.id"];
+    if (
+      reviewedId !== null &&
+      !articleMap[id].ArticleRevieweds.some((r) => r.id === reviewedId)
+    ) {
+      articleMap[id].ArticleRevieweds.push({
+        id: reviewedId,
+        userId: row["ArticleReviewed.userId"],
+        articleId: row["ArticleReviewed.articleId"],
+      });
+    }
+  }
 
-	const results = Object.values(articleMap);
-	return results;
+  const results = Object.values(articleMap);
+  return results;
 }
 
 async function sqlQueryArticlesAndAiScores(
-	articlesIdArray,
-	entityWhoCategorizedArticleId
+  articlesIdArray,
+  entityWhoCategorizedArticleId
 ) {
-	const whereClause = `WHERE aewcac."articleId" IN (${articlesIdArray.join(
-		","
-	)}) AND aewcac."entityWhoCategorizesId" = ${entityWhoCategorizedArticleId}`;
-	const sql = `
+  const whereClause = `WHERE aewcac."articleId" IN (${articlesIdArray.join(
+    ","
+  )}) AND aewcac."entityWhoCategorizesId" = ${entityWhoCategorizedArticleId}`;
+  const sql = `
     SELECT
 
       -- ArticleEntityWhoCategorizedArticleContract fields
@@ -840,16 +840,16 @@ async function sqlQueryArticlesAndAiScores(
     ORDER BY aewcac.id;
   `;
 
-	const rawResults = await sequelize.query(sql, {
-		// replacements,
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const rawResults = await sequelize.query(sql, {
+    // replacements,
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	return rawResults;
+  return rawResults;
 }
 
 async function sqlQueryArticlesReport() {
-	const sql = `
+  const sql = `
   SELECT
     a.id AS "articleId",
     a.title,
@@ -873,15 +873,15 @@ async function sqlQueryArticlesReport() {
   ORDER BY a.id;
 `;
 
-	const flatResults = await sequelize.query(sql, {
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const flatResults = await sequelize.query(sql, {
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	return flatResults;
+  return flatResults;
 }
 
 async function sqlQueryArticlesIsRelevant() {
-	const sql = `
+  const sql = `
     SELECT
       a.id AS "articleId",
       a.title,
@@ -895,25 +895,25 @@ async function sqlQueryArticlesIsRelevant() {
     ORDER BY a.id;
   `;
 
-	const flatResults = await sequelize.query(sql, {
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const flatResults = await sequelize.query(sql, {
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	return flatResults;
+  return flatResults;
 }
 
 module.exports = {
-	sqlQueryArticles,
-	sqlQueryArticlesOld,
-	sqlQueryArticlesSummaryStatistics,
-	sqlQueryArticlesApproved,
-	sqlQueryRequestsFromApi,
-	sqlQueryArticles,
-	sqlQueryArticlesWithStatesApprovedReportContract,
-	sqlQueryArticlesForWithRatingsRoute,
-	sqlQueryArticlesWithStates,
-	sqlQueryArticlesReport,
-	sqlQueryArticlesIsRelevant,
-	// sqlQueryArticlesForWithRatingsRouteNoAi,
-	sqlQueryArticlesAndAiScores,
+  sqlQueryArticles,
+  sqlQueryArticlesOld,
+  sqlQueryArticlesSummaryStatistics,
+  sqlQueryArticlesApproved,
+  sqlQueryRequestsFromApi,
+  sqlQueryArticles,
+  sqlQueryArticlesWithStatesApprovedReportContract,
+  sqlQueryArticlesForWithRatingsRoute,
+  sqlQueryArticlesWithStates,
+  sqlQueryArticlesReport,
+  sqlQueryArticlesIsRelevant,
+  // sqlQueryArticlesForWithRatingsRouteNoAi,
+  sqlQueryArticlesAndAiScores,
 };

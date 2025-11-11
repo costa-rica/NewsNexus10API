@@ -53,8 +53,8 @@ Trigger a new deduper job to run the `analyze_fast` command.
 
 ```json
 {
-	"jobId": 1,
-	"status": "pending"
+  "jobId": 1,
+  "status": "pending"
 }
 ```
 
@@ -76,14 +76,14 @@ Fetch detailed status, timestamps, and logs for a specific job.
 
 ```json
 {
-	"jobId": 1,
-	"status": "completed",
-	"createdAt": "2025-09-28T17:45:30.123Z",
-	"startedAt": "2025-09-28T17:45:30.456Z",
-	"completedAt": "2025-09-28T17:46:15.789Z",
-	"exitCode": 0,
-	"stdout": "Process output streamed to terminal",
-	"stderr": "Process errors streamed to terminal"
+  "jobId": 1,
+  "status": "completed",
+  "createdAt": "2025-09-28T17:45:30.123Z",
+  "startedAt": "2025-09-28T17:45:30.456Z",
+  "completedAt": "2025-09-28T17:46:15.789Z",
+  "exitCode": 0,
+  "stdout": "Process output streamed to terminal",
+  "stderr": "Process errors streamed to terminal"
 }
 ```
 
@@ -91,7 +91,7 @@ Fetch detailed status, timestamps, and logs for a specific job.
 
 ```json
 {
-	"error": "Job not found"
+  "error": "Job not found"
 }
 ```
 
@@ -121,9 +121,9 @@ Terminate a running or pending job.
 
 ```json
 {
-	"jobId": 1,
-	"status": "cancelled",
-	"message": "Job cancelled successfully"
+  "jobId": 1,
+  "status": "cancelled",
+  "message": "Job cancelled successfully"
 }
 ```
 
@@ -131,7 +131,7 @@ Terminate a running or pending job.
 
 ```json
 {
-	"error": "Cannot cancel job with status: completed"
+  "error": "Cannot cancel job with status: completed"
 }
 ```
 
@@ -139,7 +139,7 @@ Terminate a running or pending job.
 
 ```json
 {
-	"error": "Job not found"
+  "error": "Job not found"
 }
 ```
 
@@ -157,18 +157,18 @@ List all jobs.
 
 ```json
 {
-	"jobs": [
-		{
-			"jobId": 1,
-			"status": "completed",
-			"createdAt": "2025-09-28T17:45:30.123Z"
-		},
-		{
-			"jobId": 2,
-			"status": "running",
-			"createdAt": "2025-09-28T17:50:15.456Z"
-		}
-	]
+  "jobs": [
+    {
+      "jobId": 1,
+      "status": "completed",
+      "createdAt": "2025-09-28T17:45:30.123Z"
+    },
+    {
+      "jobId": 2,
+      "status": "running",
+      "createdAt": "2025-09-28T17:50:15.456Z"
+    }
+  ]
 }
 ```
 
@@ -186,21 +186,21 @@ Service health check and system status.
 
 ```json
 {
-	"status": "healthy",
-	"timestamp": "2025-09-28T17:45:30.123Z",
-	"environment": {
-		"deduper_path_configured": true,
-		"python_venv_configured": true,
-		"deduper_path_exists": true
-	},
-	"jobs": {
-		"total": 5,
-		"pending": 0,
-		"running": 1,
-		"completed": 3,
-		"failed": 0,
-		"cancelled": 1
-	}
+  "status": "healthy",
+  "timestamp": "2025-09-28T17:45:30.123Z",
+  "environment": {
+    "deduper_path_configured": true,
+    "python_venv_configured": true,
+    "deduper_path_exists": true
+  },
+  "jobs": {
+    "total": 5,
+    "pending": 0,
+    "running": 1,
+    "completed": 3,
+    "failed": 0,
+    "cancelled": 1
+  }
 }
 ```
 
@@ -208,9 +208,9 @@ Service health check and system status.
 
 ```json
 {
-	"status": "unhealthy",
-	"error": "Missing environment variables",
-	"timestamp": "2025-09-28T17:45:30.123Z"
+  "status": "unhealthy",
+  "error": "Missing environment variables",
+  "timestamp": "2025-09-28T17:45:30.123Z"
 }
 ```
 
@@ -234,12 +234,12 @@ Cancel all running/pending deduper jobs and clear the database table used by the
 
 ```json
 {
-	"cleared": true,
-	"cancelledJobs": [3, 5, 7],
-	"exitCode": 0,
-	"stdout": "Table cleared successfully...",
-	"stderr": "",
-	"timestamp": "2025-09-28T17:45:30.123Z"
+  "cleared": true,
+  "cancelledJobs": [3, 5, 7],
+  "exitCode": 0,
+  "stdout": "Table cleared successfully...",
+  "stderr": "",
+  "timestamp": "2025-09-28T17:45:30.123Z"
 }
 ```
 
@@ -247,13 +247,13 @@ Cancel all running/pending deduper jobs and clear the database table used by the
 
 ```json
 {
-	"cleared": false,
-	"cancelledJobs": [3, 5],
-	"exitCode": 1,
-	"stdout": "",
-	"stderr": "Error clearing table...",
-	"error": "Clear table command failed",
-	"timestamp": "2025-09-28T17:45:30.123Z"
+  "cleared": false,
+  "cancelledJobs": [3, 5],
+  "exitCode": 1,
+  "stdout": "",
+  "stderr": "Error clearing table...",
+  "error": "Clear table command failed",
+  "timestamp": "2025-09-28T17:45:30.123Z"
 }
 ```
 
@@ -261,9 +261,9 @@ Cancel all running/pending deduper jobs and clear the database table used by the
 
 ```json
 {
-	"error": "Clear table command timed out",
-	"cancelledJobs": [3, 5],
-	"timestamp": "2025-09-28T17:45:30.123Z"
+  "error": "Clear table command timed out",
+  "cancelledJobs": [3, 5],
+  "timestamp": "2025-09-28T17:45:30.123Z"
 }
 ```
 
@@ -339,7 +339,7 @@ The service requires these environment variables (configured in `.env`):
 
 ```json
 {
-	"error": "Description of the error"
+  "error": "Description of the error"
 }
 ```
 
@@ -349,7 +349,7 @@ The service requires these environment variables (configured in `.env`):
 
 ### ExpressJS Integration
 
-This API is designed to be called from NewsNexusAPI09 (ExpressJS application):
+This API is designed to be called from NewsNexus10API (ExpressJS application):
 
 - All endpoints accept JSON payloads
 - RESTful design follows standard conventions

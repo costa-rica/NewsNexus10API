@@ -1,9 +1,9 @@
-const { sequelize } = require("newsnexusdb09");
+const { sequelize } = require("newsnexus10db");
 
 // These are examples of how to create SQL queries using Sequelize
 
 async function sqlQueryArticles() {
-	const sql = `
+  const sql = `
       SELECT
         a.id,
         a.title,
@@ -21,15 +21,15 @@ async function sqlQueryArticles() {
       ORDER BY a.id;
     `;
 
-	const results = await sequelize.query(sql, {
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const results = await sequelize.query(sql, {
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	return results;
+  return results;
 }
 
 async function sqlQueryArticlesWithStates() {
-	const sql = `
+  const sql = `
       SELECT
         a.id,
         a.title,
@@ -52,54 +52,54 @@ async function sqlQueryArticlesWithStates() {
       ORDER BY a.id;
     `;
 
-	const flatResults = await sequelize.query(sql, {
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const flatResults = await sequelize.query(sql, {
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	// Group articles by articleId
-	const articlesMap = new Map();
+  // Group articles by articleId
+  const articlesMap = new Map();
 
-	for (const row of flatResults) {
-		const {
-			id,
-			title,
-			description,
-			publishedDate,
-			createdAt,
-			publicationName,
-			url,
-			stateId,
-			stateName,
-			stateAbbreviation,
-		} = row;
+  for (const row of flatResults) {
+    const {
+      id,
+      title,
+      description,
+      publishedDate,
+      createdAt,
+      publicationName,
+      url,
+      stateId,
+      stateName,
+      stateAbbreviation,
+    } = row;
 
-		if (!articlesMap.has(id)) {
-			articlesMap.set(id, {
-				id,
-				title,
-				description,
-				publishedDate,
-				createdAt,
-				publicationName,
-				url,
-				States: [],
-			});
-		}
+    if (!articlesMap.has(id)) {
+      articlesMap.set(id, {
+        id,
+        title,
+        description,
+        publishedDate,
+        createdAt,
+        publicationName,
+        url,
+        States: [],
+      });
+    }
 
-		if (stateId) {
-			articlesMap.get(id).States.push({
-				id: stateId,
-				name: stateName,
-				abbreviation: stateAbbreviation,
-			});
-		}
-	}
+    if (stateId) {
+      articlesMap.get(id).States.push({
+        id: stateId,
+        name: stateName,
+        abbreviation: stateAbbreviation,
+      });
+    }
+  }
 
-	return Array.from(articlesMap.values());
+  return Array.from(articlesMap.values());
 }
 
 async function sqlQueryArticlesWithStatesApproved() {
-	const sql = `
+  const sql = `
       SELECT
         a.id AS "articleId",
         a.title,
@@ -133,90 +133,90 @@ async function sqlQueryArticlesWithStatesApproved() {
       ORDER BY a.id;
     `;
 
-	const flatResults = await sequelize.query(sql, {
-		type: sequelize.QueryTypes.SELECT,
-	});
+  const flatResults = await sequelize.query(sql, {
+    type: sequelize.QueryTypes.SELECT,
+  });
 
-	// Group articles by articleId
-	const articlesMap = new Map();
+  // Group articles by articleId
+  const articlesMap = new Map();
 
-	for (const row of flatResults) {
-		const {
-			articleId,
-			title,
-			description,
-			publishedDate,
-			createdAt,
-			publicationName,
-			url,
-			author,
-			urlToImage,
-			entityWhoFoundArticleId,
-			newsApiRequestId,
-			newsRssRequestId,
-			stateId,
-			stateName,
-			stateAbbreviation,
-			approvedId,
-			approvedByUserId,
-			approvedAt,
-			isApproved,
-			headlineForPdfReport,
-			publicationNameForPdfReport,
-			publicationDateForPdfReport,
-			textForPdfReport,
-			urlForPdfReport,
-			kmNotes,
-		} = row;
+  for (const row of flatResults) {
+    const {
+      articleId,
+      title,
+      description,
+      publishedDate,
+      createdAt,
+      publicationName,
+      url,
+      author,
+      urlToImage,
+      entityWhoFoundArticleId,
+      newsApiRequestId,
+      newsRssRequestId,
+      stateId,
+      stateName,
+      stateAbbreviation,
+      approvedId,
+      approvedByUserId,
+      approvedAt,
+      isApproved,
+      headlineForPdfReport,
+      publicationNameForPdfReport,
+      publicationDateForPdfReport,
+      textForPdfReport,
+      urlForPdfReport,
+      kmNotes,
+    } = row;
 
-		if (!articlesMap.has(articleId)) {
-			articlesMap.set(articleId, {
-				id: articleId,
-				title,
-				description,
-				publishedDate,
-				createdAt,
-				publicationName,
-				url,
-				author,
-				urlToImage,
-				entityWhoFoundArticleId,
-				newsApiRequestId,
-				newsRssRequestId,
-				States: [],
-				ArticleApproveds: [],
-			});
-		}
+    if (!articlesMap.has(articleId)) {
+      articlesMap.set(articleId, {
+        id: articleId,
+        title,
+        description,
+        publishedDate,
+        createdAt,
+        publicationName,
+        url,
+        author,
+        urlToImage,
+        entityWhoFoundArticleId,
+        newsApiRequestId,
+        newsRssRequestId,
+        States: [],
+        ArticleApproveds: [],
+      });
+    }
 
-		if (stateId) {
-			articlesMap.get(articleId).States.push({
-				id: stateId,
-				name: stateName,
-				abbreviation: stateAbbreviation,
-			});
-		}
+    if (stateId) {
+      articlesMap.get(articleId).States.push({
+        id: stateId,
+        name: stateName,
+        abbreviation: stateAbbreviation,
+      });
+    }
 
-		if (approvedId) {
-			articlesMap.get(articleId).ArticleApproveds.push({
-				id: approvedId,
-				userId: approvedByUserId,
-				createdAt: approvedAt,
-				isApproved,
-				headlineForPdfReport,
-				publicationNameForPdfReport,
-				publicationDateForPdfReport,
-				textForPdfReport,
-				urlForPdfReport,
-				kmNotes,
-			});
-		}
-	}
+    if (approvedId) {
+      articlesMap.get(articleId).ArticleApproveds.push({
+        id: approvedId,
+        userId: approvedByUserId,
+        createdAt: approvedAt,
+        isApproved,
+        headlineForPdfReport,
+        publicationNameForPdfReport,
+        publicationDateForPdfReport,
+        textForPdfReport,
+        urlForPdfReport,
+        kmNotes,
+      });
+    }
+  }
 
-	return Array.from(articlesMap.values());
+  return Array.from(articlesMap.values());
 }
 
 module.exports = {
-	sqlQueryArticles,
-	sqlQueryArticlesWithStates,
-	sqlQueryArticlesWithStatesApproved,
+  sqlQueryArticles,
+  sqlQueryArticlesWithStates,
+  sqlQueryArticlesWithStatesApproved,
 };

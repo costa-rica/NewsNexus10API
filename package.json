@@ -1,39 +1,39 @@
 {
-	"name": "newsnexusapi09",
-	"version": "1.0.0",
-	"description": "NewsNexus API v09",
-	"main": "index.js",
-	"directories": {
-		"doc": "docs"
-	},
-	"scripts": {
-		"start": "node src/server.js",
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"dependencies": {
-		"archiver": "^7.0.1",
-		"axios": "^1.12.2",
-		"bcrypt": "^6.0.0",
-		"cheerio": "^1.1.2",
-		"cookie-parser": "^1.4.7",
-		"cors": "^2.8.5",
-		"csv-parser": "^3.2.0",
-		"dotenv": "^17.2.2",
-		"exceljs": "^4.4.0",
-		"express": "^5.1.0",
-		"json2csv": "^6.0.0-alpha.2",
-		"jsonwebtoken": "^9.0.2",
-		"luxon": "^3.7.2",
-		"morgan": "^1.10.1",
-		"multer": "^2.0.2",
-		"newsnexusdb09": "file:../NewsNexusDb09",
-		"nodemailer": "^7.0.10",
-		"pdfkit": "^0.17.2",
-		"sequelize": "^6.37.7",
-		"sqlite3": "^5.1.7",
-		"unzipper": "^0.12.3"
-	}
+  "name": "newsnexus10api",
+  "version": "1.0.0",
+  "description": "NewsNexus API v09",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "axios": "^1.12.2",
+    "bcrypt": "^6.0.0",
+    "cheerio": "^1.1.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^17.2.2",
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "json2csv": "^6.0.0-alpha.2",
+    "jsonwebtoken": "^9.0.2",
+    "luxon": "^3.7.2",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "newsnexus10db": "file:../NewsNexus10Db",
+    "nodemailer": "^7.0.10",
+    "pdfkit": "^0.17.2",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7",
+    "unzipper": "^0.12.3"
+  }
 }

@@ -1,12 +1,12 @@
 const {
-	sequelize,
-	NewsApiRequest,
-	NewsArticleAggregatorSource,
-	NewsApiRequestWebsiteDomainContract,
-	WebsiteDomain,
-	Article,
-	ArticleApproved,
-} = require("newsnexusdb09");
+  sequelize,
+  NewsApiRequest,
+  NewsArticleAggregatorSource,
+  NewsApiRequestWebsiteDomainContract,
+  WebsiteDomain,
+  Article,
+  ArticleApproved,
+} = require("newsnexus10db");
 const { Op } = require("sequelize");
 /**
  * Returns article metadata with the max keywordRating and its keyword,
@@ -17,15 +17,15 @@ const { Op } = require("sequelize");
  * @returns {Promise<Array>} rawArticles
  */
 async function createArticlesArrayWithSqlForSemanticKeywordsRating(
-	entityWhoCategorizesId,
-	publishedDateAfter = null
+  entityWhoCategorizesId,
+  publishedDateAfter = null
 ) {
-	let dateCondition = "";
-	if (publishedDateAfter) {
-		dateCondition = `AND a.publishedDate >= '${publishedDateAfter}'`;
-	}
+  let dateCondition = "";
+  if (publishedDateAfter) {
+    dateCondition = `AND a.publishedDate >= '${publishedDateAfter}'`;
+  }
 
-	const sql = `
+  const sql = `
     SELECT
       a.id,
       a.title,
@@ -51,115 +51,115 @@ async function createArticlesArrayWithSqlForSemanticKeywordsRating(
     WHERE 1=1 ${dateCondition}
   `;
 
-	const [rawArticles, metadata] = await sequelize.query(sql);
-	return rawArticles;
+  const [rawArticles, metadata] = await sequelize.query(sql);
+  return rawArticles;
 }
 
 // --------------------------------
 // Queries
 // --------------------------------
 async function createNewsApiRequestsArray() {
-	const requestsArray = await NewsApiRequest.findAll({
-		include: [
-			{
-				model: NewsArticleAggregatorSource,
-				attributes: ["nameOfOrg"],
-			},
-			{
-				model: NewsApiRequestWebsiteDomainContract,
-				include: [
-					{
-						model: WebsiteDomain,
-						attributes: ["name"],
-					},
-				],
-			},
-		],
-	});
+  const requestsArray = await NewsApiRequest.findAll({
+    include: [
+      {
+        model: NewsArticleAggregatorSource,
+        attributes: ["nameOfOrg"],
+      },
+      {
+        model: NewsApiRequestWebsiteDomainContract,
+        include: [
+          {
+            model: WebsiteDomain,
+            attributes: ["name"],
+          },
+        ],
+      },
+    ],
+  });
 
-	console.log("requestsArray.length: ", requestsArray.length);
+  console.log("requestsArray.length: ", requestsArray.length);
 
-	const requestArrayFormatted = requestsArray.map((request) => {
-		// Extract domain names from included contracts
-		const domainNames = request.NewsApiRequestWebsiteDomainContracts.map(
-			(contract) => contract.WebsiteDomain?.name
-		).filter(Boolean);
+  const requestArrayFormatted = requestsArray.map((request) => {
+    // Extract domain names from included contracts
+    const domainNames = request.NewsApiRequestWebsiteDomainContracts.map(
+      (contract) => contract.WebsiteDomain?.name
+    ).filter(Boolean);
 
-		return {
-			id: request.id,
-			andString: request.andString,
-			orString: request.orString,
-			notString: request.notString,
-			nameOfOrg: request.NewsArticleAggregatorSource?.nameOfOrg || "N/A",
-			includeOrExcludeDomainsString: domainNames.join(", "),
-			createdAt: request.createdAt,
-		};
-	});
+    return {
+      id: request.id,
+      andString: request.andString,
+      orString: request.orString,
+      notString: request.notString,
+      nameOfOrg: request.NewsArticleAggregatorSource?.nameOfOrg || "N/A",
+      includeOrExcludeDomainsString: domainNames.join(", "),
+      createdAt: request.createdAt,
+    };
+  });
 
-	return requestArrayFormatted;
+  return requestArrayFormatted;
 }
 
 async function createArticlesApprovedArray(dateRequestsLimit) {
-	let articles;
-	if (dateRequestsLimit) {
-		dateRequestsLimit = new Date(dateRequestsLimit);
-		articles = await Article.findAll({
-			where: {
-				createdAt: {
-					[Op.gte]: dateRequestsLimit,
-				},
-			},
-			include: [
-				{
-					model: ArticleApproved,
-					required: true, // ensures only articles with approved entries are fetched
-				},
-			],
-		});
-	} else {
-		articles = await Article.findAll({
-			include: [
-				{
-					model: ArticleApproved,
-					required: true, // ensures only articles with approved entries are fetched
-				},
-			],
-		});
-	}
+  let articles;
+  if (dateRequestsLimit) {
+    dateRequestsLimit = new Date(dateRequestsLimit);
+    articles = await Article.findAll({
+      where: {
+        createdAt: {
+          [Op.gte]: dateRequestsLimit,
+        },
+      },
+      include: [
+        {
+          model: ArticleApproved,
+          required: true, // ensures only articles with approved entries are fetched
+        },
+      ],
+    });
+  } else {
+    articles = await Article.findAll({
+      include: [
+        {
+          model: ArticleApproved,
+          required: true, // ensures only articles with approved entries are fetched
+        },
+      ],
+    });
+  }
 
-	// const whereClause = dateRequestsLimit
-	//   ? { createdAt: { [Op.gte]: dateRequestsLimit } }
-	//   : {};
+  // const whereClause = dateRequestsLimit
+  //   ? { createdAt: { [Op.gte]: dateRequestsLimit } }
+  //   : {};
 
-	// // Fetch Articles joined with any existing ArticleApproved rows
-	// const articles = await Article.findAll({
-	//   where: whereClause,
-	//   include: [
-	//     {
-	//       model: ArticleApproved,
-	//       required: true, // ensures only articles with approved entries are fetched
-	//     },
-	//   ],
-	// });
+  // // Fetch Articles joined with any existing ArticleApproved rows
+  // const articles = await Article.findAll({
+  //   where: whereClause,
+  //   include: [
+  //     {
+  //       model: ArticleApproved,
+  //       required: true, // ensures only articles with approved entries are fetched
+  //     },
+  //   ],
+  // });
 
-	console.log("✅ Approved articles count:", articles.length);
+  console.log("✅ Approved articles count:", articles.length);
 
-	const requestIdArray = [];
-	let manualFoundCount = 0;
+  const requestIdArray = [];
+  let manualFoundCount = 0;
 
-	for (const article of articles) {
-		if (article.newsApiRequestId) {
-			requestIdArray.push(article.newsApiRequestId);
-		} else {
-			manualFoundCount++;
-		}
-	}
+  for (const article of articles) {
+    if (article.newsApiRequestId) {
+      requestIdArray.push(article.newsApiRequestId);
+    } else {
+      manualFoundCount++;
+    }
+  }
 
-	return { requestIdArray, manualFoundCount };
+  return { requestIdArray, manualFoundCount };
 }
 
 module.exports = {
-	createArticlesArrayWithSqlForSemanticKeywordsRating,
-	createNewsApiRequestsArray,
-	createArticlesApprovedArray,
+  createArticlesArrayWithSqlForSemanticKeywordsRating,
+  createNewsApiRequestsArray,
+  createArticlesApprovedArray,
 };

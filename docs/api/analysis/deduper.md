@@ -154,7 +154,7 @@ Initiates a deduper job in NewsNexusPythonQueuer to analyze articles for duplica
 
 **Description:**
 
-This endpoint serves as a bridge between NewsNexusAPI09 and the NewsNexusPythonQueuer service. It triggers a deduper analysis job for all articles associated with the specified report ID.
+This endpoint serves as a bridge between NewsNexus10API and the NewsNexusPythonQueuer service. It triggers a deduper analysis job for all articles associated with the specified report ID.
 
 The NewsNexusPythonQueuer service handles retrieving the article IDs directly from the database, so no CSV file creation is required.
 

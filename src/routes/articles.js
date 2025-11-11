@@ -16,7 +16,7 @@ const {
   Report,
   NewsArticleAggregatorSource,
   EntityWhoCategorizedArticle,
-} = require("newsnexusdb09");
+} = require("newsnexus10db");
 const { authenticateToken } = require("../modules/userAuthentication");
 const {
   createArticlesArrayWithSqlForSemanticKeywordsRating,
@@ -325,7 +325,10 @@ router.get("/get-approved/:articleId", authenticateToken, async (req, res) => {
   });
 
   // Check if record exists AND isApproved is true
-  if (!articleApproved || (articleApproved.isApproved !== true && articleApproved.isApproved !== 1)) {
+  if (
+    !articleApproved ||
+    (articleApproved.isApproved !== true && articleApproved.isApproved !== 1)
+  ) {
     return res.json({
       articleIsApproved: false,
       article: {},
@@ -368,7 +371,9 @@ router.post("/approve/:articleId", authenticateToken, async (req, res) => {
         },
         { where: { articleId } }
       );
-      console.log(`---- > updated existing record to approved for articleId ${articleId}`);
+      console.log(
+        `---- > updated existing record to approved for articleId ${articleId}`
+      );
     } else {
       // Create new approval record
       await ArticleApproved.create({
@@ -377,7 +382,9 @@ router.post("/approve/:articleId", authenticateToken, async (req, res) => {
         isApproved: true,
         ...req.body,
       });
-      console.log(`---- > created new approval record for articleId ${articleId}`);
+      console.log(
+        `---- > created new approval record for articleId ${articleId}`
+      );
     }
   } else if (approvedStatus === "Un-approve") {
     console.log("---- > received Un-approve");
@@ -390,15 +397,20 @@ router.post("/approve/:articleId", authenticateToken, async (req, res) => {
         },
         { where: { articleId } }
       );
-      console.log(`---- > updated record to unapproved for articleId ${articleId}, userId: ${user.id}`);
+      console.log(
+        `---- > updated record to unapproved for articleId ${articleId}, userId: ${user.id}`
+      );
     } else {
-      console.log(`---- > no approval record exists for articleId ${articleId}, cannot unapprove`);
+      console.log(
+        `---- > no approval record exists for articleId ${articleId}, cannot unapprove`
+      );
     }
   }
 
-  const statusMessage = approvedStatus === "Approve"
-    ? `articleId ${articleId} is approved`
-    : `articleId ${articleId} is unapproved`;
+  const statusMessage =
+    approvedStatus === "Approve"
+      ? `articleId ${articleId} is approved`
+      : `articleId ${articleId} is unapproved`;
 
   res.json({ result: true, status: statusMessage });
 });

@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { initModels, sequelize } = require("newsnexusdb09");
+const { initModels, sequelize } = require("newsnexus10db");
 var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");

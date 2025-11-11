@@ -30,7 +30,7 @@ const {
   WebsiteDomain,
   ArticleEntityWhoCategorizedArticleContract,
   ArticleEntityWhoCategorizedArticleContracts02,
-} = require("newsnexusdb09");
+} = require("newsnexus10db");
 
 const { promisify } = require("util");
 const archiver = require("archiver");

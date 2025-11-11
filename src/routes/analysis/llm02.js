@@ -8,7 +8,7 @@ const {
   ArticleApproved,
   ArticleStateContract,
   ArticleEntityWhoCategorizedArticleContracts02,
-} = require("newsnexusdb09");
+} = require("newsnexus10db");
 const { authenticateToken } = require("../../modules/userAuthentication");
 
 // 🔹 GET /analysis/llm02/no-article-approved-rows
@@ -141,14 +141,22 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (articleId === undefined || isApproved === undefined || !entityWhoCategorizesId || !llmAnalysis) {
+    if (
+      articleId === undefined ||
+      isApproved === undefined ||
+      !entityWhoCategorizesId ||
+      !llmAnalysis
+    ) {
       return res.status(400).json({
         result: false,
-        message: "Missing required fields: articleId, isApproved, entityWhoCategorizesId, llmAnalysis",
+        message:
+          "Missing required fields: articleId, isApproved, entityWhoCategorizesId, llmAnalysis",
       });
     }
 
-    console.log(`Processing articleId: ${articleId}, isApproved: ${isApproved}`);
+    console.log(
+      `Processing articleId: ${articleId}, isApproved: ${isApproved}`
+    );
 
     // Step 1: Check if article already exists in ArticleApproveds
     const existingApproval = await ArticleApproved.findOne({
@@ -177,11 +185,14 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
     // Step 2: Check approval requirements
     // If isApproved=true, both isApproved and stateId must be provided
     if (isApproved === true && (stateId === null || stateId === undefined)) {
-      console.log(`Skipping article ${articleId}: isApproved=true but stateId is missing`);
+      console.log(
+        `Skipping article ${articleId}: isApproved=true but stateId is missing`
+      );
       return res.status(400).json({
         result: false,
         skipped: true,
-        message: "Cannot approve article without stateId. Both isApproved=true and stateId are required for approval.",
+        message:
+          "Cannot approve article without stateId. Both isApproved=true and stateId are required for approval.",
         articleId: articleId,
       });
     }
@@ -207,7 +218,9 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
     // Step 4: Create ArticleStateContracts row if approved and stateId provided
     let articleStateContract = null;
     if (isApproved === true && stateId) {
-      console.log(`Creating ArticleStateContracts row for article ${articleId} and state ${stateId}`);
+      console.log(
+        `Creating ArticleStateContracts row for article ${articleId} and state ${stateId}`
+      );
       articleStateContract = await ArticleStateContract.create({
         articleId: articleId,
         stateId: stateId,
@@ -218,14 +231,17 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
     console.log(`Processing llmAnalysis for article ${articleId}`);
 
     // Delete existing records for this article + entity combination
-    const deletedCount = await ArticleEntityWhoCategorizedArticleContracts02.destroy({
-      where: {
-        articleId: articleId,
-        entityWhoCategorizesId: entityWhoCategorizesId,
-      },
-    });
+    const deletedCount =
+      await ArticleEntityWhoCategorizedArticleContracts02.destroy({
+        where: {
+          articleId: articleId,
+          entityWhoCategorizesId: entityWhoCategorizesId,
+        },
+      });
 
-    console.log(`Deleted ${deletedCount} existing ArticleEntityWhoCategorizedArticleContracts02 records`);
+    console.log(
+      `Deleted ${deletedCount} existing ArticleEntityWhoCategorizedArticleContracts02 records`
+    );
 
     const recordsToCreate = [];
 
@@ -306,11 +322,14 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
     }
 
     // Bulk create all records
-    const createdRecords = await ArticleEntityWhoCategorizedArticleContracts02.bulkCreate(
-      recordsToCreate
-    );
+    const createdRecords =
+      await ArticleEntityWhoCategorizedArticleContracts02.bulkCreate(
+        recordsToCreate
+      );
 
-    console.log(`Created ${createdRecords.length} ArticleEntityWhoCategorizedArticleContracts02 records`);
+    console.log(
+      `Created ${createdRecords.length} ArticleEntityWhoCategorizedArticleContracts02 records`
+    );
 
     // Step 6: Return success response
     res.status(200).json({
@@ -323,19 +342,24 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
         id: articleApproved.id,
         created: true,
       },
-      articleStateContract: articleStateContract ? {
-        id: articleStateContract.id,
-        created: true,
-      } : {
-        created: false,
-      },
+      articleStateContract: articleStateContract
+        ? {
+            id: articleStateContract.id,
+            created: true,
+          }
+        : {
+            created: false,
+          },
       llmAnalysisRecords: {
         deletedCount: deletedCount,
         createdCount: createdRecords.length,
       },
     });
   } catch (error) {
-    console.error("Error in POST /analysis/llm02/update-approved-status:", error);
+    console.error(
+      "Error in POST /analysis/llm02/update-approved-status:",
+      error
+    );
     res.status(500).json({
       result: false,
       message: "Internal server error",

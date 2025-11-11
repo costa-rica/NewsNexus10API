@@ -1,6 +1,6 @@
 ![Logo](./docs/images/logoAndNameRound.png)
 
-The API for the NewsNexusDb09 and microservices suite of applications.
+The API for the NewsNexus10Db and microservices suite of applications.
 
 ## installs
 
@@ -22,17 +22,17 @@ npm install
 ### server
 
 ```
-APP_NAME=NewsNexus09
-JWT_SECRET=NewsNexus09_SECRET
+APP_NAME=NewsNexus10
+JWT_SECRET=NewsNexus10_SECRET
 NAME_DB=newsnexus09.db
-PATH_DATABASE=/home/shared/databases/NewsNexus09/
-PATH_DB_BACKUPS=/home/shared/project_resources/NewsNexus09/db_backups
-PATH_PROJECT_RESOURCES=/home/shared/project_resources/NewsNexus09
-PATH_PROJECT_RESOURCES_REPORTS=/home/shared/project_resources/NewsNexus09/reports
-PATH_TO_API_RESPONSE_JSON_FILES=/home/shared/project_resources/NewsNexus09/api_response_json_files
-PATH_TO_AUTOMATION_EXCEL_FILES=/home/shared/project_resources/NewsNexus09/utilities/automation_excel_files
-PATH_TO_UTILITIES_ANALYSIS_SPREADSHEETS=/home/shared/project_resources/NewsNexus09/utilities/analysis_spreadsheets
-PATH_TO_UTILITIES_DEDUPER=/Users/nick/Documents/_project_resources/NewsNexus09/utilities/deduper
+PATH_DATABASE=/home/shared/databases/NewsNexus10/
+PATH_DB_BACKUPS=/home/shared/project_resources/NewsNexus10/db_backups
+PATH_PROJECT_RESOURCES=/home/shared/project_resources/NewsNexus10
+PATH_PROJECT_RESOURCES_REPORTS=/home/shared/project_resources/NewsNexus10/reports
+PATH_TO_API_RESPONSE_JSON_FILES=/home/shared/project_resources/NewsNexus10/api_response_json_files
+PATH_TO_AUTOMATION_EXCEL_FILES=/home/shared/project_resources/NewsNexus10/utilities/automation_excel_files
+PATH_TO_UTILITIES_ANALYSIS_SPREADSHEETS=/home/shared/project_resources/NewsNexus10/utilities/analysis_spreadsheets
+PATH_TO_UTILITIES_DEDUPER=/Users/nick/Documents/_project_resources/NewsNexus10/utilities/deduper
 URL_BASE_NEWS_NEXUS_PYTHON_QUEUER=http://127.0.0.1:5000/
 URL_BASE_TO_WEBSITE=https://news-nexus.kineticmetrics.com/
 ADMIN_EMAIL_CREATE_ON_STARTUP=["nickrodriguez@kineticmetrics.com"]
@@ -46,18 +46,18 @@ ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES=true
 ### Mac workstation
 
 ```
-APP_NAME=NewsNexus09
+APP_NAME=NewsNexus10
 PORT=3000
-JWT_SECRET=NewsNexus09_SECRET
+JWT_SECRET=NewsNexus10_SECRET
 NAME_DB=newsnexus09.db
-PATH_DATABASE=/Users/nick/Documents/_databases/NewsNexus09/
-PATH_DB_BACKUPS=/Users/nick/Documents/_project_resources/NewsNexus09/db_backups
-PATH_PROJECT_RESOURCES=/Users/nick/Documents/_project_resources/NewsNexus09
-PATH_PROJECT_RESOURCES_REPORTS=/Users/nick/Documents/_project_resources/NewsNexus09/reports
-PATH_TO_API_RESPONSE_JSON_FILES=/Users/nick/Documents/_project_resources/NewsNexus09/api_response_json_files
-PATH_TO_AUTOMATION_EXCEL_FILES=/Users/nick/Documents/_project_resources/NewsNexus09/utilities/automation_excel_files
-PATH_TO_UTILITIES_ANALYSIS_SPREADSHEETS=/Users/nick/Documents/_project_resources/NewsNexus09/utilities/analysis_spreadsheets
-PATH_TO_UTILITIES_DEDUPER=/Users/nick/Documents/_project_resources/NewsNexus09/utilities/deduper
+PATH_DATABASE=/Users/nick/Documents/_databases/NewsNexus10/
+PATH_DB_BACKUPS=/Users/nick/Documents/_project_resources/NewsNexus10/db_backups
+PATH_PROJECT_RESOURCES=/Users/nick/Documents/_project_resources/NewsNexus10
+PATH_PROJECT_RESOURCES_REPORTS=/Users/nick/Documents/_project_resources/NewsNexus10/reports
+PATH_TO_API_RESPONSE_JSON_FILES=/Users/nick/Documents/_project_resources/NewsNexus10/api_response_json_files
+PATH_TO_AUTOMATION_EXCEL_FILES=/Users/nick/Documents/_project_resources/NewsNexus10/utilities/automation_excel_files
+PATH_TO_UTILITIES_ANALYSIS_SPREADSHEETS=/Users/nick/Documents/_project_resources/NewsNexus10/utilities/analysis_spreadsheets
+PATH_TO_UTILITIES_DEDUPER=/Users/nick/Documents/_project_resources/NewsNexus10/utilities/deduper
 URL_BASE_NEWS_NEXUS_PYTHON_QUEUER=http://127.0.0.1:5000/
 URL_BASE_TO_WEBSITE=http://localhost:3001
 ADMIN_EMAIL_CREATE_ON_STARTUP=["nickrodriguez@kineticmetrics.com"]

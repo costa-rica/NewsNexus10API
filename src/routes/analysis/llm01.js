@@ -5,7 +5,7 @@ const {
   ArtificialIntelligence,
   EntityWhoCategorizedArticle,
   ArticleEntityWhoCategorizedArticleContracts02,
-} = require("newsnexusdb09");
+} = require("newsnexus10db");
 const axios = require("axios");
 const fs = require("fs").promises;
 const path = require("path");
@@ -88,14 +88,13 @@ async function saveResponseToDatabase(articleId, aiResponse, scrapingStatus) {
   console.log("Parsed AI content:", parsedContent);
 
   // Step 3: Delete existing records with same articleId + entityWhoCategorizesId
-  const deletedCount = await ArticleEntityWhoCategorizedArticleContracts02.destroy(
-    {
+  const deletedCount =
+    await ArticleEntityWhoCategorizedArticleContracts02.destroy({
       where: {
         articleId: articleId,
         entityWhoCategorizesId: entityWhoCategorizesId,
       },
-    }
-  );
+    });
 
   console.log(
     `Deleted ${deletedCount} existing records for articleId ${articleId} and entityWhoCategorizesId ${entityWhoCategorizesId}`
@@ -139,9 +138,10 @@ async function saveResponseToDatabase(articleId, aiResponse, scrapingStatus) {
   });
 
   // Bulk create all records
-  const createdRecords = await ArticleEntityWhoCategorizedArticleContracts02.bulkCreate(
-    recordsToCreate
-  );
+  const createdRecords =
+    await ArticleEntityWhoCategorizedArticleContracts02.bulkCreate(
+      recordsToCreate
+    );
 
   console.log(`Created ${createdRecords.length} new records in database`);
 
@@ -205,10 +205,7 @@ router.post("/:articleId", authenticateToken, async (req, res) => {
     // Conditionally handle scraped content
     if (scrapedContent) {
       // Replace placeholder with scraped content
-      prompt = prompt.replace(
-        /<< ARTICLE_SCRAPED_CONTENT >>/g,
-        scrapedContent
-      );
+      prompt = prompt.replace(/<< ARTICLE_SCRAPED_CONTENT >>/g, scrapedContent);
     } else {
       // Remove the entire "### Article Content" section if scraping failed
       prompt = prompt.replace(

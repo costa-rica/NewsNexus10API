@@ -84,7 +84,7 @@ This endpoint performs comprehensive AI-powered analysis of news articles to ide
   },
   "file": {
     "saved": true,
-    "filePath": "/Users/nick/Documents/_project_resources/NewsNexus09/llm-01/responses/1234_2025-11-03T14-30-45-123Z.json",
+    "filePath": "/Users/nick/Documents/_project_resources/NewsNexus10/llm-01/responses/1234_2025-11-03T14-30-45-123Z.json",
     "error": null
   }
 }
@@ -128,7 +128,7 @@ This endpoint performs comprehensive AI-powered analysis of news articles to ide
   },
   "file": {
     "saved": true,
-    "filePath": "/Users/nick/Documents/_project_resources/NewsNexus09/llm-01/responses/1234_2025-11-03T14-30-45-123Z.json",
+    "filePath": "/Users/nick/Documents/_project_resources/NewsNexus10/llm-01/responses/1234_2025-11-03T14-30-45-123Z.json",
     "error": null
   }
 }
@@ -255,14 +255,14 @@ The AI is prompted to return a JSON object with the following structure:
 
 The endpoint parses the AI response and stores it in the `ArticleEntityWhoCategorizedArticleContracts02` table with the following records:
 
-| Key                    | Value Field   | Example Value         |
-| ---------------------- | ------------- | --------------------- |
-| product                | valueString   | "generator"           |
-| state                  | valueString   | "No state mentioned"  |
-| hazard                 | valueString   | "fire"                |
-| relevance_score        | valueNumber   | 8                     |
-| united_states_score    | valueNumber   | 5                     |
-| scrapingStatus         | valueString   | "success" or "fail"   |
+| Key                 | Value Field | Example Value        |
+| ------------------- | ----------- | -------------------- |
+| product             | valueString | "generator"          |
+| state               | valueString | "No state mentioned" |
+| hazard              | valueString | "fire"               |
+| relevance_score     | valueNumber | 8                    |
+| united_states_score | valueNumber | 5                    |
+| scrapingStatus      | valueString | "success" or "fail"  |
 
 - All records share the same `articleId` and `entityWhoCategorizesId`
 - Existing records for this combination are deleted before new records are created

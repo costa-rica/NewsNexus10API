@@ -3,7 +3,7 @@ var router = express.Router();
 const {
   ArticleReportContract,
   ArticleDuplicateAnalysis,
-} = require("newsnexusdb09");
+} = require("newsnexus10db");
 const { authenticateToken } = require("../../modules/userAuthentication");
 const {
   makeArticleApprovedsTableDictionary,

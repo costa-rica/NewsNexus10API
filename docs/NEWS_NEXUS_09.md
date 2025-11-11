@@ -10,7 +10,7 @@ Article collecting and analysis of news articles from various sources. The Consu
 
 ### Core Platform
 
-- Database: NewsNexusDb09 (TypeScript)
+- Database: NewsNexus10Db (TypeScript)
 - SQLite, Sequelize
 - API: NewsNexusApi09 (JavaScript)
 - Web App: NewsNexus08Portal (JavaScript)
