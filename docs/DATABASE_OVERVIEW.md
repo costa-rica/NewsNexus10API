@@ -1,8 +1,8 @@
 # Database Overview
 
-This document provides a comprehensive overview of the NewsNexus10Db database schema. All tables use SQLite as the underlying database engine and are managed through Sequelize ORM.
+This document provides a comprehensive overview of the NewsNexusDb09 database schema. All tables use SQLite as the underlying database engine and are managed through Sequelize ORM.
 
-## NewsNexus10Db Description
+## NewsNexusDb09 Description
 
 - One class per table (`src/models/<Name>.ts`) with strong typings.
 - Centralized initialization and associations.
@@ -16,7 +16,7 @@ This document provides a comprehensive overview of the NewsNexus10Db database sc
 ### Project Structure
 
 ```
-NewsNexus10Db/
+NewsNexusDb09/
 ├── src/                          # TypeScript source files
 │   ├── index.ts                  # Main entry point
 │   └── models/                   # Sequelize model definitions
@@ -463,7 +463,7 @@ Links NewsAPI requests to website domains for filtering.
 
 ## Database Relationships
 
-The following relationships are defined in `src/models/_associations.ts` and establish the complete relational structure of the NewsNexus10Db database:
+The following relationships are defined in `src/models/_associations.ts` and establish the complete relational structure of the NewsNexusDb09 database:
 
 ### Core Entity Relationships
 
