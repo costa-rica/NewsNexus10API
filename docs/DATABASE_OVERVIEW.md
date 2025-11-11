@@ -1,8 +1,8 @@
 # Database Overview
 
-This document provides a comprehensive overview of the NewsNexusDb09 database schema. All tables use SQLite as the underlying database engine and are managed through Sequelize ORM.
+This document provides a comprehensive overview of the NewsNexus10Db database schema. All tables use SQLite as the underlying database engine and are managed through Sequelize ORM.
 
-## NewsNexusDb09 Description
+## NewsNexus10Db Description
 
 - One class per table (`src/models/<Name>.ts`) with strong typings.
 - Centralized initialization and associations.
@@ -16,7 +16,7 @@ This document provides a comprehensive overview of the NewsNexusDb09 database sc
 ### Project Structure
 
 ```
-NewsNexusDb09/
+NewsNexus10Db/
 ├── src/                          # TypeScript source files
 │   ├── index.ts                  # Main entry point
 │   └── models/                   # Sequelize model definitions
@@ -260,6 +260,27 @@ Article approval workflow tracking.
 | createdAt                   | DATE     | NOT NULL                    | Timestamp                   |
 | updatedAt                   | DATE     | NOT NULL                    | Timestamp                   |
 
+### ArticlesApproved02
+
+**Model:** `ArticlesApproved02`
+
+Parallel article approval workflow tracking for AI-driven services. Mirrors ArticleApproved functionality but uses AI systems instead of human users for approval decisions.
+
+| Field                       | Type     | Constraints                 | Description                 |
+| --------------------------- | -------- | --------------------------- | --------------------------- |
+| id                          | INTEGER  | PRIMARY KEY, AUTO_INCREMENT | Unique approval identifier  |
+| artificialIntelligenceId    | INTEGER  | FK, NOT NULL                | AI system that approved     |
+| articleId                   | INTEGER  | FK, NOT NULL                | Reference to article        |
+| isApproved                  | BOOLEAN  | DEFAULT true                | Approval status             |
+| headlineForPdfReport        | STRING   | NULLABLE                    | PDF report headline         |
+| publicationNameForPdfReport | STRING   | NULLABLE                    | PDF report publication name |
+| publicationDateForPdfReport | DATEONLY | NULLABLE                    | PDF report publication date |
+| textForPdfReport            | STRING   | NULLABLE                    | PDF report text content     |
+| urlForPdfReport             | STRING   | NULLABLE                    | PDF report URL              |
+| kmNotes                     | STRING   | NULLABLE                    | Knowledge manager notes     |
+| createdAt                   | DATE     | NOT NULL                    | Timestamp                   |
+| updatedAt                   | DATE     | NOT NULL                    | Timestamp                   |
+
 ### ArticleDuplicateAnalyses
 
 **Model:** `ArticleDuplicateAnalysis`
@@ -463,7 +484,7 @@ Links NewsAPI requests to website domains for filtering.
 
 ## Database Relationships
 
-The following relationships are defined in `src/models/_associations.ts` and establish the complete relational structure of the NewsNexusDb09 database:
+The following relationships are defined in `src/models/_associations.ts` and establish the complete relational structure of the NewsNexus10Db database:
 
 ### Core Entity Relationships
 
@@ -486,6 +507,7 @@ The following relationships are defined in `src/models/_associations.ts` and est
 - **Article → ArticleReportContract** (1:Many): Articles can appear in multiple reports
 - **Article → ArticleReviewed** (1:Many): Articles can have multiple review records
 - **Article → ArticleApproved** (1:Many): Articles can have multiple approval records
+- **Article → ArticlesApproved02** (1:Many): Articles can have multiple AI-driven approval records
 - **Article → ArticleIsRelevant** (1:Many): Articles can have multiple relevance assessments
 
 #### Article Discovery and Source Tracking
@@ -506,6 +528,7 @@ The following relationships are defined in `src/models/_associations.ts` and est
 ### AI and Categorization Relationships
 
 - **ArtificialIntelligence → EntityWhoCategorizedArticle** (1:Many): AI systems can categorize multiple articles
+- **ArtificialIntelligence → ArticlesApproved02** (1:Many): AI systems can approve/reject multiple articles
 - **EntityWhoCategorizedArticle → ArticleKeywordContract** (1:Many): Categorizers can assign multiple keywords
 - **EntityWhoCategorizedArticle → ArticleEntityWhoCategorizedArticleContract** (1:Many): Categorizers can assign keyword and rating data
 - **EntityWhoCategorizedArticle → ArticleEntityWhoCategorizedArticleContracts02** (1:Many): Categorizers can assign flexible key-value metadata
