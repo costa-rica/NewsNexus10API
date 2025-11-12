@@ -1206,3 +1206,84 @@ const getSummaryStats = async () => {
 - `POST /articles/approve/:articleId` - Approve/unapprove articles
 
 ---
+
+## POST /articles/update-approved-all/:articleId
+
+Updates article fields across multiple tables (Articles, ArticleApproved, ArticleStateContract) for a given article. Allows updating publication details, content, and state associations in a single request.
+
+**Authentication:** Required (JWT token)
+
+### Sample Request
+
+```bash
+curl -X POST http://localhost:8001/articles/update-approved-all/12345 \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "newPublicationName": "Consumer Safety News",
+    "newTitle": "Electric Scooter Recall Announced",
+    "newUrl": "https://example.com/news/scooter-recall",
+    "newPublishedDate": "2025-11-07",
+    "newStateIdsArray": [5, 36],
+    "newContent": "Electric scooter recall due to fire hazard"
+  }'
+```
+
+### Request Body Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| newPublicationName | string | No | Updates Articles.publicationName and ArticleApproved.publicationNameForPdfReport |
+| newTitle | string | No | Updates Articles.title and ArticleApproved.headlineForPdfReport |
+| newUrl | string | No | Updates Articles.url and ArticleApproved.urlForPdfReport |
+| newPublishedDate | string | No | Updates Articles.publishedDate and ArticleApproved.publicationDateForPdfReport |
+| newStateIdsArray | array | No | Replaces all ArticleStateContract records with new state associations |
+| newContent | string | No | Updates Articles.description and ArticleApproved.textForPdfReport |
+
+### Success Response (200)
+
+```json
+{
+  "result": true,
+  "status": "articleId 12345 updated successfully",
+  "article": {
+    "id": 12345,
+    "title": "Electric Scooter Recall Announced",
+    "description": "Electric scooter recall due to fire hazard",
+    "publicationName": "Consumer Safety News",
+    "url": "https://example.com/news/scooter-recall",
+    "publishedDate": "2025-11-07",
+    "States": [
+      { "id": 5, "name": "California", "abbreviation": "CA" },
+      { "id": 36, "name": "New York", "abbreviation": "NY" }
+    ],
+    "ArticleApproveds": [
+      {
+        "id": 789,
+        "headlineForPdfReport": "Electric Scooter Recall Announced",
+        "textForPdfReport": "Electric scooter recall due to fire hazard"
+      }
+    ]
+  }
+}
+```
+
+### Error Response (500)
+
+```json
+{
+  "result": false,
+  "error": "Failed to update article",
+  "message": "Error details"
+}
+```
+
+### Behavior
+
+- **Articles Table**: Only updates fields where the corresponding body parameter is not null
+- **ArticleApproved Table**: Only updates if a record exists for the articleId; skips if no record exists
+- **ArticleStateContract Table**: If newStateIdsArray is provided, deletes ALL existing records and creates new ones
+- **Null Handling**: Null or undefined values are ignored; only non-null values trigger updates
+- **Transaction Safety**: Wrapped in try-catch for error handling
+
+---

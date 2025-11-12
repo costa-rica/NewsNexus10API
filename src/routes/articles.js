@@ -261,6 +261,143 @@ router.post("/update-approved", authenticateToken, async (req, res) => {
   return res.json({ result: true, articleApprovedArrayModified });
 });
 
+// 🔹 POST /articles/update-approved-all/:articleId
+router.post(
+  "/update-approved-all/:articleId",
+  authenticateToken,
+  async (req, res) => {
+    const { articleId } = req.params;
+    const {
+      newPublicationName,
+      newTitle,
+      newUrl,
+      newPublishedDate,
+      newStateIdsArray,
+      newContent,
+    } = req.body;
+
+    console.log(`- POST /articles/update-approved-all/${articleId}`);
+    console.log("req.body:", JSON.stringify(req.body, null, 2));
+
+    try {
+      // Step 1: Update Articles table
+      const articleUpdateFields = {};
+      if (newPublicationName !== null && newPublicationName !== undefined) {
+        articleUpdateFields.publicationName = newPublicationName;
+      }
+      if (newTitle !== null && newTitle !== undefined) {
+        articleUpdateFields.title = newTitle;
+      }
+      if (newUrl !== null && newUrl !== undefined) {
+        articleUpdateFields.url = newUrl;
+      }
+      if (newPublishedDate !== null && newPublishedDate !== undefined) {
+        articleUpdateFields.publishedDate = newPublishedDate;
+      }
+      if (newContent !== null && newContent !== undefined) {
+        articleUpdateFields.description = newContent;
+      }
+
+      if (Object.keys(articleUpdateFields).length > 0) {
+        await Article.update(articleUpdateFields, {
+          where: { id: articleId },
+        });
+        console.log(
+          `Updated Articles table for articleId ${articleId}:`,
+          articleUpdateFields
+        );
+      }
+
+      // Step 2: Update ArticleApproved table if record exists
+      const articleApprovedRecord = await ArticleApproved.findOne({
+        where: { articleId },
+      });
+
+      if (articleApprovedRecord) {
+        const approvedUpdateFields = {};
+        if (newTitle !== null && newTitle !== undefined) {
+          approvedUpdateFields.headlineForPdfReport = newTitle;
+        }
+        if (newPublicationName !== null && newPublicationName !== undefined) {
+          approvedUpdateFields.publicationNameForPdfReport = newPublicationName;
+        }
+        if (newUrl !== null && newUrl !== undefined) {
+          approvedUpdateFields.urlForPdfReport = newUrl;
+        }
+        if (newPublishedDate !== null && newPublishedDate !== undefined) {
+          approvedUpdateFields.publicationDateForPdfReport = newPublishedDate;
+        }
+        if (newContent !== null && newContent !== undefined) {
+          approvedUpdateFields.textForPdfReport = newContent;
+        }
+
+        if (Object.keys(approvedUpdateFields).length > 0) {
+          await ArticleApproved.update(approvedUpdateFields, {
+            where: { articleId },
+          });
+          console.log(
+            `Updated ArticleApproved table for articleId ${articleId}:`,
+            approvedUpdateFields
+          );
+        }
+      }
+
+      // Step 3: Replace ArticleStateContract records if newStateIdsArray is provided
+      if (newStateIdsArray !== null && newStateIdsArray !== undefined) {
+        // Delete all existing ArticleStateContract records for this articleId
+        await ArticleStateContract.destroy({
+          where: { articleId },
+        });
+        console.log(
+          `Deleted existing ArticleStateContract records for articleId ${articleId}`
+        );
+
+        // Create new ArticleStateContract records
+        for (const stateId of newStateIdsArray) {
+          await ArticleStateContract.create({
+            articleId: articleId,
+            stateId: stateId,
+          });
+        }
+        console.log(
+          `Created new ArticleStateContract records for articleId ${articleId} with stateIds:`,
+          newStateIdsArray
+        );
+      }
+
+      // Step 4: Fetch and return updated article data
+      const updatedArticle = await Article.findOne({
+        where: { id: articleId },
+        include: [
+          {
+            model: State,
+            through: { attributes: [] },
+          },
+          {
+            model: ArticleApproved,
+          },
+        ],
+      });
+
+      res.json({
+        result: true,
+        status: `articleId ${articleId} updated successfully`,
+        article: updatedArticle,
+      });
+    } catch (error) {
+      console.error(
+        `❌ Error updating articleId ${articleId}:`,
+        error.message
+      );
+      res.status(500).json({
+        result: false,
+        error: "Failed to update article",
+        message: error.message,
+      });
+    }
+  }
+);
+
 // 🔹 POST /articles/user-toggle-is-not-relevant/:articleId
 router.post(
   "/user-toggle-is-not-relevant/:articleId",
