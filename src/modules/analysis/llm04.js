@@ -85,7 +85,7 @@ async function sqlQueryArticlesApprovedChatGptWithStatesApprovedReportContract()
         newsApiRequestId,
         newsRssRequestId,
         States: [],
-        ArticleApproveds: [],
+        ArticlesApproved02: [],
       });
     }
 
@@ -105,9 +105,9 @@ async function sqlQueryArticlesApprovedChatGptWithStatesApprovedReportContract()
     if (approvedId) {
       const approvedExists = articlesMap
         .get(articleId)
-        .ArticleApproveds.some((a) => a.id === approvedId);
+        .ArticlesApproved02.some((a) => a.id === approvedId);
       if (!approvedExists) {
-        articlesMap.get(articleId).ArticleApproveds.push({
+        articlesMap.get(articleId).ArticlesApproved02.push({
           id: approvedId,
           artificialIntelligenceId: approvedByAiId,
           createdAt: approvedAt,

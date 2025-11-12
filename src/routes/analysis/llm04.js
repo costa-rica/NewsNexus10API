@@ -17,7 +17,7 @@ router.get("/approved", authenticateToken, async (req, res) => {
   );
 
   const approvedArticlesArray = articlesArray.filter((article) =>
-    article.ArticleApproveds?.some(
+    article.ArticlesApproved02?.some(
       (entry) => entry.isApproved === true || entry.isApproved === 1
     )
   );

@@ -46,7 +46,7 @@ curl -X GET http://localhost:8001/analysis/llm04/approved \
           "abbreviation": "CA"
         }
       ],
-      "ArticleApproveds": [
+      "ArticlesApproved02": [
         {
           "id": 567,
           "artificialIntelligenceId": 2,
@@ -71,6 +71,6 @@ curl -X GET http://localhost:8001/analysis/llm04/approved \
 
 - **articlesArray**: Array of approved articles with nested states and approval records
 - **States**: Array of states associated with the article
-- **ArticleApproveds**: Array of AI approval records (from ArticlesApproved02 table)
+- **ArticlesApproved02**: Array of AI approval records (from ArticlesApproved02 table)
 - **stateAbbreviation**: Comma-separated state abbreviations if multiple states
 - **timeToRenderResponseFromApiInSeconds**: Query execution time
