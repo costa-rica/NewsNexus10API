@@ -27,11 +27,13 @@ async function sqlQueryArticlesApprovedChatGptWithStatesApprovedReportContract()
       aa."publicationDateForPdfReport",
       aa."textForPdfReport",
       aa."urlForPdfReport",
-      aa."kmNotes"
+      aa."kmNotes",
+      ha."isApproved" AS "humanIsApproved"
     FROM "Articles" a
     LEFT JOIN "ArticleStateContracts" asc ON a.id = asc."articleId"
     LEFT JOIN "States" s ON s.id = asc."stateId"
     LEFT JOIN "ArticlesApproved02" aa ON aa."articleId" = a.id
+    LEFT JOIN "ArticleApproveds" ha ON ha."articleId" = a.id
     ORDER BY a.id;
   `;
 
@@ -68,6 +70,7 @@ async function sqlQueryArticlesApprovedChatGptWithStatesApprovedReportContract()
       textForPdfReport,
       urlForPdfReport,
       kmNotes,
+      humanIsApproved,
     } = row;
 
     if (!articlesMap.has(articleId)) {
@@ -84,6 +87,7 @@ async function sqlQueryArticlesApprovedChatGptWithStatesApprovedReportContract()
         entityWhoFoundArticleId,
         newsApiRequestId,
         newsRssRequestId,
+        ArticleApprovedsIsApproved: humanIsApproved !== undefined ? humanIsApproved : null,
         States: [],
         ArticlesApproved02: [],
       });

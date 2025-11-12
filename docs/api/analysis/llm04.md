@@ -60,6 +60,7 @@ curl -X GET http://localhost:8001/analysis/llm04/approved \
           "kmNotes": "High priority - widespread issue"
         }
       ],
+      "ArticleApprovedsIsApproved": true,
       "stateAbbreviation": "CA"
     }
   ],
@@ -72,6 +73,7 @@ curl -X GET http://localhost:8001/analysis/llm04/approved \
 - **articlesArray**: Array of approved articles with nested states and approval records
 - **States**: Array of states associated with the article
 - **ArticlesApproved02**: Array of AI approval records (from ArticlesApproved02 table)
+- **ArticleApprovedsIsApproved**: Human approval status from ArticleApproveds table (true, false, or null if no record exists)
 - **stateAbbreviation**: Comma-separated state abbreviations if multiple states
 - **timeToRenderResponseFromApiInSeconds**: Query execution time
 
