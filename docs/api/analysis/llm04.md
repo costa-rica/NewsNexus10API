@@ -74,3 +74,58 @@ curl -X GET http://localhost:8001/analysis/llm04/approved \
 - **ArticlesApproved02**: Array of AI approval records (from ArticlesApproved02 table)
 - **stateAbbreviation**: Comma-separated state abbreviations if multiple states
 - **timeToRenderResponseFromApiInSeconds**: Query execution time
+
+---
+
+## GET /analysis/llm04/human-approved/:articleId
+
+Creates a human approval record in the ArticleApproveds table by copying data from the ArticlesApproved02 table for the specified article.
+
+**Authentication:** Required (JWT token)
+
+### Sample Request
+
+```bash
+curl -X GET http://localhost:8001/analysis/llm04/human-approved/1234 \
+  -H "Authorization: Bearer <jwt_token>"
+```
+
+### Success Response (200)
+
+```json
+{
+  "message": "Successfully human approved article"
+}
+```
+
+### Error Responses
+
+**No AI approval found (404)**
+```json
+{
+  "error": "No row for articleId 1234 in the ArticlesApproved02 table"
+}
+```
+
+**Multiple AI approvals found (400)**
+```json
+{
+  "error": "Multiple rows in the ArticlesApproved02 table for the same articleId 1234"
+}
+```
+
+**Already human approved (400)**
+```json
+{
+  "error": "This article has already been human approved"
+}
+```
+
+### Behavior
+
+- Copies data from ArticlesApproved02 to ArticleApproveds table
+- Uses JWT token to get userId for the approval record
+- If ArticleApproveds record exists with `isApproved=false`, updates it
+- If ArticleApproveds record exists with `isApproved=true`, returns error
+- If no ArticleApproveds record exists, creates new one
+- Fields copied: `isApproved`, `headlineForPdfReport`, `publicationNameForPdfReport`, `publicationDateForPdfReport`, `textForPdfReport`, `urlForPdfReport`
