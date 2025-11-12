@@ -197,13 +197,18 @@ async function sqlQueryArticlesOld({ publishedDate }) {
 }
 
 // --- New method of creating SQL query functions
-async function sqlQueryArticles({ publishedDate }) {
+async function sqlQueryArticles({ publishedDate, createdAt }) {
   const replacements = {};
   const whereClauses = [];
 
   if (publishedDate) {
     whereClauses.push(`a."publishedDate" >= :publishedDate`);
     replacements.publishedDate = publishedDate;
+  }
+
+  if (createdAt) {
+    whereClauses.push(`a."createdAt" >= :createdAt`);
+    replacements.createdAt = createdAt;
   }
 
   const whereString =

@@ -5,44 +5,28 @@ const {
   State,
   ArticleIsRelevant,
   ArticleApproved,
-  NewsApiRequest,
   EntityWhoFoundArticle,
   ArticleStateContract,
   ArticleContent,
-  ArticleReportContract,
-  ArticleEntityWhoCategorizedArticleContract,
   ArtificialIntelligence,
   ArticleReviewed,
-  Report,
-  NewsArticleAggregatorSource,
   EntityWhoCategorizedArticle,
 } = require("newsnexus10db");
 const { authenticateToken } = require("../modules/userAuthentication");
 const {
-  createArticlesArrayWithSqlForSemanticKeywordsRating,
   createNewsApiRequestsArray,
   createArticlesApprovedArray,
 } = require("../modules/articles");
-const {
-  convertDbUtcDateOrStringToEasternString,
-  // getLastThursdayAt20h,
-  getLastThursdayAt20hInNyTimeZone,
-} = require("../modules/common");
-const { DateTime } = require("luxon");
-const { createSpreadsheetFromArray } = require("../modules/excelExports");
-const path = require("path");
-const fs = require("fs");
+const { getLastThursdayAt20hInNyTimeZone } = require("../modules/common");
+
 const {
   sqlQueryArticles,
-  sqlQueryArticlesSummaryStatistics,
-  // sqlQueryArticlesWithRatings,
   sqlQueryArticlesWithStatesApprovedReportContract,
   sqlQueryArticlesForWithRatingsRoute,
   sqlQueryArticlesWithStates,
   sqlQueryArticlesApproved,
   sqlQueryArticlesReport,
   sqlQueryArticlesIsRelevant,
-  // sqlQueryArticlesForWithRatingsRouteNoAi,
   sqlQueryArticlesAndAiScores,
 } = require("../modules/queriesSql");
 
@@ -53,13 +37,18 @@ router.post("/", authenticateToken, async (req, res) => {
 
   const {
     returnOnlyThisPublishedDateOrAfter,
+    returnOnlyThisCreatedAtDateOrAfter,
     returnOnlyIsNotApproved,
     returnOnlyIsRelevant,
   } = req.body;
 
+  console.log("req.body:");
+  console.log(JSON.stringify(req.body, null, 2));
+
   // const articlesArray = await sqlQueryArticlesOld({
   const articlesArray = await sqlQueryArticles({
     publishedDate: returnOnlyThisPublishedDateOrAfter,
+    createdAt: returnOnlyThisCreatedAtDateOrAfter,
   });
 
   console.log(
