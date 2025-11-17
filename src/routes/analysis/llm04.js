@@ -4,7 +4,11 @@ const { authenticateToken } = require("../../modules/userAuthentication");
 const {
   sqlQueryArticlesApprovedChatGptWithStatesApprovedReportContract,
 } = require("../../modules/analysis/llm04");
-const { ArticlesApproved02, ArticleApproved } = require("newsnexus10db");
+const {
+  ArticlesApproved02,
+  ArticleApproved,
+  ArticleIsRelevant,
+} = require("newsnexus10db");
 
 // 🔹 GET /analysis/llm04/approved
 router.get("/approved", authenticateToken, async (req, res) => {
@@ -80,19 +84,30 @@ router.get(
 
       const aiApproved = aiApprovedRecords[0];
 
-      // 4. Check if ArticleApproveds record exists for this articleId
+      // 4. Check ArticleIsRelevants table - if row exists, isRelevant must be true
+      const relevanceRecord = await ArticleIsRelevant.findOne({
+        where: { articleId },
+      });
+
+      if (relevanceRecord && relevanceRecord.isRelevant !== true) {
+        return res.status(400).json({
+          error: `Article ${articleId} is marked as not relevant in ArticleIsRelevants table. To approve this article, you must first mark it as relevant - in the Articles Review Page.`,
+        });
+      }
+
+      // 5. Check if ArticleApproveds record exists for this articleId
       const existingHumanApproval = await ArticleApproved.findOne({
         where: { articleId },
       });
 
-      // 5. If exists with isApproved=true, return error
+      // 6. If exists with isApproved=true, return error
       if (existingHumanApproval && existingHumanApproval.isApproved === true) {
         return res.status(400).json({
           error: `This article has already been human approved`,
         });
       }
 
-      // 6. Prepare data to copy from ArticlesApproved02
+      // 7. Prepare data to copy from ArticlesApproved02
       const dataToSave = {
         articleId,
         userId,
@@ -104,7 +119,7 @@ router.get(
         urlForPdfReport: aiApproved.urlForPdfReport,
       };
 
-      // 7. Update or create record
+      // 8. Update or create record
       if (existingHumanApproval && existingHumanApproval.isApproved === false) {
         // Update existing record
         await existingHumanApproval.update(dataToSave);
@@ -113,7 +128,7 @@ router.get(
         await ArticleApproved.create(dataToSave);
       }
 
-      // 8. Return success message
+      // 9. Return success message
       res.json({
         message: "Successfully human approved article",
       });
