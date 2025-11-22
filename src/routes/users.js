@@ -48,7 +48,12 @@ router.post("/register", async (req, res) => {
   res.status(201).json({
     message: "User created successfully",
     token,
-    user: { username: user.username, email: user.email },
+    user: {
+      username: user.username,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      id: user.id,
+    },
   });
 });
 
@@ -78,7 +83,12 @@ router.post("/login", async (req, res) => {
   res.json({
     message: "User logged in successfully",
     token,
-    user: { username: user.username, email: user.email, isAdmin: user.isAdmin },
+    user: {
+      username: user.username,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      id: user.id,
+    },
   });
   // res.status(500).json({ error: "Testing this error" });
 });
