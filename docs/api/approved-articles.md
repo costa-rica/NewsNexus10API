@@ -37,6 +37,8 @@ curl -X GET http://localhost:8001/articles-approveds/for-component \
        "url": "https://example.com/article/battery-recall",
        "publication": "Safety News Daily",
        "publicationDate": "2025-01-15",
+       "createdAt": "2025-01-16T10:30:00.000Z",
+       "updatedAt": "2025-01-18T14:22:00.000Z",
        "states": "CA, TX, NY"
      },
      {
@@ -46,6 +48,8 @@ curl -X GET http://localhost:8001/articles-approveds/for-component \
        "url": "https://example.com/article/toy-warning",
        "publication": "Consumer Safety Monitor",
        "publicationDate": "2025-01-14",
+       "createdAt": "2025-01-15T09:15:00.000Z",
+       "updatedAt": "2025-01-15T09:15:00.000Z",
        "states": "FL"
      }
    ],
@@ -68,6 +72,8 @@ curl -X GET http://localhost:8001/articles-approveds/for-component \
 - **url**: Link from ArticleApproveds.urlForPdfReport
 - **publication**: Publication name from ArticleApproveds.publicationNameForPdfReport
 - **publicationDate**: Date from ArticleApproveds.publicationDateForPdfReport
+- **createdAt**: Timestamp when approval was created in ArticleApproveds table
+- **updatedAt**: Timestamp when approval was last updated in ArticleApproveds table
 - **states**: Comma-separated state abbreviations (e.g., "CA, TX")
 - **count**: Total number of approved articles returned  
 
@@ -76,6 +82,6 @@ curl -X GET http://localhost:8001/articles-approveds/for-component \
 
 - Filters articles by authenticated user's ID from JWT token
 - Only returns articles where `isApproved = true` or `isApproved = 1`
-- Results sorted by `ArticleApproveds.createdAt` descending (most recent first)
+- Results sorted by `ArticleApproveds.updatedAt` descending (most recently updated first)
 - State abbreviations concatenated with comma-space separator
 - Articles without states will have empty string for states field

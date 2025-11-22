@@ -704,14 +704,16 @@ async function sqlQueryArticlesApprovedForComponent(userId) {
       aa."urlForPdfReport" AS "url",
       aa."publicationNameForPdfReport" AS "publication",
       aa."publicationDateForPdfReport" AS "publicationDate",
+      aa."createdAt",
+      aa."updatedAt",
       GROUP_CONCAT(s.abbreviation, ', ') AS "states"
     FROM "Articles" a
     INNER JOIN "ArticleApproveds" aa ON aa."articleId" = a.id
     LEFT JOIN "ArticleStateContracts" asc ON asc."articleId" = a.id
     LEFT JOIN "States" s ON s.id = asc."stateId"
     WHERE aa."userId" = :userId AND (aa."isApproved" = true OR aa."isApproved" = 1)
-    GROUP BY a.id, aa."headlineForPdfReport", aa."textForPdfReport", aa."urlForPdfReport", aa."publicationNameForPdfReport", aa."publicationDateForPdfReport", aa."createdAt"
-    ORDER BY aa."createdAt" DESC;
+    GROUP BY a.id, aa."headlineForPdfReport", aa."textForPdfReport", aa."urlForPdfReport", aa."publicationNameForPdfReport", aa."publicationDateForPdfReport", aa."createdAt", aa."updatedAt"
+    ORDER BY aa."updatedAt" DESC;
   `;
 
   const results = await sequelize.query(sql, {
