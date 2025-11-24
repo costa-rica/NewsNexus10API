@@ -4,11 +4,11 @@ This document provides comprehensive documentation for all state management endp
 
 ## State Endpoints
 
-All state endpoints are prefixed with `/state` and handle state retrieval and article-state association management for the CPSC consumer product safety monitoring system.
+All state endpoints are prefixed with `/states` and handle state retrieval and article-state association management for the CPSC consumer product safety monitoring system.
 
 ---
 
-## GET /state
+## GET /states
 
 Retrieves all available states from the database.
 
@@ -17,7 +17,7 @@ Retrieves all available states from the database.
 ### Sample Request
 
 ```bash
-curl -X GET http://localhost:8001/state
+curl -X GET http://localhost:8001/states
 ```
 
 ### Sample Response
@@ -50,7 +50,7 @@ curl -X GET http://localhost:8001/state
 
 ---
 
-## POST /state/:articleId
+## POST /states/:articleId
 
 Associates one or more states with a specific article by creating ArticleStateContract records. Replaces any existing state associations for the article.
 
@@ -62,14 +62,14 @@ Associates one or more states with a specific article by creating ArticleStateCo
 
 ### Request Body Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| stateIdArray | Array<number> | Yes | Array of state IDs to associate with the article |
+| Field        | Type          | Required | Description                                      |
+| ------------ | ------------- | -------- | ------------------------------------------------ |
+| stateIdArray | Array<number> | Yes      | Array of state IDs to associate with the article |
 
 ### Sample Request
 
 ```bash
-curl -X POST http://localhost:8001/state/1234 \
+curl -X POST http://localhost:8001/states/1234 \
   -H "Authorization: Bearer <jwt_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -102,6 +102,7 @@ curl -X POST http://localhost:8001/state/1234 \
 ### Error Responses
 
 **Missing required field (400)**
+
 ```json
 {
   "error": "Missing stateIdArray"
