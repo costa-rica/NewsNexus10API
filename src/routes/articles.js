@@ -385,10 +385,7 @@ router.post(
         article: updatedArticle,
       });
     } catch (error) {
-      console.error(
-        `❌ Error updating articleId ${articleId}:`,
-        error.message
-      );
+      console.error(`❌ Error updating articleId ${articleId}:`, error.message);
       res.status(500).json({
         result: false,
         error: "Failed to update article",
@@ -602,7 +599,7 @@ router.get("/summary-statistics", authenticateToken, async (req, res) => {
   });
 });
 
-// 🔹 POST /add-article
+// 🔹 POST /articles/add-article
 router.post("/add-article", authenticateToken, async (req, res) => {
   const {
     publicationName,
