@@ -1287,3 +1287,79 @@ curl -X POST http://localhost:8001/articles/update-approved-all/12345 \
 - **Transaction Safety**: Wrapped in try-catch for error handling
 
 ---
+
+## POST /articles/add-article
+
+Creates a new article manually with associated states and optional approval record. Used for manually adding articles that were found outside automated feeds.
+
+**Authentication:** Required (JWT token)
+
+### Sample Request
+
+```bash
+curl -X POST http://localhost:8001/articles/add-article \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "publicationName": "Consumer Safety News",
+    "author": "Jane Smith",
+    "title": "Electric Bike Battery Recall Issued",
+    "description": "Company announces recall of electric bike batteries due to fire risk",
+    "content": "Detailed article content for PDF report...",
+    "url": "https://example.com/news/bike-battery-recall",
+    "publishedDate": "2025-11-07",
+    "stateObjArray": [
+      { "id": 5, "name": "California", "abbreviation": "CA" },
+      { "id": 36, "name": "New York", "abbreviation": "NY" }
+    ],
+    "isApproved": true,
+    "kmNotes": "High priority - widespread issue"
+  }'
+```
+
+### Request Body Fields
+
+| Field           | Type    | Required | Description                                                    |
+| --------------- | ------- | -------- | -------------------------------------------------------------- |
+| publicationName | string  | Yes      | Name of the publication source                                 |
+| author          | string  | No       | Article author name                                            |
+| title           | string  | Yes      | Article headline/title                                         |
+| description     | string  | Yes      | Article description/summary                                    |
+| content         | string  | No       | Full article text content (used for PDF report if approved)    |
+| url             | string  | Yes      | URL to the original article                                    |
+| publishedDate   | string  | Yes      | Publication date in YYYY-MM-DD format                          |
+| stateObjArray   | array   | Yes      | Array of state objects with id, name, and abbreviation fields  |
+| isApproved      | boolean | No       | If true, creates ArticleApproved record immediately            |
+| kmNotes         | string  | No       | Knowledge manager notes (saved in ArticleApproved.kmNotes)     |
+
+### Success Response (200)
+
+```json
+{
+  "result": true,
+  "newArticle": {
+    "id": 12345,
+    "publicationName": "Consumer Safety News",
+    "author": "Jane Smith",
+    "title": "Electric Bike Battery Recall Issued",
+    "description": "Company announces recall of electric bike batteries due to fire risk",
+    "url": "https://example.com/news/bike-battery-recall",
+    "publishedDate": "2025-11-07",
+    "entityWhoFoundArticleId": 42,
+    "createdAt": "2025-11-07T10:30:00.000Z",
+    "updatedAt": "2025-11-07T10:30:00.000Z"
+  }
+}
+```
+
+### Behavior
+
+- **EntityWhoFoundArticle**: Automatically looks up the entity associated with the authenticated user
+- **Article Creation**: Creates new Article record with provided fields
+- **State Associations**: Creates ArticleStateContract records for each state in stateObjArray
+- **Optional Approval**: If isApproved=true, creates ArticleApproved record with:
+  - Fields mapped from request: title → headlineForPdfReport, publicationName → publicationNameForPdfReport, publishedDate → publicationDateForPdfReport, content → textForPdfReport, url → urlForPdfReport
+  - Additional fields: userId (from JWT), kmNotes
+- **Use Case**: Intended for manually found articles not captured by automated NewsAPI/RSS feeds
+
+---
