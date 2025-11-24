@@ -42,6 +42,7 @@ All endpoint documentation should follow this concise structure:
 
 - [/core/articles](./api/articles.md) : Article management
 - [/core/articles-approveds](./api/articles-approveds.md) : Article approval management
+- [/state](./api/state.md) : State management and article-state associations
 
 ## Analysis Routes
 
