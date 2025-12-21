@@ -6,6 +6,11 @@ const bcrypt = require("bcrypt");
 const { checkBodyReturnMissing } = require("../modules/common");
 const { authenticateToken } = require("../modules/userAuthentication");
 const { sendResetPasswordEmail } = require("../modules/mailer");
+const {
+  loginLimiter,
+  registerLimiter,
+  passwordResetLimiter,
+} = require("../middleware/rateLimiting");
 
 /* GET users listing. */
 router.get("/", function (req, res, next) {
@@ -13,7 +18,7 @@ router.get("/", function (req, res, next) {
 });
 
 // 🔹 POST /users/register: Register User (Create)
-router.post("/register", async (req, res) => {
+router.post("/register", registerLimiter, async (req, res) => {
   const { password, email } = req.body;
   const { isValid, missingKeys } = checkBodyReturnMissing(req.body, [
     "password",
@@ -58,7 +63,7 @@ router.post("/register", async (req, res) => {
 });
 
 // 🔹 POST /users/login: Login User (Read)
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   const { email, password } = req.body;
   const { isValid, missingKeys } = checkBodyReturnMissing(req.body, [
     "email",
@@ -94,7 +99,7 @@ router.post("/login", async (req, res) => {
 });
 
 // 🔹 POST /users/request-password-reset: Send reset token
-router.post("/request-password-reset", async (req, res) => {
+router.post("/request-password-reset", passwordResetLimiter, async (req, res) => {
   const { email } = req.body;
   console.log(`- in POST /users/request-password-reset for email: ${email}`);
 

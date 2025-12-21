@@ -3,6 +3,7 @@ var router = express.Router();
 const { authenticateToken } = require("../modules/userAuthentication");
 const { createSpreadsheetFromArray } = require("../modules/excelExports");
 const { safeFileExists } = require("../middleware/fileSecurity");
+const { fileOperationLimiter } = require("../middleware/rateLimiting");
 const path = require("path");
 const fs = require("fs");
 
@@ -11,6 +12,7 @@ const fs = require("fs");
 router.get(
   "/utilities/download-excel-file/:excelFileName",
   authenticateToken,
+  fileOperationLimiter,
   async (req, res) => {
     console.log(
       `- in GET /downloads/utilities/download-excel-file/${req.params.excelFileName}`
@@ -81,6 +83,7 @@ router.get(
 router.post(
   "/utilities/download-excel-file/:excelFileName",
   authenticateToken,
+  fileOperationLimiter,
   async (req, res) => {
     console.log(
       `- in POST /downloads/utilities/download-excel-file/${req.params.excelFileName}`

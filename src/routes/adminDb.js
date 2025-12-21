@@ -62,6 +62,7 @@ const { promisify } = require("util");
 const archiver = require("archiver");
 const { Parser } = require("json2csv");
 const { safeFileExists } = require("../middleware/fileSecurity");
+const { databaseOperationLimiter } = require("../middleware/rateLimiting");
 // Promisify fs functions
 const mkdirAsync = promisify(fs.mkdir);
 const { authenticateToken } = require("../modules/userAuthentication");
@@ -78,7 +79,7 @@ const upload = multer({
   dest: path.join(process.env.PATH_PROJECT_RESOURCES, "uploads-delete-ok/"),
 }); // Temporary storage for file uploads
 
-router.get("/table/:tableName", authenticateToken, async (req, res) => {
+router.get("/table/:tableName", authenticateToken, databaseOperationLimiter, async (req, res) => {
   try {
     const { tableName } = req.params;
     console.log(`- in GET /admin-db/table/${tableName}`);
@@ -105,7 +106,7 @@ router.get("/table/:tableName", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/create-database-backup", authenticateToken, async (req, res) => {
+router.get("/create-database-backup", authenticateToken, databaseOperationLimiter, async (req, res) => {
   console.log(`- in GET /admin-db/create-database-backup`);
 
   try {
@@ -242,6 +243,7 @@ router.get("/db-row-counts-by-table", authenticateToken, async (req, res) => {
 router.post(
   "/import-db-backup",
   authenticateToken,
+  databaseOperationLimiter,
   upload.single("backupFile"),
   async (req, res) => {
     console.log("- in POST /admin-db/import-db-backup");
