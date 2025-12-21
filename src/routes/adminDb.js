@@ -61,6 +61,7 @@ const path = require("path");
 const { promisify } = require("util");
 const archiver = require("archiver");
 const { Parser } = require("json2csv");
+const { safeFileExists } = require("../middleware/fileSecurity");
 // Promisify fs functions
 const mkdirAsync = promisify(fs.mkdir);
 const { authenticateToken } = require("../modules/userAuthentication");
@@ -170,21 +171,26 @@ router.get("/send-db-backup/:filename", authenticateToken, async (req, res) => {
         .json({ result: false, message: "Backup directory not configured." });
     }
 
-    const filePath = path.join(backupDir, filename);
-    console.log(`filePath: ${filePath}`);
+    // 🔒 Secure file path validation (prevents path traversal)
+    const { valid, path: safePath, error } = safeFileExists(
+      backupDir,
+      filename,
+      { allowedExtensions: ['.zip'] }
+    );
 
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
+    if (!valid) {
       return res
         .status(404)
-        .json({ result: false, message: "File not found." });
+        .json({ result: false, message: error || "File not found." });
     }
 
-    console.log(`Sending file: ${filePath}`);
-    res.download(filePath, filename, (err) => {
+    console.log(`Sending file: ${safePath}`);
+    res.download(safePath, path.basename(safePath), (err) => {
       if (err) {
         console.error("Error sending file:", err);
-        res.status(500).json({ result: false, message: "Error sending file." });
+        if (!res.headersSent) {
+          res.status(500).json({ result: false, message: "Error sending file." });
+        }
       }
     });
   } catch (error) {

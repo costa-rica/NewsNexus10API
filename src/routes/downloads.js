@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 const { authenticateToken } = require("../modules/userAuthentication");
 const { createSpreadsheetFromArray } = require("../modules/excelExports");
+const { safeFileExists } = require("../middleware/fileSecurity");
 const path = require("path");
 const fs = require("fs");
 
@@ -27,17 +28,21 @@ router.get(
         });
       }
 
-      const filePathAndName = path.join(outputDir, excelFileName);
+      // 🔒 Secure file path validation (prevents path traversal)
+      const { valid, path: safePath, error } = safeFileExists(
+        outputDir,
+        excelFileName,
+        { allowedExtensions: ['.xlsx', '.xls'] }
+      );
 
-      // Check if file exists
-      if (!fs.existsSync(filePathAndName)) {
+      if (!valid) {
         return res.status(404).json({
           result: false,
-          message: "File not found.",
+          message: error || "File not found.",
         });
       }
 
-      console.log(`Downloading file: ${filePathAndName}`);
+      console.log(`Downloading file: ${safePath}`);
 
       res.setHeader(
         "Content-Type",
@@ -45,11 +50,11 @@ router.get(
       );
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${excelFileName}"`
+        `attachment; filename="${path.basename(safePath)}"`
       );
 
       // Let Express handle download
-      res.download(filePathAndName, excelFileName, (err) => {
+      res.download(safePath, path.basename(safePath), (err) => {
         if (err) {
           console.error("Download error:", err);
           if (!res.headersSent) {
@@ -83,29 +88,43 @@ router.post(
     const { excelFileName } = req.params;
     const { arrayToExport } = req.body;
 
+    const outputDir = process.env.PATH_TO_UTILITIES_ANALYSIS_SPREADSHEETS;
+    if (!outputDir) {
+      return res.status(500).json({
+        result: false,
+        message: "PATH_TO_UTILITIES_ANALYSIS_SPREADSHEETS not configured",
+      });
+    }
+
+    // 🔒 Validate filename before creating file
+    const { valid: isValidFilename, path: safePath, error: validationError } = safeFileExists(
+      outputDir,
+      excelFileName,
+      { allowedExtensions: ['.xlsx', '.xls'] }
+    );
+
+    // For POST, we expect file might not exist yet, so just validate the path
+    if (!safePath) {
+      return res.status(400).json({
+        result: false,
+        message: validationError || "Invalid filename",
+      });
+    }
+
     console.log(`arrayToExport: ${typeof arrayToExport}`);
     console.log(`arrayToExport: ${arrayToExport[0]}`);
 
-    const outputFilePath = path.join(
-      process.env.PATH_TO_UTILITIES_ANALYSIS_SPREADSHEETS,
-      excelFileName
-    );
-    await createSpreadsheetFromArray(arrayToExport, outputFilePath);
-    console.log(`✅ Excel file saved to: ${outputFilePath}`);
+    await createSpreadsheetFromArray(arrayToExport, safePath);
+    console.log(`✅ Excel file saved to: ${safePath}`);
 
     try {
-      const filePathAndName = path.join(
-        process.env.PATH_TO_UTILITIES_ANALYSIS_SPREADSHEETS,
-        excelFileName
-      );
-
-      // Check if file exists
-      if (!fs.existsSync(filePathAndName)) {
+      // Verify file was created
+      if (!fs.existsSync(safePath)) {
         return res
           .status(404)
           .json({ result: false, message: "File not found." });
       } else {
-        console.log(`----> File exists: ${filePathAndName}`);
+        console.log(`----> File exists: ${safePath}`);
       }
 
       res.setHeader(
@@ -114,11 +133,11 @@ router.post(
       );
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${excelFileName}"`
+        `attachment; filename="${path.basename(safePath)}"`
       );
 
       // Let Express handle download
-      res.download(filePathAndName, excelFileName, (err) => {
+      res.download(safePath, path.basename(safePath), (err) => {
         if (err) {
           console.error("Download error:", err);
           res
