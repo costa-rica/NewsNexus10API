@@ -43,7 +43,12 @@ app.use(express.json({ limit: "10mb" })); // adjust as needed
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-// Increase body size limits
+
+// 🔒 Global Security Middleware - Sanitize all incoming data
+// This automatically removes dangerous inputs (XSS, path traversal, null bytes, etc.)
+// while preserving normal user data. No validation rules imposed.
+const { globalSecurityMiddleware } = require("./middleware/globalSecurity");
+app.use(globalSecurityMiddleware);
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
