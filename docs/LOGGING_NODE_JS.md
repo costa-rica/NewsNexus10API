@@ -29,7 +29,7 @@ The following environment variables control logging behavior:
 | Variable        | Required        | Description                                         | Example                       |
 | --------------- | --------------- | --------------------------------------------------- | ----------------------------- |
 | `NODE_ENV`      | Yes             | Environment mode                                    | `production` or `development` |
-| `APP_NAME`      | Yes             | Application identifier for log filenames            | `NewsNexus10API`              |
+| `NAME_APP`      | Yes             | Application identifier for log filenames            | `NewsNexus10API`              |
 | `PATH_TO_LOGS`  | Production only | Directory path for log file storage                 | `/var/log/newsnexus`          |
 | `LOG_MAX_SIZE`  | No              | Maximum size per log file (default: 10MB)           | `10485760` (bytes)            |
 | `LOG_MAX_FILES` | No              | Maximum number of log files to retain (default: 10) | `10`                          |
@@ -138,7 +138,7 @@ logger.info("User authenticated", { userId });
 **Parent Processes**:
 
 - Write to rotating log files in `PATH_TO_LOGS` directory
-- Filename pattern: `${APP_NAME}-YYYY-MM-DD-HH.log` (with rotation number if needed)
+- Filename pattern: `${NAME_APP}-YYYY-MM-DD-HH.log` (with rotation number if needed)
 - File rotation: Size-based (default 10MB per file)
 - Retention: Keep last 10 files by default
 - Format: Human-readable text with timestamps
@@ -174,7 +174,7 @@ logger.info("User authenticated", { userId });
 
 - Timestamp in ISO format with milliseconds
 - Log level in uppercase
-- Application name from `APP_NAME` env variable
+- Application name from `NAME_APP` env variable
 - Message string
 - Metadata object (if provided) in JSON format
 
@@ -200,14 +200,14 @@ Child process logs should include process identification:
 [2025-12-21 14:32:15.234] [INFO] [NewsNexus10API:worker:12345] Background job completed { jobId: 789 }
 ```
 
-Format: `[APP_NAME:process-type:PID]`
+Format: `[NAME_APP:process-type:PID]`
 
 ## File Rotation Strategy
 
 ### Size-Based Rotation
 
 - **Trigger**: File size exceeds `LOG_MAX_SIZE` (default 10MB)
-- **Naming**: `${APP_NAME}-error.log`, `${APP_NAME}-error.1.log`, `${APP_NAME}-error.2.log`, etc.
+- **Naming**: `${NAME_APP}-error.log`, `${NAME_APP}-error.1.log`, `${NAME_APP}-error.2.log`, etc.
 - **Retention**: Keep last `LOG_MAX_FILES` files (default 10)
 - **Compression**: Optional gzip compression for rotated files
 
@@ -312,7 +312,7 @@ if (isChildProcess) {
 
 ```javascript
 // Add process metadata to all child logs
-const processId = `${process.env.APP_NAME}:worker:${process.pid}`;
+const processId = `${process.env.NAME_APP}:worker:${process.pid}`;
 // Include in log format
 ```
 
@@ -325,7 +325,7 @@ const winston = require("winston");
 const path = require("path");
 
 const isProduction = process.env.NODE_ENV === "production";
-const appName = process.env.APP_NAME || "app";
+const appName = process.env.NAME_APP || "app";
 const logDir = process.env.PATH_TO_LOGS || "./logs";
 const maxSize = parseInt(process.env.LOG_MAX_SIZE) || 10485760; // 10MB
 const maxFiles = parseInt(process.env.LOG_MAX_FILES) || 10;
@@ -383,7 +383,7 @@ module.exports = logger;
 ```javascript
 const winston = require("winston");
 
-const appName = process.env.APP_NAME || "app";
+const appName = process.env.NAME_APP || "app";
 const processId = `${appName}:worker:${process.pid}`;
 
 // Always use console transport for child processes

@@ -57,7 +57,7 @@ Currently no test framework configured - `npm test` will exit with error.
 
 Required `.env` file with these key variables:
 
-- `APP_NAME` - Application identifier for logging
+- `NAME_APP` - Application identifier for logging
 - `JWT_SECRET` - Secret key for JWT token signing
 - `PATH_DATABASE` - Directory path for SQLite database
 - `NAME_DB` - Database filename

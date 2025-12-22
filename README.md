@@ -22,7 +22,7 @@ npm install
 ### server
 
 ```
-APP_NAME=NewsNexus10
+NAME_APP=NewsNexus10
 JWT_SECRET=NewsNexus10_SECRET
 NAME_DB=newsnexus10.db
 PATH_DATABASE=/home/shared/databases/NewsNexus10/
@@ -46,7 +46,7 @@ ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES=true
 ### Mac workstation
 
 ```
-APP_NAME=NewsNexus10
+NAME_APP=NewsNexus10
 PORT=3000
 JWT_SECRET=NewsNexus10_SECRET
 NAME_DB=newsnexus10.db
