@@ -1,38 +1,16 @@
+// Load environment variables FIRST (before anything else)
+require("dotenv").config();
+
+// Initialize Winston logger (after env vars are loaded)
+// This sets up console.* method overrides and file logging
+require("./modules/logger");
+
 const app = require("./app"); // Import the configured app
 const PORT = process.env.PORT || 8001;
 
-const APP_NAME = process.env.APP_NAME || "DefaultApp"; // Fallback if APP_NAME is undefined
-
-// Override console.log and console.error to include the app name
-console.log = (
-	(log) =>
-	(...args) =>
-		log(`[${APP_NAME}]`, ...args)
-)(console.log);
-
-console.error = (
-	(log) =>
-	(...args) =>
-		log(`[${APP_NAME}]`, ...args)
-)(console.error);
-
-// Capture stack traces for errors
-process.on("uncaughtException", (err) => {
-	console.error("Ther is an error");
-	console.error(`[${APP_NAME}] Uncaught Exception: ${err.message}`);
-	console.error(`[${APP_NAME}] Stack Trace:\n${err.stack}`);
-	process.exit(1); // Exit the process to avoid undefined behavior
-});
-
-process.on("unhandledRejection", (reason, promise) => {
-	console.error(`[${APP_NAME}] Unhandled Rejection at:`, promise);
-	if (reason instanceof Error) {
-		console.error(`[${APP_NAME}] Reason: ${reason.message}`);
-		console.error(`[${APP_NAME}] Stack Trace:\n${reason.stack}`);
-	} else {
-		console.error(`[${APP_NAME}] Reason:`, reason);
-	}
-});
+// Note: console.log and console.error are now handled by Winston logger
+// Winston also handles uncaughtException and unhandledRejection
+// See src/modules/logger.js for configuration
 
 // Start the server
 app.listen(PORT, "0.0.0.0", () => {
