@@ -14,7 +14,7 @@ router.get(
   authenticateToken,
   fileOperationLimiter,
   async (req, res) => {
-    console.log(
+    logger.info(
       `- in GET /downloads/utilities/download-excel-file/${req.params.excelFileName}`
     );
     const { excelFileName } = req.params;
@@ -31,11 +31,13 @@ router.get(
       }
 
       // 🔒 Secure file path validation (prevents path traversal)
-      const { valid, path: safePath, error } = safeFileExists(
-        outputDir,
-        excelFileName,
-        { allowedExtensions: ['.xlsx', '.xls'] }
-      );
+      const {
+        valid,
+        path: safePath,
+        error,
+      } = safeFileExists(outputDir, excelFileName, {
+        allowedExtensions: [".xlsx", ".xls"],
+      });
 
       if (!valid) {
         return res.status(404).json({
@@ -44,7 +46,7 @@ router.get(
         });
       }
 
-      console.log(`Downloading file: ${safePath}`);
+      logger.info(`Downloading file: ${safePath}`);
 
       res.setHeader(
         "Content-Type",
@@ -58,7 +60,7 @@ router.get(
       // Let Express handle download
       res.download(safePath, path.basename(safePath), (err) => {
         if (err) {
-          console.error("Download error:", err);
+          logger.error("Download error:", err);
           if (!res.headersSent) {
             res.status(500).json({
               result: false,
@@ -68,7 +70,7 @@ router.get(
         }
       });
     } catch (error) {
-      console.error("Error processing request:", error);
+      logger.error("Error processing request:", error);
       res.status(500).json({
         result: false,
         message: "Internal server error",
@@ -85,7 +87,7 @@ router.post(
   authenticateToken,
   fileOperationLimiter,
   async (req, res) => {
-    console.log(
+    logger.info(
       `- in POST /downloads/utilities/download-excel-file/${req.params.excelFileName}`
     );
     const { excelFileName } = req.params;
@@ -100,11 +102,13 @@ router.post(
     }
 
     // 🔒 Validate filename before creating file
-    const { valid: isValidFilename, path: safePath, error: validationError } = safeFileExists(
-      outputDir,
-      excelFileName,
-      { allowedExtensions: ['.xlsx', '.xls'] }
-    );
+    const {
+      valid: isValidFilename,
+      path: safePath,
+      error: validationError,
+    } = safeFileExists(outputDir, excelFileName, {
+      allowedExtensions: [".xlsx", ".xls"],
+    });
 
     // For POST, we expect file might not exist yet, so just validate the path
     if (!safePath) {
@@ -114,11 +118,11 @@ router.post(
       });
     }
 
-    console.log(`arrayToExport: ${typeof arrayToExport}`);
-    console.log(`arrayToExport: ${arrayToExport[0]}`);
+    logger.info(`arrayToExport: ${typeof arrayToExport}`);
+    logger.info(`arrayToExport: ${arrayToExport[0]}`);
 
     await createSpreadsheetFromArray(arrayToExport, safePath);
-    console.log(`✅ Excel file saved to: ${safePath}`);
+    logger.info(`✅ Excel file saved to: ${safePath}`);
 
     try {
       // Verify file was created
@@ -127,7 +131,7 @@ router.post(
           .status(404)
           .json({ result: false, message: "File not found." });
       } else {
-        console.log(`----> File exists: ${safePath}`);
+        logger.info(`----> File exists: ${safePath}`);
       }
 
       res.setHeader(
@@ -142,14 +146,14 @@ router.post(
       // Let Express handle download
       res.download(safePath, path.basename(safePath), (err) => {
         if (err) {
-          console.error("Download error:", err);
+          logger.error("Download error:", err);
           res
             .status(500)
             .json({ result: false, message: "File download failed." });
         }
       });
     } catch (error) {
-      console.error("Error processing request:", error);
+      logger.error("Error processing request:", error);
       res.status(500).json({
         result: false,
         message: "Internal server error",

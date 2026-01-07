@@ -16,10 +16,10 @@ router.post("/add-entity", authenticateToken, async (req, res) => {
   const { name, description, huggingFaceModelName, huggingFaceModelType } =
     req.body;
 
-  console.log("body.name: ", req.body.name);
-  console.log("body.description: ", req.body.description);
-  console.log("body.huggingFaceModelName: ", req.body.huggingFaceModelName);
-  console.log("body.huggingFaceModelType: ", req.body.huggingFaceModelType);
+  logger.info("body.name: ", req.body.name);
+  logger.info("body.description: ", req.body.description);
+  logger.info("body.huggingFaceModelName: ", req.body.huggingFaceModelName);
+  logger.info("body.huggingFaceModelType: ", req.body.huggingFaceModelType);
 
   const ai = await ArtificialIntelligence.create({
     name,
@@ -61,7 +61,7 @@ router.get(
     const entity = aiModel?.EntityWhoCategorizedArticles?.[0];
     const entityWhoCategorizesId = entity?.id;
 
-    console.log("EntityWhoCategorizedArticle:", entityWhoCategorizesId);
+    logger.info("EntityWhoCategorizedArticle:", entityWhoCategorizesId);
     const articlesArray = await createFilteredArticlesArray(
       entityWhoCategorizesId
     );

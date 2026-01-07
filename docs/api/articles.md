@@ -578,7 +578,7 @@ const toggleRelevance = async (articleId) => {
   );
 
   const { articleIsRelevant, status } = await response.json();
-  console.log(status);
+  logger.info(status);
 
   return articleIsRelevant;
 };
@@ -747,11 +747,11 @@ const getApprovalInfo = async (articleId) => {
   const { articleIsApproved, article, content, States } = await response.json();
 
   if (articleIsApproved) {
-    console.log("Article is approved");
-    console.log("PDF Report Text:", content);
-    console.log("States:", States.map((s) => s.abbreviation).join(", "));
+    logger.info("Article is approved");
+    logger.info("PDF Report Text:", content);
+    logger.info("States:", States.map((s) => s.abbreviation).join(", "));
   } else {
-    console.log("Article is not approved");
+    logger.info("Article is not approved");
   }
 
   return { articleIsApproved, article, content, States };
@@ -1160,13 +1160,13 @@ const getSummaryStats = async () => {
   const { summaryStatistics } = await response.json();
 
   // Display on dashboard
-  console.log(`Total Articles: ${summaryStatistics.articlesCount}`);
-  console.log(
+  logger.info(`Total Articles: ${summaryStatistics.articlesCount}`);
+  logger.info(
     `This Week: ${summaryStatistics.articlesSinceLastThursday20hEst}`
   );
-  console.log(`With States: ${summaryStatistics.articleHasStateCount}`);
-  console.log(`Approved: ${summaryStatistics.articleIsApprovedCount}`);
-  console.log(
+  logger.info(`With States: ${summaryStatistics.articleHasStateCount}`);
+  logger.info(`Approved: ${summaryStatistics.articleIsApprovedCount}`);
+  logger.info(
     `Pending Report: ${summaryStatistics.approvedButNotInReportCount}`
   );
 
@@ -1231,14 +1231,14 @@ curl -X POST http://localhost:8001/articles/update-approved-all/12345 \
 
 ### Request Body Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| newPublicationName | string | No | Updates Articles.publicationName and ArticleApproved.publicationNameForPdfReport |
-| newTitle | string | No | Updates Articles.title and ArticleApproved.headlineForPdfReport |
-| newUrl | string | No | Updates Articles.url and ArticleApproved.urlForPdfReport |
-| newPublishedDate | string | No | Updates Articles.publishedDate and ArticleApproved.publicationDateForPdfReport |
-| newStateIdsArray | array | No | Replaces all ArticleStateContract records with new state associations |
-| newContent | string | No | Updates Articles.description and ArticleApproved.textForPdfReport |
+| Field              | Type   | Required | Description                                                                      |
+| ------------------ | ------ | -------- | -------------------------------------------------------------------------------- |
+| newPublicationName | string | No       | Updates Articles.publicationName and ArticleApproved.publicationNameForPdfReport |
+| newTitle           | string | No       | Updates Articles.title and ArticleApproved.headlineForPdfReport                  |
+| newUrl             | string | No       | Updates Articles.url and ArticleApproved.urlForPdfReport                         |
+| newPublishedDate   | string | No       | Updates Articles.publishedDate and ArticleApproved.publicationDateForPdfReport   |
+| newStateIdsArray   | array  | No       | Replaces all ArticleStateContract records with new state associations            |
+| newContent         | string | No       | Updates Articles.description and ArticleApproved.textForPdfReport                |
 
 ### Success Response (200)
 
@@ -1319,18 +1319,18 @@ curl -X POST http://localhost:8001/articles/add-article \
 
 ### Request Body Fields
 
-| Field           | Type    | Required | Description                                                    |
-| --------------- | ------- | -------- | -------------------------------------------------------------- |
-| publicationName | string  | Yes      | Name of the publication source                                 |
-| author          | string  | No       | Article author name                                            |
-| title           | string  | Yes      | Article headline/title                                         |
-| description     | string  | Yes      | Article description/summary                                    |
-| content         | string  | No       | Full article text content (used for PDF report if approved)    |
-| url             | string  | Yes      | URL to the original article                                    |
-| publishedDate   | string  | Yes      | Publication date in YYYY-MM-DD format                          |
-| stateObjArray   | array   | Yes      | Array of state objects with id, name, and abbreviation fields  |
-| isApproved      | boolean | No       | If true, creates ArticleApproved record immediately            |
-| kmNotes         | string  | No       | Knowledge manager notes (saved in ArticleApproved.kmNotes)     |
+| Field           | Type    | Required | Description                                                   |
+| --------------- | ------- | -------- | ------------------------------------------------------------- |
+| publicationName | string  | Yes      | Name of the publication source                                |
+| author          | string  | No       | Article author name                                           |
+| title           | string  | Yes      | Article headline/title                                        |
+| description     | string  | Yes      | Article description/summary                                   |
+| content         | string  | No       | Full article text content (used for PDF report if approved)   |
+| url             | string  | Yes      | URL to the original article                                   |
+| publishedDate   | string  | Yes      | Publication date in YYYY-MM-DD format                         |
+| stateObjArray   | array   | Yes      | Array of state objects with id, name, and abbreviation fields |
+| isApproved      | boolean | No       | If true, creates ArticleApproved record immediately           |
+| kmNotes         | string  | No       | Knowledge manager notes (saved in ArticleApproved.kmNotes)    |
 
 ### Success Response (200)
 

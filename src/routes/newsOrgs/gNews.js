@@ -10,7 +10,7 @@ const { NewsArticleAggregatorSource } = require("newsnexus10db");
 
 // POST /gnews/request
 router.post("/request", async (req, res) => {
-  // console.log("- starting request-gnews");
+  // logger.info("- starting request-gnews");
   try {
     const { startDate, endDate, keywordString } = req.body;
 
@@ -25,20 +25,20 @@ router.post("/request", async (req, res) => {
         message: `Missing ${missingKeys.join(", ")}`,
       });
     }
-    // console.log(`- got correct body ${JSON.stringify(req.body)}`);
+    // logger.info(`- got correct body ${JSON.stringify(req.body)}`);
     const gNewsSourceObj = await NewsArticleAggregatorSource.findOne({
       where: { nameOfOrg: "GNews" },
       raw: true, // Returns data without all the database gibberish
     });
-    // console.log(gNewsSourceObj);
+    // logger.info(gNewsSourceObj);
     // const keywordObj = await Keyword.findOne({
     //   where: { keyword: keywordString },
     //   raw: true, // Returns data without all the database gibberish
     // });
     // const keywordObjModified = { ...keywordObj, keywordId: keywordObj.id };
-    // console.log(keywordObj);
+    // logger.info(keywordObj);
     // // 2. make request
-    // console.log(`- making request`);
+    // logger.info(`- making request`);
     const { requestResponseData, newsApiRequestObj } = await makeGNewsRequest(
       gNewsSourceObj,
       keywordString,
@@ -52,13 +52,13 @@ router.post("/request", async (req, res) => {
     //     newsApiRequestObj,
     //   });
     // } else {
-    //   console.log(
+    //   logger.info(
     //     `what is process.env.ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES: ${process.env.ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES}`
     //   );
     // }
 
     // // 3 save articles to db
-    // console.log(`- saving articles`);
+    // logger.info(`- saving articles`);
     await storeGNewsArticles(requestResponseData, newsApiRequestObj);
 
     res.json({
@@ -66,7 +66,7 @@ router.post("/request", async (req, res) => {
       message: `Imported ## articles from GNews.`,
     });
   } catch (error) {
-    console.error("Error in /request-gnews:", error);
+    logger.error("Error in /request-gnews:", error);
     res.status(500).json({
       result: false,
       message: "NewsNexusAPI internal server error",
@@ -96,12 +96,12 @@ router.post("/get-articles", async (req, res) => {
 
     if (process.env.ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES === "true") {
       if (requestResponseData.articles) {
-        console.log("- articles count: ", requestResponseData.articles.length);
+        logger.info("- articles count: ", requestResponseData.articles.length);
         // Step 4: store articles to db
 
         await storeGNewsArticles(requestResponseData, newsApiRequestObj);
       } else {
-        console.log("--- > there was no articles element in the response ???/");
+        logger.info("--- > there was no articles element in the response ???/");
         return res.status(400).json({
           status: requestResponseData?.status || "error",
           result: false,
@@ -109,8 +109,8 @@ router.post("/get-articles", async (req, res) => {
         });
       }
     } else {
-      console.log("--- > ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES is false");
-      console.log(
+      logger.info("--- > ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES is false");
+      logger.info(
         `requestResponseData: ${JSON.stringify(requestResponseData, null, 2)}`
       );
     }
@@ -121,7 +121,7 @@ router.post("/get-articles", async (req, res) => {
       newsApiRequestObj,
     });
   } catch (error) {
-    console.error("Error in /request-detailed-gnews:", error);
+    logger.error("Error in /request-detailed-gnews:", error);
     res.status(500).json({
       result: false,
       message: "NewsNexusAPI internal server error",

@@ -18,7 +18,7 @@ router.post("/add-aggregator", authenticateToken, async (req, res) => {
   const { nameOfOrg, url, apiKey, state, isApi, isRss } = req.body;
   const { isValid, missingKeys } = checkBodyReturnMissing(req.body, ["url"]);
 
-  console.log(`body: ${JSON.stringify(req.body)}`);
+  logger.info(`body: ${JSON.stringify(req.body)}`);
 
   if (!isValid) {
     return res.status(400).json({ error: `Missing ${missingKeys.join(", ")}` });
@@ -49,10 +49,10 @@ router.post("/add-aggregator", authenticateToken, async (req, res) => {
 });
 // 🔹 POST /news-aggregators/requests: this sends the list of all the requests the Portal "Get Articles page"
 router.post("/requests", authenticateToken, async (req, res) => {
-  // console.log("- starting /requests");
+  // logger.info("- starting /requests");
 
   const { dateLimitOnRequestMade, includeIsFromAutomation } = req.body;
-  // console.log(`body: ${JSON.stringify(req.body)}`);
+  // logger.info(`body: ${JSON.stringify(req.body)}`);
 
   // Build where clause dynamically
   // const whereClause = {};
@@ -159,7 +159,7 @@ router.post("/requests", authenticateToken, async (req, res) => {
   //   let excludeSourcesArray = [];
   //   let includeString = "";
   //   let excludeString = "";
-  //   // console.log(JSON.stringify(request.NewsApiRequestWebsiteDomainContracts));
+  //   // logger.info(JSON.stringify(request.NewsApiRequestWebsiteDomainContracts));
   //   if (request.NewsApiRequestWebsiteDomainContracts.length > 0) {
   //     const excludeArrayForString = [];
   //     const includeArrayForString = [];
@@ -178,11 +178,11 @@ router.post("/requests", authenticateToken, async (req, res) => {
   //   }
 
   //   if (includeString) {
-  //     // console.log(`- includeString: ${includeString}`);
+  //     // logger.info(`- includeString: ${includeString}`);
   //     keyword += ` INCLUDE ${includeString}`;
   //   }
   //   if (excludeString) {
-  //     // console.log(`- excludeString: ${excludeString}`);
+  //     // logger.info(`- excludeString: ${excludeString}`);
   //     keyword += ` EXCLUDE ${excludeString}`;
   //   }
 
@@ -235,7 +235,7 @@ router.post(
     const { newsArticleAggregatorSourceId } = req.params;
     const { nameOfOrg, url, apiKey, state, isApi, isRss } = req.body;
 
-    console.log(
+    logger.info(
       `Updating news article aggregator source ${newsArticleAggregatorSourceId}`
     );
 
@@ -264,11 +264,11 @@ router.post(
     // Perform the update if there are fields to update
     if (Object.keys(updatedFields).length > 0) {
       await newsArticleAggregatorSource.update(updatedFields);
-      console.log(
+      logger.info(
         `News article aggregator source ${newsArticleAggregatorSourceId} updated successfully`
       );
     } else {
-      console.log(
+      logger.info(
         `No updates applied for news article aggregator source ${newsArticleAggregatorSourceId}`
       );
     }
@@ -286,7 +286,7 @@ router.delete(
   async (req, res) => {
     const { newsArticleAggregatorSourceId } = req.params;
 
-    console.log(
+    logger.info(
       `Deleting news article aggregator source ${newsArticleAggregatorSourceId}`
     );
 
@@ -301,7 +301,7 @@ router.delete(
 
     // Perform the delete
     await newsArticleAggregatorSource.destroy();
-    console.log(
+    logger.info(
       `News article aggregator source ${newsArticleAggregatorSourceId} deleted successfully`
     );
 

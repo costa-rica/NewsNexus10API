@@ -30,9 +30,9 @@ router.post("/get-articles", async (req, res) => {
   //   const includeSourcesArrayNames = includeWebsiteDomainObjArray.map(
   //     (obj) => obj.name
   //   );
-  //   console.log("includeSourcesArrayNames:", includeSourcesArrayNames);
+  //   logger.info("includeSourcesArrayNames:", includeSourcesArrayNames);
   // } else {
-  //   console.log(
+  //   logger.info(
   //     "includeWebsiteDomainObjArray is not an array:",
   //     includeWebsiteDomainObjArray
   //   );
@@ -54,15 +54,15 @@ router.post("/get-articles", async (req, res) => {
     keywordsOr,
     keywordsNot
   );
-  // console.log("includeWebsiteDomainObjArray:", includeWebsiteDomainObjArray);
+  // logger.info("includeWebsiteDomainObjArray:", includeWebsiteDomainObjArray);
 
   // if (Array.isArray(includeWebsiteDomainObjArray)) {
   //   const includeSourcesArrayNames = includeWebsiteDomainObjArray.map(
   //     (obj) => obj.name
   //   );
-  //   console.log("includeSourcesArrayNames:", includeSourcesArrayNames);
+  //   logger.info("includeSourcesArrayNames:", includeSourcesArrayNames);
   // } else {
-  //   console.log(
+  //   logger.info(
   //     "includeWebsiteDomainObjArray is not an array:",
   //     includeWebsiteDomainObjArray
   //   );
@@ -70,11 +70,11 @@ router.post("/get-articles", async (req, res) => {
 
   if (process.env.ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES === "true") {
     if (requestResponseData.status === "success") {
-      console.log("- articles count: ", requestResponseData.results.length);
+      logger.info("- articles count: ", requestResponseData.results.length);
       // Step 4: store articles to db
       await storeNewsDataIoArticles(requestResponseData, newsApiRequest, null);
     } else {
-      console.log(
+      logger.info(
         "--- > [NewsData.IO] there was no articles element in the response ???/"
       );
       return res.status(400).json({

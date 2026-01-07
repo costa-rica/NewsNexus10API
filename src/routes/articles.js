@@ -33,7 +33,7 @@ const {
 // NOTE: ---- > will need to refactor because sqlQueryArticles is changed
 // 🔹 POST /articles: filtered list of articles
 router.post("/", authenticateToken, async (req, res) => {
-  console.log("- POST /articles");
+  logger.info("- POST /articles");
 
   const {
     returnOnlyThisPublishedDateOrAfter,
@@ -42,8 +42,8 @@ router.post("/", authenticateToken, async (req, res) => {
     returnOnlyIsRelevant,
   } = req.body;
 
-  console.log("req.body:");
-  console.log(JSON.stringify(req.body, null, 2));
+  logger.info("req.body:");
+  logger.info(JSON.stringify(req.body, null, 2));
 
   // const articlesArray = await sqlQueryArticlesOld({
   const articlesArray = await sqlQueryArticles({
@@ -51,7 +51,7 @@ router.post("/", authenticateToken, async (req, res) => {
     createdAt: returnOnlyThisCreatedAtDateOrAfter,
   });
 
-  console.log(
+  logger.info(
     "- articlesArray.length (before filtering):",
     articlesArray.length
   );
@@ -184,12 +184,12 @@ router.post("/", authenticateToken, async (req, res) => {
 
 // 🔹 GET /articles/approved
 router.get("/approved", authenticateToken, async (req, res) => {
-  console.log("- GET /articles/approved");
+  logger.info("- GET /articles/approved");
   const startTime = Date.now();
   const articlesArray =
     await sqlQueryArticlesWithStatesApprovedReportContract();
 
-  console.log(
+  logger.info(
     `- articlesArray.length (before filtering): ${articlesArray.length}`
   );
 
@@ -221,7 +221,7 @@ router.get("/approved", authenticateToken, async (req, res) => {
     };
   });
 
-  console.log(
+  logger.info(
     `- approvedArticlesArrayModified.length (after filtering): ${approvedArticlesArrayModified.length}`
   );
 
@@ -235,8 +235,8 @@ router.get("/approved", authenticateToken, async (req, res) => {
 // 🔹 POST /articles/update-approved
 router.post("/update-approved", authenticateToken, async (req, res) => {
   const { articleId, contentToUpdate } = req.body;
-  console.log(`articleId: ${articleId}`);
-  console.log(`contentToUpdate: ${contentToUpdate}`);
+  logger.info(`articleId: ${articleId}`);
+  logger.info(`contentToUpdate: ${contentToUpdate}`);
 
   const articleApprovedArrayOriginal = await ArticleApproved.findAll({
     where: { articleId },
@@ -276,8 +276,8 @@ router.post(
       newContent,
     } = req.body;
 
-    console.log(`- POST /articles/update-approved-all/${articleId}`);
-    console.log("req.body:", JSON.stringify(req.body, null, 2));
+    logger.info(`- POST /articles/update-approved-all/${articleId}`);
+    logger.info("req.body:", JSON.stringify(req.body, null, 2));
 
     try {
       // Step 1: Update Articles table
@@ -302,7 +302,7 @@ router.post(
         await Article.update(articleUpdateFields, {
           where: { id: articleId },
         });
-        console.log(
+        logger.info(
           `Updated Articles table for articleId ${articleId}:`,
           articleUpdateFields
         );
@@ -335,7 +335,7 @@ router.post(
           await ArticleApproved.update(approvedUpdateFields, {
             where: { articleId },
           });
-          console.log(
+          logger.info(
             `Updated ArticleApproved table for articleId ${articleId}:`,
             approvedUpdateFields
           );
@@ -348,7 +348,7 @@ router.post(
         await ArticleStateContract.destroy({
           where: { articleId },
         });
-        console.log(
+        logger.info(
           `Deleted existing ArticleStateContract records for articleId ${articleId}`
         );
 
@@ -359,7 +359,7 @@ router.post(
             stateId: stateId,
           });
         }
-        console.log(
+        logger.info(
           `Created new ArticleStateContract records for articleId ${articleId} with stateIds:`,
           newStateIdsArray
         );
@@ -385,7 +385,7 @@ router.post(
         article: updatedArticle,
       });
     } catch (error) {
-      console.error(`❌ Error updating articleId ${articleId}:`, error.message);
+      logger.error(`❌ Error updating articleId ${articleId}:`, error.message);
       res.status(500).json({
         result: false,
         error: "Failed to update article",
@@ -476,8 +476,8 @@ router.post("/approve/:articleId", authenticateToken, async (req, res) => {
   } = req.body;
   const user = req.user;
 
-  console.log(`articleId ${articleId}: ${headlineForPdfReport}`);
-  console.log(`approvedStatus: ${approvedStatus}`);
+  logger.info(`articleId ${articleId}: ${headlineForPdfReport}`);
+  logger.info(`approvedStatus: ${approvedStatus}`);
 
   const articleApprovedExists = await ArticleApproved.findOne({
     where: { articleId },
@@ -494,7 +494,7 @@ router.post("/approve/:articleId", authenticateToken, async (req, res) => {
         },
         { where: { articleId } }
       );
-      console.log(
+      logger.info(
         `---- > updated existing record to approved for articleId ${articleId}`
       );
     } else {
@@ -505,12 +505,12 @@ router.post("/approve/:articleId", authenticateToken, async (req, res) => {
         isApproved: true,
         ...req.body,
       });
-      console.log(
+      logger.info(
         `---- > created new approval record for articleId ${articleId}`
       );
     }
   } else if (approvedStatus === "Un-approve") {
-    console.log("---- > received Un-approve");
+    logger.info("---- > received Un-approve");
     if (articleApprovedExists) {
       // Update existing record to unapproved instead of deleting
       await ArticleApproved.update(
@@ -520,11 +520,11 @@ router.post("/approve/:articleId", authenticateToken, async (req, res) => {
         },
         { where: { articleId } }
       );
-      console.log(
+      logger.info(
         `---- > updated record to unapproved for articleId ${articleId}, userId: ${user.id}`
       );
     } else {
-      console.log(
+      logger.info(
         `---- > no approval record exists for articleId ${articleId}, cannot unapprove`
       );
     }
@@ -614,16 +614,16 @@ router.post("/add-article", authenticateToken, async (req, res) => {
     kmNotes,
   } = req.body;
 
-  console.log(`publicationName: ${publicationName}`);
-  console.log(`author: ${author}`);
-  console.log(`title: ${title}`);
-  console.log(`description: ${description}`);
-  console.log(`content: ${content}`);
-  console.log(`url: ${url}`);
-  console.log(`publishedDate: ${publishedDate}`);
-  console.log(`stateObjArray: ${stateObjArray}`);
-  console.log(`isApproved: ${isApproved}`);
-  console.log(`kmNotes: ${kmNotes}`);
+  logger.info(`publicationName: ${publicationName}`);
+  logger.info(`author: ${author}`);
+  logger.info(`title: ${title}`);
+  logger.info(`description: ${description}`);
+  logger.info(`content: ${content}`);
+  logger.info(`url: ${url}`);
+  logger.info(`publishedDate: ${publishedDate}`);
+  logger.info(`stateObjArray: ${stateObjArray}`);
+  logger.info(`isApproved: ${isApproved}`);
+  logger.info(`kmNotes: ${kmNotes}`);
 
   const user = req.user;
 
@@ -641,7 +641,7 @@ router.post("/add-article", authenticateToken, async (req, res) => {
     entityWhoFoundArticleId: entityWhoFoundArticleObj.id,
   });
 
-  console.log(`stateObjArray: ${stateObjArray}`);
+  logger.info(`stateObjArray: ${stateObjArray}`);
 
   for (let stateObj of stateObjArray) {
     await ArticleStateContract.create({
@@ -697,7 +697,7 @@ router.post(
     const { isBeingReviewed } = req.body;
     const user = req.user;
 
-    console.log(`articleId ${articleId}: ${isBeingReviewed}`);
+    logger.info(`articleId ${articleId}: ${isBeingReviewed}`);
 
     if (isBeingReviewed) {
       // Create or update the record
@@ -723,7 +723,7 @@ router.post(
 );
 // 🔹 POST /articles/with-ratings - Get articles with ratings
 router.post("/with-ratings", authenticateToken, async (req, res) => {
-  console.log("- POST /articles/with-ratings");
+  logger.info("- POST /articles/with-ratings");
   const startTime = Date.now();
   const {
     returnOnlyThisPublishedDateOrAfter,
@@ -920,7 +920,7 @@ router.post("/with-ratings", authenticateToken, async (req, res) => {
   });
 
   const timeToRenderResponseFromApiInSeconds = (Date.now() - startTime) / 1000;
-  console.log(
+  logger.info(
     `timeToRenderResponseFromApiInSeconds: ${timeToRenderResponseFromApiInSeconds}`
   );
   res.json({
@@ -930,7 +930,7 @@ router.post("/with-ratings", authenticateToken, async (req, res) => {
     timeToRenderResponseFromApiInSeconds,
   });
   // } catch (error) {
-  //   console.error("❌ Error in /articles/with-ratings:", error);
+  //   logger.error("❌ Error in /articles/with-ratings:", error);
   //   res.status(500).json({ error: "Failed to fetch articles with ratings." });
   // }
 });
@@ -940,7 +940,7 @@ router.post(
   "/table-approved-by-request",
   authenticateToken,
   async (req, res) => {
-    console.log("- POST /articles/table-approved-by-request");
+    logger.info("- POST /articles/table-approved-by-request");
     let { dateRequestsLimit } = req.body;
     if (!dateRequestsLimit) {
       dateRequestsLimit = null;
@@ -968,7 +968,7 @@ router.post(
       const filteredRequestsArray = requestsArrayWithCounts.filter(
         (request) => {
           // if (request.id === 6002) {
-          //   console.log(request);
+          //   logger.info(request);
           // }
           return request.countOfApprovedArticles > 0;
         }
@@ -984,7 +984,7 @@ router.post(
       //   `approved_by_request_${new Date().toISOString().split("T")[0]}.xlsx`
       // );
       // await createSpreadsheetFromArray(sortedRequestsArray, outputFilePath);
-      // console.log(`✅ Excel file saved to: ${outputFilePath}`);
+      // logger.info(`✅ Excel file saved to: ${outputFilePath}`);
 
       res.json({
         countOfApprovedArticles: requestIdArray.length + manualFoundCount,
@@ -992,7 +992,7 @@ router.post(
         requestsArray: sortedRequestsArray,
       });
     } catch (error) {
-      console.error("❌ Error in /articles/table-approved-by-request:", error);
+      logger.error("❌ Error in /articles/table-approved-by-request:", error);
       res.status(500).json({ error: "Failed to fetch request summary." });
     }
   }

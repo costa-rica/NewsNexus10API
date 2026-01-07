@@ -67,7 +67,7 @@ async function storeNewsDataIoArticles(
       // newsApiRequest.url
     );
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     writeResponseDataFromNewsAggregator(
       newsApiSource.id,
       newsApiRequest,
@@ -91,20 +91,20 @@ async function makeNewsDataIoRequest(
   keywordsNot
   // max = 100
 ) {
-  // console.log(`keywordsAnd: ${keywordsAnd}, ${typeof keywordsAnd}`);
-  // console.log(`keywordsOr: ${keywordsOr}, ${typeof keywordsOr}`);
-  // console.log(`keywordsNot: ${keywordsNot}, ${typeof keywordsNot}`);
+  // logger.info(`keywordsAnd: ${keywordsAnd}, ${typeof keywordsAnd}`);
+  // logger.info(`keywordsOr: ${keywordsOr}, ${typeof keywordsOr}`);
+  // logger.info(`keywordsNot: ${keywordsNot}, ${typeof keywordsNot}`);
 
   // if (Array.isArray(includeWebsiteDomainObjArray)) {
   //   const includeSourcesArrayNames = includeWebsiteDomainObjArray.map(
   //     (obj) => obj.name
   //   );
-  //   console.log(
+  //   logger.info(
   //     "[makeNewsApiRequestDetailed02] includeSourcesArrayNames:",
   //     includeSourcesArrayNames
   //   );
   // } else {
-  //   console.log(
+  //   logger.info(
   //     "[makeNewsApiRequestDetailed02] includeWebsiteDomainObjArray is not an array:",
   //     includeWebsiteDomainObjArray
   //   );
@@ -176,7 +176,7 @@ async function makeNewsDataIoRequest(
   // queryParams.push(`timeframe=48`);
 
   const requestUrl = `${source.url}latest?${queryParams.join("&")}`;
-  console.log("- [makeNewsDataIoRequest] requestUrl", requestUrl);
+  logger.info("- [makeNewsDataIoRequest] requestUrl", requestUrl);
   let status = "success";
   let requestResponseData = null;
   let newsApiRequest = null;
@@ -240,7 +240,7 @@ async function handleErrorNewsDataIoRequest(
       "The domain you provided does not exist"
     )
   ) {
-    console.log(
+    logger.info(
       "- [makeNewsDataIoRequest] invalid domain: ",
       requestResponseData.results?.message?.[0]?.invalid_domain
     );
@@ -255,11 +255,11 @@ async function handleErrorNewsDataIoRequest(
       }
     );
   } else {
-    console.log("Correctly handled invalid_domain with no message 🤩");
+    logger.info("Correctly handled invalid_domain with no message 🤩");
   }
 
   if (requestResponseData.results.message[0]?.suggestion) {
-    console.log(
+    logger.info(
       "- [makeNewsDataIoRequest] suggestion: ",
       requestResponseData.results.message[0].suggestion
     );
@@ -268,7 +268,7 @@ async function handleErrorNewsDataIoRequest(
       const suggestions = msg.suggestion;
 
       if (invalidDomain) {
-        console.log(
+        logger.info(
           "- [makeNewsDataIoRequest] Archiving invalid domain:",
           invalidDomain
         );
@@ -284,12 +284,12 @@ async function handleErrorNewsDataIoRequest(
             const websiteDomain = await WebsiteDomain.create({
               name: suggestion,
             });
-            console.log(
+            logger.info(
               "- [makeNewsDataIoRequest] Added suggestion:",
               websiteDomain.name
             );
           } catch (err) {
-            console.warn(
+            logger.warn(
               `⚠️ Failed to add suggestion ${suggestion}:`,
               err.message
             );

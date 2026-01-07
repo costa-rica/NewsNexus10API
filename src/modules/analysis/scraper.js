@@ -28,12 +28,11 @@ async function scrapeArticle(url) {
     const clean = text.replace(/\s+/g, " ").trim();
 
     // Truncate to keep prompt manageable
-    const snippet =
-      clean.length > 4000 ? clean.slice(0, 4000) + "..." : clean;
+    const snippet = clean.length > 4000 ? clean.slice(0, 4000) + "..." : clean;
 
     return snippet || null;
   } catch (err) {
-    console.warn(`⚠️ Failed to scrape ${url}:`, err.message);
+    logger.warn(`⚠️ Failed to scrape ${url}:`, err.message);
     return null;
   }
 }

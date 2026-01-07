@@ -14,7 +14,7 @@
  *   router.post('/login', loginLimiter, handler);
  */
 
-const rateLimit = require('express-rate-limit');
+const rateLimit = require("express-rate-limit");
 
 /**
  * Global API rate limiter
@@ -27,8 +27,8 @@ const globalLimiter = rateLimit({
   max: 100, // Limit each IP to 100 requests per windowMs
   message: {
     result: false,
-    error: 'Too many requests from this IP, please try again later.',
-    retryAfter: '15 minutes',
+    error: "Too many requests from this IP, please try again later.",
+    retryAfter: "15 minutes",
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -36,10 +36,10 @@ const globalLimiter = rateLimit({
   skipSuccessfulRequests: false,
   // Handler called when rate limit is exceeded
   handler: (req, res) => {
-    console.warn(`[RATE LIMIT] Global limit exceeded for IP: ${req.ip}`);
+    logger.warn(`[RATE LIMIT] Global limit exceeded for IP: ${req.ip}`);
     res.status(429).json({
       result: false,
-      error: 'Too many requests, please try again later.',
+      error: "Too many requests, please try again later.",
     });
   },
 });
@@ -56,15 +56,20 @@ const loginLimiter = rateLimit({
   max: 5, // 5 login attempts per 15 minutes
   message: {
     result: false,
-    error: 'Too many login attempts from this IP, please try again after 15 minutes.',
-    retryAfter: '15 minutes',
+    error:
+      "Too many login attempts from this IP, please try again after 15 minutes.",
+    retryAfter: "15 minutes",
   },
   skipSuccessfulRequests: true, // Don't count successful logins
   handler: (req, res) => {
-    console.warn(`[RATE LIMIT] Login attempts exceeded for IP: ${req.ip}, Email: ${req.body?.email || 'unknown'}`);
+    logger.warn(
+      `[RATE LIMIT] Login attempts exceeded for IP: ${req.ip}, Email: ${
+        req.body?.email || "unknown"
+      }`
+    );
     res.status(429).json({
       result: false,
-      error: 'Too many login attempts. Please try again later.',
+      error: "Too many login attempts. Please try again later.",
     });
   },
 });
@@ -80,14 +85,15 @@ const registerLimiter = rateLimit({
   max: 3, // 3 registrations per hour
   message: {
     result: false,
-    error: 'Too many accounts created from this IP, please try again after an hour.',
-    retryAfter: '1 hour',
+    error:
+      "Too many accounts created from this IP, please try again after an hour.",
+    retryAfter: "1 hour",
   },
   handler: (req, res) => {
-    console.warn(`[RATE LIMIT] Registration limit exceeded for IP: ${req.ip}`);
+    logger.warn(`[RATE LIMIT] Registration limit exceeded for IP: ${req.ip}`);
     res.status(429).json({
       result: false,
-      error: 'Too many accounts created from this IP. Please try again later.',
+      error: "Too many accounts created from this IP. Please try again later.",
     });
   },
 });
@@ -103,14 +109,19 @@ const passwordResetLimiter = rateLimit({
   max: 3, // 3 password reset requests per hour
   message: {
     result: false,
-    error: 'Too many password reset requests from this IP, please try again after an hour.',
-    retryAfter: '1 hour',
+    error:
+      "Too many password reset requests from this IP, please try again after an hour.",
+    retryAfter: "1 hour",
   },
   handler: (req, res) => {
-    console.warn(`[RATE LIMIT] Password reset limit exceeded for IP: ${req.ip}, Email: ${req.body?.email || 'unknown'}`);
+    logger.warn(
+      `[RATE LIMIT] Password reset limit exceeded for IP: ${req.ip}, Email: ${
+        req.body?.email || "unknown"
+      }`
+    );
     res.status(429).json({
       result: false,
-      error: 'Too many password reset requests. Please try again later.',
+      error: "Too many password reset requests. Please try again later.",
     });
   },
 });
@@ -127,14 +138,16 @@ const databaseOperationLimiter = rateLimit({
   max: 20, // 20 requests per minute
   message: {
     result: false,
-    error: 'Too many database requests, please slow down.',
-    retryAfter: '1 minute',
+    error: "Too many database requests, please slow down.",
+    retryAfter: "1 minute",
   },
   handler: (req, res) => {
-    console.warn(`[RATE LIMIT] Database operation limit exceeded for IP: ${req.ip}, Path: ${req.path}`);
+    logger.warn(
+      `[RATE LIMIT] Database operation limit exceeded for IP: ${req.ip}, Path: ${req.path}`
+    );
     res.status(429).json({
       result: false,
-      error: 'Too many requests. Please wait a moment and try again.',
+      error: "Too many requests. Please wait a moment and try again.",
     });
   },
 });
@@ -150,14 +163,16 @@ const fileOperationLimiter = rateLimit({
   max: 30, // 30 file operations per minute
   message: {
     result: false,
-    error: 'Too many file operations, please slow down.',
-    retryAfter: '1 minute',
+    error: "Too many file operations, please slow down.",
+    retryAfter: "1 minute",
   },
   handler: (req, res) => {
-    console.warn(`[RATE LIMIT] File operation limit exceeded for IP: ${req.ip}, Path: ${req.path}`);
+    logger.warn(
+      `[RATE LIMIT] File operation limit exceeded for IP: ${req.ip}, Path: ${req.path}`
+    );
     res.status(429).json({
       result: false,
-      error: 'Too many file requests. Please wait a moment and try again.',
+      error: "Too many file requests. Please wait a moment and try again.",
     });
   },
 });
@@ -173,7 +188,7 @@ const generalLimiter = rateLimit({
   max: 200, // 200 requests per 15 minutes
   message: {
     result: false,
-    error: 'Too many requests, please try again later.',
+    error: "Too many requests, please try again later.",
   },
   standardHeaders: true,
   legacyHeaders: false,

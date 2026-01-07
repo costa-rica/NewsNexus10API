@@ -13,7 +13,7 @@ const { authenticateToken } = require("../../modules/userAuthentication");
 
 // 🔹 GET /analysis/llm02/no-article-approved-rows
 router.get("/no-article-approved-rows", authenticateToken, async (req, res) => {
-  console.log(`- in GET /analysis/llm02/no-article-approved-rows`);
+  logger.info(`- in GET /analysis/llm02/no-article-approved-rows`);
 
   try {
     // Query to find articles that have NO corresponding row in ArticleApproveds
@@ -39,7 +39,7 @@ router.get("/no-article-approved-rows", authenticateToken, async (req, res) => {
       type: sequelize.QueryTypes.SELECT,
     });
 
-    console.log(`Found ${articles.length} articles without approval rows`);
+    logger.info(`Found ${articles.length} articles without approval rows`);
 
     res.status(200).json({
       result: true,
@@ -47,7 +47,7 @@ router.get("/no-article-approved-rows", authenticateToken, async (req, res) => {
       articles: articles,
     });
   } catch (error) {
-    console.error(
+    logger.error(
       "Error in GET /analysis/llm02/no-article-approved-rows:",
       error
     );
@@ -61,7 +61,7 @@ router.get("/no-article-approved-rows", authenticateToken, async (req, res) => {
 
 // 🔹 POST /analysis/llm02/service-login
 router.post("/service-login", authenticateToken, async (req, res) => {
-  console.log(`- in POST /analysis/llm02/service-login`);
+  logger.info(`- in POST /analysis/llm02/service-login`);
 
   try {
     const { name } = req.body;
@@ -74,7 +74,7 @@ router.post("/service-login", authenticateToken, async (req, res) => {
       });
     }
 
-    console.log(`Looking up AI entity with name: ${name}`);
+    logger.info(`Looking up AI entity with name: ${name}`);
 
     // Query ArtificialIntelligence table with the provided name
     const aiModel = await ArtificialIntelligence.findOne({
@@ -106,7 +106,7 @@ router.post("/service-login", authenticateToken, async (req, res) => {
       });
     }
 
-    console.log(
+    logger.info(
       `Found entityWhoCategorizesId: ${entity.id} for AI entity: ${aiModel.name}`
     );
 
@@ -117,7 +117,7 @@ router.post("/service-login", authenticateToken, async (req, res) => {
       entityWhoCategorizesId: entity.id,
     });
   } catch (error) {
-    console.error("Error in POST /analysis/llm02/service-login:", error);
+    logger.error("Error in POST /analysis/llm02/service-login:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -128,7 +128,7 @@ router.post("/service-login", authenticateToken, async (req, res) => {
 
 // 🔹 POST /analysis/llm02/update-approved-status
 router.post("/update-approved-status", authenticateToken, async (req, res) => {
-  console.log(`- in POST /analysis/llm02/update-approved-status`);
+  logger.info(`- in POST /analysis/llm02/update-approved-status`);
 
   try {
     const {
@@ -154,7 +154,7 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
       });
     }
 
-    console.log(
+    logger.info(
       `Processing articleId: ${articleId}, isApproved: ${isApproved}`
     );
 
@@ -171,7 +171,7 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
     });
 
     if (existingApproval) {
-      console.log(`Article ${articleId} already exists in ArticleApproveds`);
+      logger.info(`Article ${articleId} already exists in ArticleApproveds`);
       return res.status(200).json({
         result: false,
         skipped: true,
@@ -185,7 +185,7 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
     // Step 2: Check approval requirements
     // If isApproved=true, both isApproved and stateId must be provided
     if (isApproved === true && (stateId === null || stateId === undefined)) {
-      console.log(
+      logger.info(
         `Skipping article ${articleId}: isApproved=true but stateId is missing`
       );
       return res.status(400).json({
@@ -207,7 +207,7 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
     }
 
     // Step 3: Create ArticleApproveds row
-    console.log(`Creating ArticleApproveds row for article ${articleId}`);
+    logger.info(`Creating ArticleApproveds row for article ${articleId}`);
     const articleApproved = await ArticleApproved.create({
       articleId: articleId,
       userId: req.user.id, // From JWT token
@@ -218,7 +218,7 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
     // Step 4: Create ArticleStateContracts row if approved and stateId provided
     let articleStateContract = null;
     if (isApproved === true && stateId) {
-      console.log(
+      logger.info(
         `Creating ArticleStateContracts row for article ${articleId} and state ${stateId}`
       );
       articleStateContract = await ArticleStateContract.create({
@@ -228,7 +228,7 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
     }
 
     // Step 5: Create ArticleEntityWhoCategorizedArticleContracts02 rows
-    console.log(`Processing llmAnalysis for article ${articleId}`);
+    logger.info(`Processing llmAnalysis for article ${articleId}`);
 
     // Delete existing records for this article + entity combination
     const deletedCount =
@@ -239,7 +239,7 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
         },
       });
 
-    console.log(
+    logger.info(
       `Deleted ${deletedCount} existing ArticleEntityWhoCategorizedArticleContracts02 records`
     );
 
@@ -327,7 +327,7 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
         recordsToCreate
       );
 
-    console.log(
+    logger.info(
       `Created ${createdRecords.length} ArticleEntityWhoCategorizedArticleContracts02 records`
     );
 
@@ -356,7 +356,7 @@ router.post("/update-approved-status", authenticateToken, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(
+    logger.error(
       "Error in POST /analysis/llm02/update-approved-status:",
       error
     );

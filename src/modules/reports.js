@@ -10,7 +10,7 @@ const { Report } = require("newsnexus10db");
 // const { DateTime } = require("luxon");
 
 async function createXlsxForReport(dataArray, excelFilename = false) {
-  console.log(` 🔹 createXlsxForReport`);
+  logger.info(` 🔹 createXlsxForReport`);
   const outputDir = process.env.PATH_PROJECT_RESOURCES_REPORTS;
   if (!outputDir) {
     throw new Error(
@@ -29,7 +29,7 @@ async function createXlsxForReport(dataArray, excelFilename = false) {
     const filePath = path.join(outputDir, fileName);
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Report");
-    console.log(`filename: ${fileName}`);
+    logger.info(`filename: ${fileName}`);
     const columns = [
       { header: "Ref #", key: "refNumber", width: 15 },
       {
@@ -65,12 +65,12 @@ async function createXlsxForReport(dataArray, excelFilename = false) {
         cell.alignment = { wrapText: false, vertical: "top" };
       });
     });
-    // console.log(`dataArray: ${JSON.stringify(dataArray)}`);
+    // logger.info(`dataArray: ${JSON.stringify(dataArray)}`);
     await workbook.xlsx.writeFile(filePath);
-    console.log("---> finished createXlsxForReport");
+    logger.info("---> finished createXlsxForReport");
     return fileName;
   } catch (error) {
-    console.error(`Error creating XLSX file: ${error.message}`);
+    logger.error(`Error creating XLSX file: ${error.message}`);
     throw error;
   }
 }
@@ -103,9 +103,9 @@ function createCsvForReport(dataArray) {
   // const timestamp = nowET.replace(/[-:]/g, "").replace("T", "-").slice(2, 8);
   const timestamp = nowET.replace(/[-:]/g, "").slice(2, 8);
 
-  console.log("-------- check timestamp --------");
-  console.log(`timestamp: ${timestamp}`);
-  console.log("---------------------------------");
+  logger.info("-------- check timestamp --------");
+  logger.info(`timestamp: ${timestamp}`);
+  logger.info("---------------------------------");
 
   const fileName = `cr${timestamp}.csv`;
   const filePath = path.join(outputDir, fileName);
@@ -167,7 +167,7 @@ function createReportPdfFiles(dataArray) {
     doc.end();
   });
 
-  console.log(`---> finished pdf creation`);
+  logger.info(`---> finished pdf creation`);
   return pdfOutputDir;
 }
 
@@ -242,7 +242,7 @@ async function getDateOfLastSubmittedReport() {
       return adjusted;
     }
   } catch (error) {
-    console.error("Error in getDateOfLastSubmittedReport:", error);
+    logger.error("Error in getDateOfLastSubmittedReport:", error);
     throw error;
   }
 }

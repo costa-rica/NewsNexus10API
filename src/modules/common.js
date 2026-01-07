@@ -50,12 +50,12 @@ function writeRequestArgs(requestBody, fileNameSuffix) {
 
       // Write request body to file
       fs.writeFileSync(filePath, JSON.stringify(requestBody, null, 2), "utf8");
-      console.log(`✅ Request arguments saved to: ${filePath}`);
+      logger.info(`✅ Request arguments saved to: ${filePath}`);
     } catch (err) {
-      console.error("❌ Error writing request arguments file:", err);
+      logger.error("❌ Error writing request arguments file:", err);
     }
   } else {
-    console.warn(
+    logger.warn(
       "⚠️ PATH_TEST_REQUEST_ARGS is not set, skipping request logging."
     );
   }
@@ -103,11 +103,11 @@ function writeResponseDataFromNewsAggregator(
 function convertDbUtcDateOrStringToEasternString(input) {
   // NOTE: this is useful for converting article.createdAt dates - if not for database seriously ask why am I using it and not createJavaScriptExcelDateObjectEastCoasUs
   let dt;
-  // console.log("input typeof: ");
-  // console.log(typeof input);
+  // logger.info("input typeof: ");
+  // logger.info(typeof input);
 
   if (typeof input === "string") {
-    // console.log("-----> input is string");
+    // logger.info("-----> input is string");
     const sanitized = input.trim().replace(" ", "T").replace(" +", "+");
     dt = DateTime.fromISO(sanitized, { zone: "utc" });
   } else if (input instanceof Date) {
@@ -116,8 +116,8 @@ function convertDbUtcDateOrStringToEasternString(input) {
     return "Invalid";
   }
 
-  // console.log("dt: ");
-  // console.log(dt);
+  // logger.info("dt: ");
+  // logger.info(dt);
 
   return dt.setZone("America/New_York").toFormat("yyyy-MM-dd HH:mm");
   // return dt.setZone("America/New_York");

@@ -68,7 +68,7 @@ async function makeArticleApprovedsTableDictionary() {
 
     return articleApprovedsTableDictionary;
   } catch (error) {
-    console.error("Error in makeArticleApprovedsTableDictionary:", error);
+    logger.error("Error in makeArticleApprovedsTableDictionary:", error);
     throw error;
   }
 }
@@ -198,11 +198,11 @@ async function createDeduperAnalysis(
 
     // Save the Excel file
     await workbook.xlsx.writeFile(outputFilePath);
-    console.log("✅ Deduper analysis Excel file saved to:", outputFilePath);
+    logger.info("✅ Deduper analysis Excel file saved to:", outputFilePath);
 
     return outputFilePath;
   } catch (error) {
-    console.error("Error in createDeduperAnalysis:", error);
+    logger.error("Error in createDeduperAnalysis:", error);
     throw error;
   }
 }

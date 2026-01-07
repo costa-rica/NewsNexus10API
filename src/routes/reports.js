@@ -26,7 +26,7 @@ const { DateTime } = require("luxon");
 
 // 🔹 GET /reports/table
 router.get("/table", authenticateToken, async (req, res) => {
-  console.log(`- in GET /reports/table`);
+  logger.info(`- in GET /reports/table`);
 
   const reports = await Report.findAll({
     include: [
@@ -61,7 +61,7 @@ router.get("/table", authenticateToken, async (req, res) => {
 
 // 🔹 GET /reports - Return reports grouped by crName with full report and ARC data
 router.get("/", authenticateToken, async (req, res) => {
-  console.log(`- in GET /reports`);
+  logger.info(`- in GET /reports`);
 
   try {
     const allReports = await Report.findAll({
@@ -106,7 +106,7 @@ router.get("/", authenticateToken, async (req, res) => {
 
     res.json({ reportsArrayByCrName });
   } catch (error) {
-    console.error("Error generating new reports list:", error);
+    logger.error("Error generating new reports list:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -118,7 +118,7 @@ router.get("/", authenticateToken, async (req, res) => {
 // 🔹 POST /reports/create: Create a new report
 router.post("/create", authenticateToken, async (req, res) => {
   const { articlesIdArrayForReport } = req.body; // if this is not set we only make report of articles that are not already in a report
-  console.log(
+  logger.info(
     `- in POST /reports/create - articlesIdArrayForReport: ${articlesIdArrayForReport}`
   );
   // Step 1: get array of all articles in articlesIdArray
@@ -141,7 +141,7 @@ router.post("/create", authenticateToken, async (req, res) => {
     return res.status(400).json({ error: "No approved articles found" });
   }
 
-  console.log(
+  logger.info(
     `1) approvedArticlesObjArray.length: ${approvedArticlesObjArray.length}`
   );
 
@@ -157,7 +157,7 @@ router.post("/create", authenticateToken, async (req, res) => {
     "America/New_York"
   ).dateString; // YYYY-MM-DD
   const datePrefixET = nowET.replace(/[-:]/g, "").slice(2, 8);
-  console.log(`datePrefixET: ${datePrefixET}`);
+  logger.info(`datePrefixET: ${datePrefixET}`);
 
   report.nameCrFormat = `cr${datePrefixET}`;
   await report.save();
@@ -185,9 +185,9 @@ router.post("/create", authenticateToken, async (req, res) => {
         "America/New_York"
       );
 
-      // console.log("----- Verify dateParts are New York Time -----");
-      // console.log(JSON.stringify(dateParts, null, 2));
-      // console.log("----- ------ ----");
+      // logger.info("----- Verify dateParts are New York Time -----");
+      // logger.info(JSON.stringify(dateParts, null, 2));
+      // logger.info("----- ------ ----");
 
       // Build string "MM/DD/YYYY"
       // const submittedDateString = `${dateParts.month}/${dateParts.day}/${dateParts.year}`;
@@ -209,7 +209,7 @@ router.post("/create", authenticateToken, async (req, res) => {
         text: article.ArticleApproveds[0].textForPdfReport,
       });
     } catch (error) {
-      console.log(`Error processing article id ${article.id}: ${error}`);
+      logger.info(`Error processing article id ${article.id}: ${error}`);
       return res
         .status(500)
         .json({ error: `Error processing article id ${article.id}: ${error}` });
@@ -235,7 +235,7 @@ router.post("/create", authenticateToken, async (req, res) => {
 
 // 🔹 GET /reports/list - Get Report List
 router.get("/list", authenticateToken, async (req, res) => {
-  console.log(`- in GET /reports/list`);
+  logger.info(`- in GET /reports/list`);
 
   try {
     const reportsDir = process.env.PATH_PROJECT_RESOURCES_REPORTS;
@@ -251,11 +251,11 @@ router.get("/list", authenticateToken, async (req, res) => {
     // Filter only .zip files
     const zipFiles = files.filter((file) => file.endsWith(".zip"));
 
-    // console.log(`Found ${zipFiles.length} backup files.`);
+    // logger.info(`Found ${zipFiles.length} backup files.`);
 
     res.json({ result: true, reports: zipFiles });
   } catch (error) {
-    console.error("Error retrieving report list:", error);
+    logger.error("Error retrieving report list:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -266,7 +266,7 @@ router.get("/list", authenticateToken, async (req, res) => {
 
 // 🔹 DELETE /reports/:reportId - Delete Report
 router.delete("/:reportId", authenticateToken, async (req, res) => {
-  console.log(`- in DELETE /reports/${req.params.reportId}`);
+  logger.info(`- in DELETE /reports/${req.params.reportId}`);
 
   try {
     const { reportId } = req.params;
@@ -282,16 +282,16 @@ router.delete("/:reportId", authenticateToken, async (req, res) => {
     const reportsDir = process.env.PATH_PROJECT_RESOURCES_REPORTS;
     const filePath = path.join(reportsDir, report.nameZipFile);
     if (reportsDir) {
-      console.log(`- Deleting report file: ${filePath}`);
+      logger.info(`- Deleting report file: ${filePath}`);
       if (fs.existsSync(filePath)) {
-        console.log(`---->  in if (fs.existsSync(filePath))`);
+        logger.info(`---->  in if (fs.existsSync(filePath))`);
         fs.unlinkSync(filePath);
       }
     }
 
     res.json({ result: true, message: "Report deleted successfully." });
   } catch (error) {
-    console.error("Error deleting report:", error);
+    logger.error("Error deleting report:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -302,7 +302,7 @@ router.delete("/:reportId", authenticateToken, async (req, res) => {
 
 // 🔹 GET /reports/download/:reportId - Download Report
 router.get("/download/:reportId", authenticateToken, async (req, res) => {
-  console.log(`- in GET /reports/download/${req.params.reportId}`);
+  logger.info(`- in GET /reports/download/${req.params.reportId}`);
 
   const reportId = req.params.reportId;
   const report = await Report.findByPk(reportId);
@@ -323,7 +323,7 @@ router.get("/download/:reportId", authenticateToken, async (req, res) => {
     // const filePath = path.join(backupDir, filename);
 
     const filePath = path.join(reportsDir, report.nameZipFile);
-    console.log(`filePath: ${filePath}`);
+    logger.info(`filePath: ${filePath}`);
 
     // Check if file exists
     if (!fs.existsSync(filePath)) {
@@ -332,9 +332,9 @@ router.get("/download/:reportId", authenticateToken, async (req, res) => {
         .json({ result: false, message: "File not found." });
     }
 
-    console.log(`Sending file: ${filePath}`);
+    logger.info(`Sending file: ${filePath}`);
     // const filename = path.basename(report.pathToReport);
-    console.log(`filename: ${report.nameZipFile}`);
+    logger.info(`filename: ${report.nameZipFile}`);
     // res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.setHeader(
       "Content-Disposition",
@@ -344,12 +344,12 @@ router.get("/download/:reportId", authenticateToken, async (req, res) => {
     // res.download(filePath, filename, (err) => {
     res.download(filePath, (err) => {
       if (err) {
-        console.error("Error sending file:", err);
+        logger.error("Error sending file:", err);
         res.status(500).json({ result: false, message: "Error sending file." });
       }
     });
   } catch (error) {
-    console.error("Error processing request:", error);
+    logger.error("Error processing request:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -363,7 +363,7 @@ router.post(
   "/update-submitted-to-client-date/:reportId",
   authenticateToken,
   async (req, res) => {
-    console.log(
+    logger.info(
       `- in POST /reports/update-submitted-to-client-date/${req.params.reportId}`
     );
 
@@ -387,7 +387,7 @@ router.post(
         message: "Submissions status updated successfully.",
       });
     } catch (error) {
-      console.error("Error updating submissions status:", error);
+      logger.error("Error updating submissions status:", error);
       res.status(500).json({
         result: false,
         message: "Internal server error",
@@ -402,15 +402,15 @@ router.post(
   "/toggle-article-rejection/:articleReportContractId",
   authenticateToken,
   async (req, res) => {
-    console.log(
+    logger.info(
       `- in POST /reports/toggle-article-rejection/${req.params.articleReportContractId}`
     );
 
     const { articleRejectionReason } = req.body;
     const articleReportContractId = req.params.articleReportContractId;
 
-    console.log(`articleRejectionReason: ${articleRejectionReason}`);
-    console.log(`articleReportContractId: ${articleReportContractId}`);
+    logger.info(`articleRejectionReason: ${articleRejectionReason}`);
+    logger.info(`articleReportContractId: ${articleReportContractId}`);
     const articleReportContract = await ArticleReportContract.findByPk(
       articleReportContractId
     );
@@ -419,7 +419,7 @@ router.post(
         .status(404)
         .json({ result: false, message: "Article Report Contract not found." });
     }
-    console.log(
+    logger.info(
       `---> current Accepted Status : ${articleReportContract.articleAcceptedByCpsc}`
     );
 
@@ -427,7 +427,7 @@ router.post(
       articleReportContract.articleAcceptedByCpsc = false;
       articleReportContract.articleRejectionReason = articleRejectionReason;
     } else {
-      console.log(`----> Changing status to accepted`);
+      logger.info(`----> Changing status to accepted`);
       articleReportContract.articleAcceptedByCpsc = true;
       articleReportContract.articleRejectionReason = articleRejectionReason;
     }
@@ -446,7 +446,7 @@ router.post(
   "/update-article-report-reference-number/:articleReportContractId",
   authenticateToken,
   async (req, res) => {
-    console.log(
+    logger.info(
       `- in POST /reports/update-article-report-reference-number/${req.params.articleReportContractId}`
     );
 
@@ -460,7 +460,7 @@ router.post(
         .status(404)
         .json({ result: false, message: "Article Report Contract not found." });
     }
-    console.log(
+    logger.info(
       `---> current Ref Number : ${articleReportContract.articleReferenceNumberInReport}`
     );
 
@@ -478,7 +478,7 @@ router.post(
 
 // GET /reports/recreate/:reportId
 router.get("/recreate/:reportId", authenticateToken, async (req, res) => {
-  console.log(`- in GET /reports/recreate/${req.params.reportId}`);
+  logger.info(`- in GET /reports/recreate/${req.params.reportId}`);
 
   const reportId = req.params.reportId;
   const user = req.user;
@@ -562,7 +562,7 @@ router.get("/recreate/:reportId", authenticateToken, async (req, res) => {
         text: approvedArticleObj.textForPdfReport,
       });
     } catch (error) {
-      console.log(
+      logger.info(
         `Error processing article id ${approvedArticleObj.id}: ${error}`
       );
       return res.status(500).json({
@@ -602,9 +602,9 @@ router.get("/recreate/:reportId", authenticateToken, async (req, res) => {
 
 // // 🔹 POST reports/duplicate-checker-table
 // router.post("/duplicate-checker-table", authenticateToken, async (req, res) => {
-// 	console.log(`- in POST /reports/duplicate-checker-table`);
+// 	logger.info(`- in POST /reports/duplicate-checker-table`);
 // 	const { reportId, embeddingScoreThreshold } = req.body;
-// 	console.log(
+// 	logger.info(
 // 		`reportId: ${reportId}, embeddingScoreThreshold: ${embeddingScoreThreshold}`
 // 	);
 

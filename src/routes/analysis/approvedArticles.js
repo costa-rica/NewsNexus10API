@@ -25,7 +25,7 @@ router.get("/by-state", authenticateToken, async (req, res) => {
         },
       ],
     });
-    // console.log(approvedArticlesArray[0]);
+    // logger.info(approvedArticlesArray[0]);
     const unassignedArticlesArray = [];
     const stateCounts = {};
     const stateCountsSinceLastReport = {};
@@ -37,7 +37,7 @@ router.get("/by-state", authenticateToken, async (req, res) => {
       if (article && article.States && article.States.length > 0) {
         stateName = article.States[0].name;
       } else {
-        // console.log(article);
+        // logger.info(article);
         unassignedArticlesArray.push(article);
       }
 
@@ -104,7 +104,7 @@ router.get("/by-state", authenticateToken, async (req, res) => {
 
     res.json({ articleCountByStateArray, unassignedArticlesArray });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

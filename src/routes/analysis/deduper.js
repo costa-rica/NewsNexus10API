@@ -13,11 +13,11 @@ const axios = require("axios");
 
 // 🔹 POST /deduper/report-checker-table
 router.post("/report-checker-table", authenticateToken, async (req, res) => {
-  console.log(`- in POST /deduper/report-checker-table`);
+  logger.info(`- in POST /deduper/report-checker-table`);
 
   try {
     const { reportId, embeddingThresholdMinimum, spacerRow } = req.body;
-    console.log(
+    logger.info(
       `reportId: ${reportId}, embeddingThresholdMinimum: ${embeddingThresholdMinimum}, spacerRow: ${spacerRow}`
     );
 
@@ -119,9 +119,9 @@ router.post("/report-checker-table", authenticateToken, async (req, res) => {
         articleIdToRefNumberMap,
         spacerRow
       );
-      console.log("Deduper analysis Excel file created:", excelFilePath);
+      logger.info("Deduper analysis Excel file created:", excelFilePath);
     } catch (error) {
-      console.error("Error creating deduper analysis Excel file:", error);
+      logger.error("Error creating deduper analysis Excel file:", error);
       // Don't fail the main request if Excel creation fails
     }
 
@@ -130,7 +130,7 @@ router.post("/report-checker-table", authenticateToken, async (req, res) => {
       reportArticleDictionary,
     });
   } catch (error) {
-    console.error("Error in POST /deduper/report-checker-table:", error);
+    logger.error("Error in POST /deduper/report-checker-table:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -141,11 +141,11 @@ router.post("/report-checker-table", authenticateToken, async (req, res) => {
 
 // 🔹 GET /deduper/request-job/:reportId
 router.get("/request-job/:reportId", authenticateToken, async (req, res) => {
-  console.log(`- in GET /deduper/request-job/:reportId`);
+  logger.info(`- in GET /deduper/request-job/:reportId`);
 
   try {
     const { reportId } = req.params;
-    console.log(`reportId: ${reportId}`);
+    logger.info(`reportId: ${reportId}`);
 
     // Validate that the report exists and has articles
     const articleReportContracts = await ArticleReportContract.findAll({
@@ -162,7 +162,7 @@ router.get("/request-job/:reportId", authenticateToken, async (req, res) => {
       });
     }
 
-    console.log(
+    logger.info(
       `Found ${articleReportContracts.length} articles for reportId ${reportId}`
     );
 
@@ -178,11 +178,11 @@ router.get("/request-job/:reportId", authenticateToken, async (req, res) => {
 
     // Build the URL for the new reportId-specific endpoint
     const pythonQueuerUrl = `${pythonQueuerBaseUrl}deduper/jobs/reportId/${reportId}`;
-    console.log(`Sending request to: ${pythonQueuerUrl}`);
+    logger.info(`Sending request to: ${pythonQueuerUrl}`);
 
     // Send GET request to NewsNexusPythonQueuer
     const response = await axios.get(pythonQueuerUrl);
-    console.log(
+    logger.info(
       `Python Queuer response:`,
       JSON.stringify(response.data, null, 2)
     );
@@ -195,7 +195,7 @@ router.get("/request-job/:reportId", authenticateToken, async (req, res) => {
       pythonQueuerResponse: response.data,
     });
   } catch (error) {
-    console.error("Error in GET /deduper/request-job/:reportId:", error);
+    logger.error("Error in GET /deduper/request-job/:reportId:", error);
 
     // If it's an Axios error with a response, include that information
     if (error.response) {
@@ -218,7 +218,7 @@ router.get("/request-job/:reportId", authenticateToken, async (req, res) => {
 
 // 🔹 GET /deduper/job-list-status
 router.get("/job-list-status", authenticateToken, async (req, res) => {
-  console.log(`- in GET /deduper/job-list-status`);
+  logger.info(`- in GET /deduper/job-list-status`);
 
   try {
     // Get Python Queuer base URL from environment
@@ -233,11 +233,11 @@ router.get("/job-list-status", authenticateToken, async (req, res) => {
 
     // Build the URL for the jobs/list endpoint
     const jobsListUrl = `${pythonQueuerBaseUrl}deduper/jobs/list`;
-    console.log(`Sending GET request to: ${jobsListUrl}`);
+    logger.info(`Sending GET request to: ${jobsListUrl}`);
 
     // Make GET request to Python Queuer
     const response = await axios.get(jobsListUrl);
-    console.log(
+    logger.info(
       `Python Queuer response:`,
       JSON.stringify(response.data, null, 2)
     );
@@ -245,7 +245,7 @@ router.get("/job-list-status", authenticateToken, async (req, res) => {
     // Return the response from Python Queuer
     res.json(response.data);
   } catch (error) {
-    console.error("Error in GET /deduper/job-list-status:", error);
+    logger.error("Error in GET /deduper/job-list-status:", error);
 
     // If it's an Axios error with a response, include that information
     if (error.response) {
@@ -271,7 +271,7 @@ router.delete(
   "/clear-article-duplicate-analyses-table",
   authenticateToken,
   async (req, res) => {
-    console.log(`- in DELETE /deduper/clear-article-duplicate-analyses-table`);
+    logger.info(`- in DELETE /deduper/clear-article-duplicate-analyses-table`);
 
     try {
       // Get Python Queuer base URL from environment
@@ -286,11 +286,11 @@ router.delete(
 
       // Build the URL for the clear-db-table endpoint
       const clearTableUrl = `${pythonQueuerBaseUrl}deduper/clear-db-table`;
-      console.log(`Sending DELETE request to: ${clearTableUrl}`);
+      logger.info(`Sending DELETE request to: ${clearTableUrl}`);
 
       // Make DELETE request to Python Queuer
       const response = await axios.delete(clearTableUrl);
-      console.log(
+      logger.info(
         `Python Queuer response:`,
         JSON.stringify(response.data, null, 2)
       );
@@ -302,7 +302,7 @@ router.delete(
         pythonQueuerResponse: response.data,
       });
     } catch (error) {
-      console.error(
+      logger.error(
         "Error in DELETE /deduper/clear-article-duplicate-analyses-table:",
         error
       );
@@ -332,7 +332,7 @@ router.get(
   "/article-duplicate-analyses-status",
   authenticateToken,
   async (req, res) => {
-    console.log(`- in GET /deduper/article-duplicate-analyses-status`);
+    logger.info(`- in GET /deduper/article-duplicate-analyses-status`);
 
     try {
       // Query the ArticleDuplicateAnalysis table to get any one row with reportId
@@ -355,7 +355,7 @@ router.get(
         });
       }
     } catch (error) {
-      console.error(
+      logger.error(
         "Error in GET /deduper/article-duplicate-analyses-status:",
         error
       );

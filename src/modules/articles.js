@@ -77,7 +77,7 @@ async function createNewsApiRequestsArray() {
     ],
   });
 
-  console.log("requestsArray.length: ", requestsArray.length);
+  logger.info("requestsArray.length: ", requestsArray.length);
 
   const requestArrayFormatted = requestsArray.map((request) => {
     // Extract domain names from included contracts
@@ -142,7 +142,7 @@ async function createArticlesApprovedArray(dateRequestsLimit) {
   //   ],
   // });
 
-  console.log("✅ Approved articles count:", articles.length);
+  logger.info("✅ Approved articles count:", articles.length);
 
   const requestIdArray = [];
   let manualFoundCount = 0;

@@ -68,8 +68,8 @@ const models = {
 };
 
 async function readAndAppendDbTables(backupFolderPath) {
-  console.log(`Processing CSV files from: ${backupFolderPath}`);
-  console.log(`Sequelize instance: ${sequelize}`);
+  logger.info(`Processing CSV files from: ${backupFolderPath}`);
+  logger.info(`Sequelize instance: ${sequelize}`);
   let currentTable = null;
   try {
     // Read all CSV files from the backup directory
@@ -84,7 +84,7 @@ async function readAndAppendDbTables(backupFolderPath) {
       appendBatch1.push(file);
     });
 
-    console.log(`Append Batch 1 (First): ${appendBatch1}`);
+    logger.info(`Append Batch 1 (First): ${appendBatch1}`);
 
     // Helper function to process CSV files
     async function processCSVFiles(files) {
@@ -93,11 +93,11 @@ async function readAndAppendDbTables(backupFolderPath) {
       for (const file of files) {
         const tableName = file.replace(".csv", "");
         if (!models[tableName]) {
-          console.log(`Skipping ${file}, no matching table found.`);
+          logger.info(`Skipping ${file}, no matching table found.`);
           continue;
         }
 
-        console.log(`Importing data into table: ${tableName}`);
+        logger.info(`Importing data into table: ${tableName}`);
         currentTable = tableName;
         const filePath = path.join(backupFolderPath, file);
         const records = [];
@@ -122,9 +122,9 @@ async function readAndAppendDbTables(backupFolderPath) {
             ignoreDuplicates: true,
           });
           recordsImported += records.length;
-          console.log(`Imported ${records.length} records into ${tableName}`);
+          logger.info(`Imported ${records.length} records into ${tableName}`);
         } else {
-          console.log(`No records found in ${file}`);
+          logger.info(`No records found in ${file}`);
         }
       }
 
@@ -133,14 +133,14 @@ async function readAndAppendDbTables(backupFolderPath) {
 
     // 🔹 Disable foreign key constraints before importing
     // ↪This allows us to append when necessary foreign keys are not yet populated.
-    console.log("Disabling foreign key constraints...");
+    logger.info("Disabling foreign key constraints...");
     await sequelize.query("PRAGMA foreign_keys = OFF;");
 
     // Process the batches in order
     totalRecordsImported += await processCSVFiles(appendBatch1); // First batch
 
     // 🔹 Re-enable foreign key constraints after importing
-    console.log("Re-enabling foreign key constraints...");
+    logger.info("Re-enabling foreign key constraints...");
     await sequelize.query("PRAGMA foreign_keys = ON;");
 
     return {
@@ -148,7 +148,7 @@ async function readAndAppendDbTables(backupFolderPath) {
       message: `Successfully imported ${totalRecordsImported} records.`,
     };
   } catch (error) {
-    console.error("Error processing CSV files:", error);
+    logger.error("Error processing CSV files:", error);
 
     // Ensure foreign key constraints are re-enabled even if an error occurs
     await sequelize.query("PRAGMA foreign_keys = ON;");
@@ -162,7 +162,7 @@ async function readAndAppendDbTables(backupFolderPath) {
 }
 
 async function createDatabaseBackupZipFile(suffix = "") {
-  console.log(`suffix: ${suffix}`);
+  logger.info(`suffix: ${suffix}`);
   try {
     const timestamp = new Date()
       .toISOString()
@@ -173,7 +173,7 @@ async function createDatabaseBackupZipFile(suffix = "") {
       process.env.PATH_DB_BACKUPS,
       `db_backup_${timestamp}${suffix}`
     );
-    console.log(`Backup directory: ${backupDir}`);
+    logger.info(`Backup directory: ${backupDir}`);
     await mkdirAsync(backupDir, { recursive: true });
 
     let hasData = false;
@@ -212,7 +212,7 @@ async function createDatabaseBackupZipFile(suffix = "") {
       });
     });
   } catch (error) {
-    console.error("Error creating database backup:", error);
+    logger.error("Error creating database backup:", error);
     throw error;
   }
 }

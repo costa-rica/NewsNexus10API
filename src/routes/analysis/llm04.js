@@ -12,12 +12,12 @@ const {
 
 // 🔹 GET /analysis/llm04/approved
 router.get("/approved", authenticateToken, async (req, res) => {
-  console.log("- GET /analysis/llm04/approved");
+  logger.info("- GET /analysis/llm04/approved");
   const startTime = Date.now();
   const articlesArray =
     await sqlQueryArticlesApprovedChatGptWithStatesApprovedReportContract();
 
-  console.log(
+  logger.info(
     `- articlesArray.length (before filtering): ${articlesArray.length}`
   );
 
@@ -42,7 +42,7 @@ router.get("/approved", authenticateToken, async (req, res) => {
     };
   });
 
-  console.log(
+  logger.info(
     `- approvedArticlesArrayModified.length (after filtering): ${approvedArticlesArrayModified.length}`
   );
 
@@ -58,7 +58,7 @@ router.get(
   "/human-approved/:articleId",
   authenticateToken,
   async (req, res) => {
-    console.log("- GET /analysis/llm04/human-approved/:articleId");
+    logger.info("- GET /analysis/llm04/human-approved/:articleId");
     const { articleId } = req.params;
     const userId = req.user.id;
 
@@ -133,7 +133,7 @@ router.get(
         message: "Successfully human approved article",
       });
     } catch (error) {
-      console.error("Error in /human-approved/:articleId:", error);
+      logger.error("Error in /human-approved/:articleId:", error);
       res.status(500).json({
         error: "Internal server error",
       });

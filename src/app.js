@@ -83,11 +83,11 @@ sequelize
   .sync()
   .then(async () => {
     if (process.env.NODE_ENV !== "test") {
-      console.log("✅ Database connected & synced");
+      logger.info("✅ Database connected & synced");
       await onStartUpCreateEnvUsers(); // <-- Call function here
       verifyCheckDirectoryExists();
     }
   })
-  .catch((error) => console.error("Error syncing database:", error));
+  .catch((error) => logger.error("Error syncing database:", error));
 
 module.exports = app;

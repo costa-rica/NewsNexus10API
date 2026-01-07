@@ -28,10 +28,10 @@ async function saveResponseToFile(articleId, aiResponse) {
 
     await fs.mkdir(responsesDir, { recursive: true });
     await fs.writeFile(filePath, JSON.stringify(aiResponse, null, 2), "utf-8");
-    console.log(`Response saved to: ${filePath}`);
+    logger.info(`Response saved to: ${filePath}`);
     return { success: true, filePath };
   } catch (error) {
-    console.error("Error saving response to file:", error);
+    logger.error("Error saving response to file:", error);
     return { success: false, error: error.message };
   }
 }
@@ -68,7 +68,7 @@ async function saveResponseToDatabase(articleId, aiResponse, scrapingStatus) {
   }
 
   const entityWhoCategorizesId = entity.id;
-  console.log(
+  logger.info(
     `Using entityWhoCategorizesId: ${entityWhoCategorizesId} for AI entity: ${aiModel.name}`
   );
 
@@ -85,7 +85,7 @@ async function saveResponseToDatabase(articleId, aiResponse, scrapingStatus) {
     throw new Error(`Failed to parse AI response as JSON: ${error.message}`);
   }
 
-  console.log("Parsed AI content:", parsedContent);
+  logger.info("Parsed AI content:", parsedContent);
 
   // Step 3: Delete existing records with same articleId + entityWhoCategorizesId
   const deletedCount =
@@ -96,7 +96,7 @@ async function saveResponseToDatabase(articleId, aiResponse, scrapingStatus) {
       },
     });
 
-  console.log(
+  logger.info(
     `Deleted ${deletedCount} existing records for articleId ${articleId} and entityWhoCategorizesId ${entityWhoCategorizesId}`
   );
 
@@ -143,7 +143,7 @@ async function saveResponseToDatabase(articleId, aiResponse, scrapingStatus) {
       recordsToCreate
     );
 
-  console.log(`Created ${createdRecords.length} new records in database`);
+  logger.info(`Created ${createdRecords.length} new records in database`);
 
   return {
     deletedCount,
@@ -154,11 +154,11 @@ async function saveResponseToDatabase(articleId, aiResponse, scrapingStatus) {
 
 // 🔹 POST /analysis/llm01/:articleId
 router.post("/:articleId", authenticateToken, async (req, res) => {
-  console.log(`- in POST /analysis/llm01/:articleId`);
+  logger.info(`- in POST /analysis/llm01/:articleId`);
 
   try {
     const { articleId } = req.params;
-    console.log(`articleId: ${articleId}`);
+    logger.info(`articleId: ${articleId}`);
 
     // Step 1: Get article from database
     const article = await Article.findByPk(articleId);
@@ -171,13 +171,13 @@ router.post("/:articleId", authenticateToken, async (req, res) => {
     }
 
     const { title, description, url } = article;
-    console.log(`Article found: ${title}`);
+    logger.info(`Article found: ${title}`);
 
     // Step 2: Scrape article content from URL
-    console.log(`Attempting to scrape content from: ${url}`);
+    logger.info(`Attempting to scrape content from: ${url}`);
     const scrapedContent = await scrapeArticle(url);
     const scrapingStatus = scrapedContent ? "success" : "fail";
-    console.log(`Scraping status: ${scrapingStatus}`);
+    logger.info(`Scraping status: ${scrapingStatus}`);
 
     // Step 3: Read the template file
     const templatePath = path.join(
@@ -189,7 +189,7 @@ router.post("/:articleId", authenticateToken, async (req, res) => {
     try {
       promptTemplate = await fs.readFile(templatePath, "utf-8");
     } catch (error) {
-      console.error("Error reading template file:", error);
+      logger.error("Error reading template file:", error);
       return res.status(500).json({
         result: false,
         message: "Error reading template file",
@@ -249,9 +249,9 @@ router.post("/:articleId", authenticateToken, async (req, res) => {
       );
 
       aiResponse = response.data;
-      console.log("OpenAI API response received");
+      logger.info("OpenAI API response received");
     } catch (error) {
-      console.error("Error calling OpenAI API:", error.message);
+      logger.error("Error calling OpenAI API:", error.message);
       aiError = error.message;
 
       // If OpenAI fails, return error immediately (no response to save)
@@ -270,11 +270,11 @@ router.post("/:articleId", authenticateToken, async (req, res) => {
         aiResponse,
         scrapingStatus
       );
-      console.log(
+      logger.info(
         `Database save successful: ${dbSaveResult.createdCount} records created`
       );
     } catch (error) {
-      console.error("Error saving to database:", error);
+      logger.error("Error saving to database:", error);
       // Database save failure is a critical error
       return res.status(500).json({
         result: false,
@@ -309,7 +309,7 @@ router.post("/:articleId", authenticateToken, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error in POST /analysis/llm01/:articleId:", error);
+    logger.error("Error in POST /analysis/llm01/:articleId:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -320,11 +320,11 @@ router.post("/:articleId", authenticateToken, async (req, res) => {
 
 // 🔹 POST /analysis/llm01/scrape/:articleId (Test endpoint)
 router.post("/scrape/:articleId", authenticateToken, async (req, res) => {
-  console.log(`- in POST /analysis/llm01/scrape/:articleId`);
+  logger.info(`- in POST /analysis/llm01/scrape/:articleId`);
 
   try {
     const { articleId } = req.params;
-    console.log(`articleId: ${articleId}`);
+    logger.info(`articleId: ${articleId}`);
 
     // Step 1: Get article from database
     const article = await Article.findByPk(articleId);
@@ -337,8 +337,8 @@ router.post("/scrape/:articleId", authenticateToken, async (req, res) => {
     }
 
     const { url, title } = article;
-    console.log(`Testing scrape for article: ${title}`);
-    console.log(`URL: ${url}`);
+    logger.info(`Testing scrape for article: ${title}`);
+    logger.info(`URL: ${url}`);
 
     // Step 2: Attempt to scrape
     const startTime = Date.now();
@@ -373,7 +373,7 @@ router.post("/scrape/:articleId", authenticateToken, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error in POST /analysis/llm01/scrape/:articleId:", error);
+    logger.error("Error in POST /analysis/llm01/scrape/:articleId:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",

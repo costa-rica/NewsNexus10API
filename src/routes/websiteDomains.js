@@ -17,7 +17,7 @@ router.post(
   async (req, res) => {
     const { excludeArchievedNewsDataIo } = req.body;
 
-    console.log(
+    logger.info(
       "---> excludeArchievedNewsDataIo: ",
       excludeArchievedNewsDataIo
     );
@@ -28,13 +28,13 @@ router.post(
           isArchievedNewsDataIo: false,
         },
       });
-      console.log(
+      logger.info(
         "websiteDomainsArray (excludeArchievedNewsDataIo): ",
         websiteDomainsArray.length
       );
     } else {
       websiteDomainsArray = await WebsiteDomain.findAll();
-      console.log("websiteDomainsArray: ", websiteDomainsArray.length);
+      logger.info("websiteDomainsArray: ", websiteDomainsArray.length);
     }
 
     res.json({ websiteDomainsArray });

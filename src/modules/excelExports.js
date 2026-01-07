@@ -23,7 +23,7 @@ async function createSpreadsheetFromArray(array, outputFilePath = null) {
   // Step 3: Save or return buffer
   if (outputFilePath) {
     await workbook.xlsx.writeFile(outputFilePath);
-    console.log("✅ Excel file saved to:", outputFilePath);
+    logger.info("✅ Excel file saved to:", outputFilePath);
     return outputFilePath;
   } else {
     const buffer = await workbook.xlsx.writeBuffer();

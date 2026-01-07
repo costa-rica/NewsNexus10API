@@ -5,7 +5,7 @@ const fs = require("fs");
 
 async function onStartUpCreateEnvUsers() {
   if (!process.env.ADMIN_EMAIL_CREATE_ON_STARTUP) {
-    console.warn("⚠️ No admin emails found in env variables.");
+    logger.warn("⚠️ No admin emails found in env variables.");
     return;
   }
 
@@ -14,7 +14,7 @@ async function onStartUpCreateEnvUsers() {
     adminEmails = JSON.parse(process.env.ADMIN_EMAIL_CREATE_ON_STARTUP);
     if (!Array.isArray(adminEmails)) throw new Error();
   } catch (error) {
-    console.error(
+    logger.error(
       "❌ Error parsing ADMIN_EMAIL_CREATE_ON_STARTUP. Ensure it's a valid JSON array."
     );
     return;
@@ -25,7 +25,7 @@ async function onStartUpCreateEnvUsers() {
       const existingUser = await User.findOne({ where: { email } });
 
       if (!existingUser) {
-        console.log(`🔹 Creating admin user: ${email}`);
+        logger.info(`🔹 Creating admin user: ${email}`);
 
         const hashedPassword = await bcrypt.hash("test", 10); // Default password, should be changed later.
 
@@ -41,12 +41,12 @@ async function onStartUpCreateEnvUsers() {
           userId: newUser.id,
         });
 
-        console.log(`✅ Admin user created: ${email}`);
+        logger.info(`✅ Admin user created: ${email}`);
       } else {
-        console.log(`🔸 User already exists: ${email}`);
+        logger.info(`🔸 User already exists: ${email}`);
       }
     } catch (err) {
-      console.error(`❌ Error creating admin user (${email}):`, err);
+      logger.error(`❌ Error creating admin user (${email}):`, err);
     }
   }
 }
@@ -64,7 +64,7 @@ function verifyCheckDirectoryExists() {
   pathsToCheck.forEach((dirPath) => {
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
-      console.log(`Created directory: ${dirPath}`);
+      logger.info(`Created directory: ${dirPath}`);
     }
   });
 }

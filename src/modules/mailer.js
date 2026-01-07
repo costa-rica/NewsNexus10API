@@ -60,22 +60,22 @@ const sendRegistrationEmail = async (toEmail, username) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", info.response);
+    logger.info("Email sent:", info.response);
     return info;
   } catch (error) {
-    console.error("Error sending email:", error);
+    logger.error("Error sending email:", error);
     throw error;
   }
 };
 
 const sendResetPasswordEmail = async (toEmail, resetLink) => {
-  console.log(`- Sending reset password email to: ${toEmail}`);
+  logger.info(`- Sending reset password email to: ${toEmail}`);
 
-  console.log(
+  logger.info(
     "[MAILER DEBUG] ADMIN_NODEMAILER_EMAIL_ADDRESS:",
     process.env.ADMIN_NODEMAILER_EMAIL_ADDRESS
   );
-  console.log("[MAILER DEBUG] NODE_ENV:", process.env.NODE_ENV);
+  logger.info("[MAILER DEBUG] NODE_ENV:", process.env.NODE_ENV);
 
   try {
     // Validate configuration before attempting to send
@@ -100,40 +100,40 @@ const sendResetPasswordEmail = async (toEmail, resetLink) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`✓ Password reset email sent successfully:`, info.response);
+    logger.info(`✓ Password reset email sent successfully:`, info.response);
     return info;
   } catch (error) {
     // Enhanced error logging with context
-    console.error("❌ [MAILER DEBUG] Error type:", typeof error);
-    console.error("❌ [MAILER DEBUG] Error is null/undefined?", error == null);
-    console.error(
+    logger.error("❌ [MAILER DEBUG] Error type:", typeof error);
+    logger.error("❌ [MAILER DEBUG] Error is null/undefined?", error == null);
+    logger.error(
       "❌ [MAILER DEBUG] Error stringified:",
       JSON.stringify(error, null, 2)
     );
-    console.error("❌ [MAILER DEBUG] Error toString:", String(error));
-    console.error("❌ [MAILER DEBUG] Error.message:", error?.message);
-    console.error("❌ [MAILER DEBUG] Error.code:", error?.code);
-    console.error("❌ [MAILER DEBUG] Full error:", error);
-    console.error(
+    logger.error("❌ [MAILER DEBUG] Error toString:", String(error));
+    logger.error("❌ [MAILER DEBUG] Error.message:", error?.message);
+    logger.error("❌ [MAILER DEBUG] Error.code:", error?.code);
+    logger.error("❌ [MAILER DEBUG] Full error:", error);
+    logger.error(
       "❌ [MAILER DEBUG] ADMIN_NODEMAILER_EMAIL_ADDRESS:",
       process.env.ADMIN_NODEMAILER_EMAIL_ADDRESS
     );
-    console.log("❌ [MAILER DEBUG] NODE_ENV:", process.env.NODE_ENV);
+    logger.info("❌ [MAILER DEBUG] NODE_ENV:", process.env.NODE_ENV);
 
     if (error?.message && error.message.includes("Email configuration error")) {
-      console.error("❌ EMAIL CONFIGURATION ERROR:", error.message);
+      logger.error("❌ EMAIL CONFIGURATION ERROR:", error.message);
     } else if (error?.code === "EAUTH") {
-      console.error(
+      logger.error(
         "❌ EMAIL AUTHENTICATION FAILED: Invalid ADMIN_NODEMAILER_EMAIL_ADDRESS or ADMIN_NODEMAILER_EMAIL_PASSWORD. " +
           "Please verify your Gmail credentials in .env file."
       );
     } else if (error?.code === "ENOTFOUND" || error?.code === "ECONNECTION") {
-      console.error(
+      logger.error(
         "❌ EMAIL NETWORK ERROR: Cannot reach Gmail SMTP server.",
         error?.message
       );
     } else {
-      console.error("❌ EMAIL SEND ERROR:", error?.message || "Unknown error");
+      logger.error("❌ EMAIL SEND ERROR:", error?.message || "Unknown error");
     }
 
     throw error; // Re-throw for route handler to catch

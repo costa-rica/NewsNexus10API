@@ -99,73 +99,82 @@ router.post("/login", loginLimiter, async (req, res) => {
 });
 
 // 🔹 POST /users/request-password-reset: Send reset token
-router.post("/request-password-reset", passwordResetLimiter, async (req, res) => {
-  const { email } = req.body;
-  console.log(`- in POST /users/request-password-reset for email: ${email}`);
+router.post(
+  "/request-password-reset",
+  passwordResetLimiter,
+  async (req, res) => {
+    const { email } = req.body;
+    logger.info(`- in POST /users/request-password-reset for email: ${email}`);
 
-  try {
-    const user = await User.findOne({ where: { email } });
+    try {
+      const user = await User.findOne({ where: { email } });
 
-    if (!user) {
-      return res.status(404).json({ result: false, message: "User not found" });
-    }
-
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "5h",
-    });
-    // Reset link
-    const resetLink = `${process.env.URL_BASE_TO_WEBSITE}/forgot-password/reset/${token}`;
-
-    // Send email - let errors propagate to catch block
-    await sendResetPasswordEmail(email, resetLink);
-
-    console.log(`✓ Password reset email sent successfully to ${email}`);
-    res.json({ result: true, message: "Password reset email sent" });
-  } catch (error) {
-    console.error(
-      `❌ [ROUTE DEBUG] Error in /request-password-reset for ${email}:`,
-      {
-        message: error.message,
-        code: error.code,
-        stack: error.stack,
+      if (!user) {
+        return res
+          .status(404)
+          .json({ result: false, message: "User not found" });
       }
-    );
 
-    // Provide specific error responses based on error type
-    if (error.message && error.message.includes("Email configuration error")) {
-      return res.status(503).json({
-        result: false,
-        error:
-          "Email service is not configured. Please contact the administrator.",
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: "5h",
       });
-    } else if (error.code === "EAUTH") {
-      return res.status(503).json({
-        result: false,
-        error:
-          "Email service authentication failed. Please contact the administrator.",
-      });
-    } else {
-      return res.status(500).json({
-        result: false,
-        error: "Failed to send password reset email. Please try again later.",
-      });
+      // Reset link
+      const resetLink = `${process.env.URL_BASE_TO_WEBSITE}/forgot-password/reset/${token}`;
+
+      // Send email - let errors propagate to catch block
+      await sendResetPasswordEmail(email, resetLink);
+
+      logger.info(`✓ Password reset email sent successfully to ${email}`);
+      res.json({ result: true, message: "Password reset email sent" });
+    } catch (error) {
+      logger.error(
+        `❌ [ROUTE DEBUG] Error in /request-password-reset for ${email}:`,
+        {
+          message: error.message,
+          code: error.code,
+          stack: error.stack,
+        }
+      );
+
+      // Provide specific error responses based on error type
+      if (
+        error.message &&
+        error.message.includes("Email configuration error")
+      ) {
+        return res.status(503).json({
+          result: false,
+          error:
+            "Email service is not configured. Please contact the administrator.",
+        });
+      } else if (error.code === "EAUTH") {
+        return res.status(503).json({
+          result: false,
+          error:
+            "Email service authentication failed. Please contact the administrator.",
+        });
+      } else {
+        return res.status(500).json({
+          result: false,
+          error: "Failed to send password reset email. Please try again later.",
+        });
+      }
     }
   }
-});
+);
 
 // 🔹 POST /users/reset-password/:token: Reset password
 router.post("/reset-password/:token", async (req, res) => {
   const token = req.params.token;
-  console.log(`- in POST /users/reset-password/:token`);
-  console.log(`  Token received: ${token.substring(0, 20)}...`);
-  console.log(`  Request body:`, req.body);
+  logger.info(`- in POST /users/reset-password/:token`);
+  logger.info(`  Token received: ${token.substring(0, 20)}...`);
+  logger.info(`  Request body:`, req.body);
 
   const { newPassword } = req.body;
-  console.log(`  Password received: ${newPassword ? "Yes" : "No"}`);
+  logger.info(`  Password received: ${newPassword ? "Yes" : "No"}`);
 
   // Validate password is present
   if (!newPassword) {
-    console.log(`  ❌ Password missing in request body`);
+    logger.info(`  ❌ Password missing in request body`);
     return res.status(400).json({
       result: false,
       error: "Password is required",
@@ -173,29 +182,29 @@ router.post("/reset-password/:token", async (req, res) => {
   }
 
   try {
-    console.log(`  Verifying JWT token...`);
+    logger.info(`  Verifying JWT token...`);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(`  Token decoded successfully. User ID:`, decoded.id);
+    logger.info(`  Token decoded successfully. User ID:`, decoded.id);
 
-    console.log(`  Looking up user with ID: ${decoded.id}`);
+    logger.info(`  Looking up user with ID: ${decoded.id}`);
     const user = await User.findByPk(decoded.id);
 
     if (!user) {
-      console.log(`  ❌ User not found with ID: ${decoded.id}`);
+      logger.info(`  ❌ User not found with ID: ${decoded.id}`);
       return res.status(404).json({ result: false, message: "User not found" });
     }
 
-    console.log(`  User found: ${user.email}`);
-    console.log(`  Hashing new password...`);
+    logger.info(`  User found: ${user.email}`);
+    logger.info(`  Hashing new password...`);
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    console.log(`  Updating user password...`);
+    logger.info(`  Updating user password...`);
     await user.update({ password: hashedPassword });
 
-    console.log(`  ✓ Password reset successfully for user: ${user.email}`);
+    logger.info(`  ✓ Password reset successfully for user: ${user.email}`);
     res.json({ result: true, message: "Password reset successfully" });
   } catch (error) {
-    console.error(`  ❌ Error in /reset-password/:token:`, {
+    logger.error(`  ❌ Error in /reset-password/:token:`, {
       name: error.name,
       message: error.message,
       stack: error.stack,
@@ -238,7 +247,7 @@ router.post(
     const { userId } = req.params;
     const { username, password, email, isAdmin } = req.body;
 
-    console.log(`Updating user ${userId}`);
+    logger.info(`Updating user ${userId}`);
 
     // Find the user by ID
     const user = await User.findByPk(userId);
@@ -262,9 +271,9 @@ router.post(
     // Perform the update if there are fields to update
     if (Object.keys(updatedFields).length > 0) {
       await user.update(updatedFields);
-      console.log(`User ${userId} updated successfully`);
+      logger.info(`User ${userId} updated successfully`);
     } else {
-      console.log(`No updates applied for user ${userId}`);
+      logger.info(`No updates applied for user ${userId}`);
     }
 
     res.status(200).json({ message: "Mise à jour réussie.", user });

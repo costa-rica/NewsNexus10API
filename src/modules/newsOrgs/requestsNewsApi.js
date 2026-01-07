@@ -32,13 +32,13 @@ async function makeNewsApiRequest(
       .split("T")[0];
   }
 
-  console.log("- keywordString :  ", keywordString);
+  logger.info("- keywordString :  ", keywordString);
   // Step 2: make request url
   const urlNewsApi = `${source.url}everything?q=${encodeURIComponent(
     keywordString
   )}&from=${startDate}&to=${endDate}&pageSize=${max}&language=en&apiKey=${token}`;
 
-  // console.log("- urlNewsApi :  ", urlNewsApi);
+  // logger.info("- urlNewsApi :  ", urlNewsApi);
   // if (process.env.ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES === "false") {
   //   return { requestResponseData: null, newsApiRequest: urlNewsApi };
   // }
@@ -46,7 +46,7 @@ async function makeNewsApiRequest(
   const response = await fetch(urlNewsApi);
   const requestResponseData = await response.json();
 
-  // console.log("- requestResponseData.articles", requestResponseData.articles);
+  // logger.info("- requestResponseData.articles", requestResponseData.articles);
 
   let status = "success";
   if (!requestResponseData.articles) {
@@ -132,7 +132,7 @@ async function storeNewsApiArticles(
       // newsApiRequest.url
     );
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     writeResponseDataFromNewsAggregator(
       newsApiSource.id,
       newsApiRequest,
@@ -156,20 +156,20 @@ async function makeNewsApiRequestDetailed(
   keywordsNot
   // max = 100
 ) {
-  // console.log(`keywordsAnd: ${keywordsAnd}, ${typeof keywordsAnd}`);
-  // console.log(`keywordsOr: ${keywordsOr}, ${typeof keywordsOr}`);
-  // console.log(`keywordsNot: ${keywordsNot}, ${typeof keywordsNot}`);
+  // logger.info(`keywordsAnd: ${keywordsAnd}, ${typeof keywordsAnd}`);
+  // logger.info(`keywordsOr: ${keywordsOr}, ${typeof keywordsOr}`);
+  // logger.info(`keywordsNot: ${keywordsNot}, ${typeof keywordsNot}`);
 
   // if (Array.isArray(includeWebsiteDomainObjArray)) {
   //   const includeSourcesArrayNames = includeWebsiteDomainObjArray.map(
   //     (obj) => obj.name
   //   );
-  //   console.log(
+  //   logger.info(
   //     "[makeNewsApiRequestDetailed02] includeSourcesArrayNames:",
   //     includeSourcesArrayNames
   //   );
   // } else {
-  //   console.log(
+  //   logger.info(
   //     "[makeNewsApiRequestDetailed02] includeWebsiteDomainObjArray is not an array:",
   //     includeWebsiteDomainObjArray
   //   );
@@ -236,7 +236,7 @@ async function makeNewsApiRequestDetailed(
   queryParams.push(`apiKey=${source.apiKey}`);
 
   const requestUrl = `${source.url}everything?${queryParams.join("&")}`;
-  console.log("- [makeNewsApiRequestDetailed] requestUrl", requestUrl);
+  logger.info("- [makeNewsApiRequestDetailed] requestUrl", requestUrl);
   let status = "success";
   let requestResponseData = null;
   let newsApiRequest = null;

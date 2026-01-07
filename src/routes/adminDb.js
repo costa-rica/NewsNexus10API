@@ -79,58 +79,68 @@ const upload = multer({
   dest: path.join(process.env.PATH_PROJECT_RESOURCES, "uploads-delete-ok/"),
 }); // Temporary storage for file uploads
 
-router.get("/table/:tableName", authenticateToken, databaseOperationLimiter, async (req, res) => {
-  try {
-    const { tableName } = req.params;
-    console.log(`- in GET /admin-db/table/${tableName}`);
+router.get(
+  "/table/:tableName",
+  authenticateToken,
+  databaseOperationLimiter,
+  async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      logger.info(`- in GET /admin-db/table/${tableName}`);
 
-    // Check if the requested table exists in the models
-    if (!models[tableName]) {
-      return res
-        .status(400)
-        .json({ result: false, message: `Table '${tableName}' not found.` });
+      // Check if the requested table exists in the models
+      if (!models[tableName]) {
+        return res
+          .status(400)
+          .json({ result: false, message: `Table '${tableName}' not found.` });
+      }
+
+      // Fetch all records from the table
+      const tableData = (await models[tableName].findAll()) || [];
+      // logger.info(`Fetched data from ${tableName}:`, tableData);
+
+      res.json({ result: true, data: tableData });
+    } catch (error) {
+      logger.error("Error fetching table data:", error);
+      res.status(500).json({
+        result: false,
+        message: "Internal server error",
+        error: error.message,
+      });
     }
-
-    // Fetch all records from the table
-    const tableData = (await models[tableName].findAll()) || [];
-    // console.log(`Fetched data from ${tableName}:`, tableData);
-
-    res.json({ result: true, data: tableData });
-  } catch (error) {
-    console.error("Error fetching table data:", error);
-    res.status(500).json({
-      result: false,
-      message: "Internal server error",
-      error: error.message,
-    });
   }
-});
+);
 
-router.get("/create-database-backup", authenticateToken, databaseOperationLimiter, async (req, res) => {
-  console.log(`- in GET /admin-db/create-database-backup`);
+router.get(
+  "/create-database-backup",
+  authenticateToken,
+  databaseOperationLimiter,
+  async (req, res) => {
+    logger.info(`- in GET /admin-db/create-database-backup`);
 
-  try {
-    const zipFilePath = await createDatabaseBackupZipFile();
-    console.log(`Backup zip created: ${zipFilePath}`);
+    try {
+      const zipFilePath = await createDatabaseBackupZipFile();
+      logger.info(`Backup zip created: ${zipFilePath}`);
 
-    res.json({
-      result: true,
-      message: "Database backup completed",
-      backupFile: zipFilePath,
-    });
-  } catch (error) {
-    console.error("Error creating database backup:", error);
-    res.status(500).json({
-      result: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+      res.json({
+        result: true,
+        message: "Database backup completed",
+        backupFile: zipFilePath,
+      });
+    } catch (error) {
+      logger.error("Error creating database backup:", error);
+      res.status(500).json({
+        result: false,
+        message: "Internal server error",
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // 🔹 Get Database Backup List (GET /admin-db/backup-database-list)
 router.get("/backup-database-list", authenticateToken, async (req, res) => {
-  console.log(`- in GET /admin-db/backup-database-list`);
+  logger.info(`- in GET /admin-db/backup-database-list`);
 
   try {
     const backupDir = process.env.PATH_DB_BACKUPS;
@@ -146,11 +156,11 @@ router.get("/backup-database-list", authenticateToken, async (req, res) => {
     // Filter only .zip files
     const zipFiles = files.filter((file) => file.endsWith(".zip"));
 
-    // console.log(`Found ${zipFiles.length} backup files.`);
+    // logger.info(`Found ${zipFiles.length} backup files.`);
 
     res.json({ result: true, backups: zipFiles });
   } catch (error) {
-    console.error("Error retrieving backup list:", error);
+    logger.error("Error retrieving backup list:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -160,7 +170,7 @@ router.get("/backup-database-list", authenticateToken, async (req, res) => {
 });
 
 router.get("/send-db-backup/:filename", authenticateToken, async (req, res) => {
-  console.log(`- in GET /admin-db/send-db-backup/${req.params.filename}`);
+  logger.info(`- in GET /admin-db/send-db-backup/${req.params.filename}`);
 
   try {
     const { filename } = req.params;
@@ -173,11 +183,11 @@ router.get("/send-db-backup/:filename", authenticateToken, async (req, res) => {
     }
 
     // 🔒 Secure file path validation (prevents path traversal)
-    const { valid, path: safePath, error } = safeFileExists(
-      backupDir,
-      filename,
-      { allowedExtensions: ['.zip'] }
-    );
+    const {
+      valid,
+      path: safePath,
+      error,
+    } = safeFileExists(backupDir, filename, { allowedExtensions: [".zip"] });
 
     if (!valid) {
       return res
@@ -185,17 +195,19 @@ router.get("/send-db-backup/:filename", authenticateToken, async (req, res) => {
         .json({ result: false, message: error || "File not found." });
     }
 
-    console.log(`Sending file: ${safePath}`);
+    logger.info(`Sending file: ${safePath}`);
     res.download(safePath, path.basename(safePath), (err) => {
       if (err) {
-        console.error("Error sending file:", err);
+        logger.error("Error sending file:", err);
         if (!res.headersSent) {
-          res.status(500).json({ result: false, message: "Error sending file." });
+          res
+            .status(500)
+            .json({ result: false, message: "Error sending file." });
         }
       }
     });
   } catch (error) {
-    console.error("Error processing request:", error);
+    logger.error("Error processing request:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -205,14 +217,14 @@ router.get("/send-db-backup/:filename", authenticateToken, async (req, res) => {
 });
 
 router.get("/db-row-counts-by-table", authenticateToken, async (req, res) => {
-  console.log(`- in GET /admin-db/db-row-counts-by-table`);
+  logger.info(`- in GET /admin-db/db-row-counts-by-table`);
 
   try {
     let arrayRowCountsByTable = [];
 
     for (const tableName in models) {
       if (models.hasOwnProperty(tableName)) {
-        console.log(`Checking table: ${tableName}`);
+        logger.info(`Checking table: ${tableName}`);
 
         // Count rows in the table
         const rowCount = await models[tableName].count();
@@ -228,10 +240,10 @@ router.get("/db-row-counts-by-table", authenticateToken, async (req, res) => {
     arrayRowCountsByTable.sort((a, b) =>
       a.tableName.localeCompare(b.tableName)
     );
-    // console.log(`Database row counts by table:`, arrayRowCountsByTable);
+    // logger.info(`Database row counts by table:`, arrayRowCountsByTable);
     res.json({ result: true, arrayRowCountsByTable });
   } catch (error) {
-    console.error("Error retrieving database row counts:", error);
+    logger.error("Error retrieving database row counts:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -246,7 +258,7 @@ router.post(
   databaseOperationLimiter,
   upload.single("backupFile"),
   async (req, res) => {
-    console.log("- in POST /admin-db/import-db-backup");
+    logger.info("- in POST /admin-db/import-db-backup");
 
     try {
       if (!req.file) {
@@ -257,7 +269,7 @@ router.post(
 
       const backupDir = process.env.PATH_PROJECT_RESOURCES;
       if (!backupDir) {
-        console.log("*** no file ***");
+        logger.info("*** no file ***");
         return res.status(500).json({
           result: false,
           message: "Temporary directory not configured.",
@@ -268,14 +280,14 @@ router.post(
 
       // Ensure the temp_db_import folder is clean before extracting
       if (fs.existsSync(tempExtractPath)) {
-        console.log("Previous temp_db_import folder found. Deleting...");
+        logger.info("Previous temp_db_import folder found. Deleting...");
         await fs.promises.rm(tempExtractPath, { recursive: true });
-        console.log("Old temp_db_import folder deleted.");
+        logger.info("Old temp_db_import folder deleted.");
       }
 
       await mkdirAsync(tempExtractPath, { recursive: true });
 
-      console.log(`Extracting backup to: ${tempExtractPath}`);
+      logger.info(`Extracting backup to: ${tempExtractPath}`);
 
       // Unzip the uploaded file
       await fs
@@ -283,7 +295,7 @@ router.post(
         .pipe(unzipper.Extract({ path: tempExtractPath }))
         .promise();
 
-      console.log("Backup extracted successfully.");
+      logger.info("Backup extracted successfully.");
 
       // Read all subfolders inside tempExtractPath
       const extractedFolders = await fs.promises.readdir(tempExtractPath);
@@ -298,7 +310,7 @@ router.post(
         ? path.join(tempExtractPath, backupFolder)
         : tempExtractPath;
 
-      console.log(`Using backup folder: ${backupFolderPath}`);
+      logger.info(`Using backup folder: ${backupFolderPath}`);
 
       // Call the new function to read and append database tables
       const status = await readAndAppendDbTables(backupFolderPath);
@@ -310,9 +322,9 @@ router.post(
       //   path.join(process.env.PATH_PROJECT_RESOURCES, "uploads/"),
       //   { recursive: true }
       // );
-      console.log("Temporary files deleted.");
+      logger.info("Temporary files deleted.");
 
-      console.log(status);
+      logger.info(status);
       if (status?.failedOnTableName) {
         res.status(500).json({
           result: false,
@@ -326,7 +338,7 @@ router.post(
         });
       }
     } catch (error) {
-      console.error("Error importing database backup:", error);
+      logger.error("Error importing database backup:", error);
       res.status(500).json({
         result: false,
         message: "Internal server error",
@@ -340,7 +352,7 @@ router.delete(
   "/delete-db-backup/:filename",
   authenticateToken,
   async (req, res) => {
-    console.log(
+    logger.info(
       `- in DELETE /admin-db/delete-db-backup/${req.params.filename}`
     );
 
@@ -365,11 +377,11 @@ router.delete(
 
       // Delete the file
       await fs.promises.unlink(filePath);
-      console.log(`Deleted file: ${filePath}`);
+      logger.info(`Deleted file: ${filePath}`);
 
       res.json({ result: true, message: "Backup file deleted successfully." });
     } catch (error) {
-      console.error("Error deleting backup file:", error);
+      logger.error("Error deleting backup file:", error);
       res.status(500).json({
         result: false,
         message: "Internal server error",
@@ -381,15 +393,15 @@ router.delete(
 
 // 🔹 DELETE route to remove the entire database
 router.delete("/the-entire-database", authenticateToken, async (req, res) => {
-  console.log("- in DELETE /admin-db/the-entire-database");
+  logger.info("- in DELETE /admin-db/the-entire-database");
 
   try {
     // Create a backup before deletion
-    console.log("Creating database backup before deletion...");
+    logger.info("Creating database backup before deletion...");
     const backupPath = await createDatabaseBackupZipFile(
       (suffix = "_last_before_db_delete")
     );
-    console.log(`Backup created at: ${backupPath}`);
+    logger.info(`Backup created at: ${backupPath}`);
 
     // Get database path and name from environment variables
     const dbPath = process.env.PATH_DATABASE;
@@ -406,7 +418,7 @@ router.delete("/the-entire-database", authenticateToken, async (req, res) => {
 
     // Delete the database file
     await unlinkAsync(fullDbPath);
-    console.log(`Database file deleted: ${fullDbPath}`);
+    logger.info(`Database file deleted: ${fullDbPath}`);
 
     res.json({
       result: true,
@@ -414,7 +426,7 @@ router.delete("/the-entire-database", authenticateToken, async (req, res) => {
       backupFile: backupPath,
     });
   } catch (error) {
-    console.error("Error deleting the database:", error);
+    logger.error("Error deleting the database:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error.",
@@ -427,7 +439,7 @@ router.delete("/the-entire-database", authenticateToken, async (req, res) => {
 router.delete("/table/:tableName", authenticateToken, async (req, res) => {
   try {
     const { tableName } = req.params;
-    console.log(`- in DELETE /admin-db/table/${tableName}`);
+    logger.info(`- in DELETE /admin-db/table/${tableName}`);
 
     // Check if the requested table exists in the models
     if (!models[tableName]) {
@@ -444,7 +456,7 @@ router.delete("/table/:tableName", authenticateToken, async (req, res) => {
       message: `Table '${tableName}' has been deleted.`,
     });
   } catch (error) {
-    console.error("Error deleting table:", error);
+    logger.error("Error deleting table:", error);
     res.status(500).json({
       result: false,
       message: "Internal server error",
@@ -460,7 +472,7 @@ router.delete(
   async (req, res) => {
     try {
       const { tableName, rowId } = req.params;
-      console.log(`- in DELETE /admin-db/table-row/${tableName}/${rowId}`);
+      logger.info(`- in DELETE /admin-db/table-row/${tableName}/${rowId}`);
 
       // Check if the requested table exists in the models
       if (!models[tableName]) {
@@ -477,7 +489,7 @@ router.delete(
         message: `Row ${rowId} from table '${tableName}' has been deleted.`,
       });
     } catch (error) {
-      console.error("Error deleting row:", error);
+      logger.error("Error deleting row:", error);
       res.status(500).json({
         result: false,
         message: "Internal server error",
@@ -495,8 +507,8 @@ router.put(
     try {
       const { tableName, rowId } = req.params;
       const dataToSave = req.body;
-      console.log(`- in PUT /admin-db/table-row/${tableName}/${rowId}`);
-      console.log("Incoming data:", dataToSave);
+      logger.info(`- in PUT /admin-db/table-row/${tableName}/${rowId}`);
+      logger.info("Incoming data:", dataToSave);
 
       // Validate table
       if (!models[tableName]) {
@@ -536,7 +548,7 @@ router.put(
         // data: result,
       });
     } catch (error) {
-      console.error("Error saving row:", error);
+      logger.error("Error saving row:", error);
       return res.status(500).json({
         result: false,
         message: "Internal server error",

@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
 
 // 🔹 POST /state/:articleId: Add API
 router.post("/:articleId", authenticateToken, async (req, res) => {
-  console.log("- starting /state/:articleId");
+  logger.info("- starting /state/:articleId");
   const { articleId } = req.params;
   const { stateIdArray } = req.body;
   const { isValid, missingKeys } = checkBodyReturnMissing(req.body, [

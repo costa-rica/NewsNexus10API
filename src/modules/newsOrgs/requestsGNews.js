@@ -110,7 +110,7 @@ async function storeGNewsArticles(
       // newsApiRequest.url
     );
   } catch (error) {
-    console.error(error);
+    logger.error(error);
 
     writeResponseDataFromNewsAggregator(
       gNewsSource.id,
@@ -130,7 +130,7 @@ async function makeGNewsApiRequestDetailed(
   keywordsOr,
   keywordsNot
 ) {
-  console.log("- in makeGNewsApiRequestDetailed");
+  logger.info("- in makeGNewsApiRequestDetailed");
 
   function splitPreservingQuotes(str) {
     return str.match(/"[^"]+"|\S+/g)?.map((s) => s.trim()) || [];
@@ -140,7 +140,7 @@ async function makeGNewsApiRequestDetailed(
   const orArray = splitPreservingQuotes(keywordsOr ? keywordsOr : "");
   const notArray = splitPreservingQuotes(keywordsNot ? keywordsNot : "");
 
-  console.log(`andArray: ${andArray}`);
+  logger.info(`andArray: ${andArray}`);
 
   // Step 1: prepare token and dates
   const token = sourceObj.apiKey;
@@ -156,14 +156,14 @@ async function makeGNewsApiRequestDetailed(
 
   let queryParams = [];
 
-  console.log(`startDate: ${startDate}`);
+  logger.info(`startDate: ${startDate}`);
   const andPart = andArray.length > 0 ? andArray.join(" AND ") : "";
   const orPart = orArray.length > 0 ? `(${orArray.join(" OR ")})` : "";
   const notPart =
     notArray.length > 0 ? notArray.map((k) => `NOT ${k}`).join(" AND ") : "";
 
   const fullQuery = [andPart, orPart, notPart].filter(Boolean).join(" AND ");
-  console.log(`fullQuery: ${fullQuery}`);
+  logger.info(`fullQuery: ${fullQuery}`);
   if (fullQuery) {
     queryParams.push(`q=${encodeURIComponent(fullQuery)}`);
   }
@@ -189,8 +189,8 @@ async function makeGNewsApiRequestDetailed(
   queryParams.push(`apikey=${sourceObj.apiKey}`);
 
   const requestUrl = `${sourceObj.url}search?${queryParams.join("&")}`;
-  console.log(` [in makeGNewsApiRequestDetailed] requestUrl: ${requestUrl}`);
-  // console.log(` [in makeGNewsApiRequestDetailed] queryParams: ${queryParams}`);
+  logger.info(` [in makeGNewsApiRequestDetailed] requestUrl: ${requestUrl}`);
+  // logger.info(` [in makeGNewsApiRequestDetailed] queryParams: ${queryParams}`);
 
   let status = "success";
   let requestResponseData = null;

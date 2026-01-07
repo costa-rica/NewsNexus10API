@@ -17,11 +17,11 @@ async function authenticateToken(req, res, next) {
   }
 
   jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-    // console.log("-- check here");
+    // logger.info("-- check here");
     if (err) return res.status(403).json({ message: "Invalid token" });
     const { id } = decoded;
     const user = await User.findByPk(id);
-    // console.log(user);
+    // logger.info(user);
     req.user = user;
     next();
   });
@@ -31,12 +31,12 @@ async function findUserByEmail(email) {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      console.log("User not found");
+      logger.info("User not found");
     }
-    console.log(user);
+    logger.info(user);
     return user;
   } catch (error) {
-    console.error("Error finding user by email:", error);
+    logger.error("Error finding user by email:", error);
   }
 }
 

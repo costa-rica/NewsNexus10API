@@ -12,7 +12,7 @@ const {
 
 // 🔹 POST news-api/request
 router.post("/request", async (req, res) => {
-  console.log("- starting request news-api");
+  logger.info("- starting request news-api");
   try {
     const { startDate, endDate, keywordString, max } = req.body;
 
@@ -74,7 +74,7 @@ router.post("/request", async (req, res) => {
       // keywordObjModified,
     });
   } catch (error) {
-    console.error("Error in /request:", error);
+    logger.error("Error in /request:", error);
     res.status(500).json({
       result: false,
       message: "NewsNexusAPI internal server error",
@@ -100,9 +100,9 @@ router.post("/get-articles", async (req, res) => {
   //   const includeSourcesArrayNames = includeWebsiteDomainObjArray.map(
   //     (obj) => obj.name
   //   );
-  //   console.log("includeSourcesArrayNames:", includeSourcesArrayNames);
+  //   logger.info("includeSourcesArrayNames:", includeSourcesArrayNames);
   // } else {
-  //   console.log(
+  //   logger.info(
   //     "includeWebsiteDomainObjArray is not an array:",
   //     includeWebsiteDomainObjArray
   //   );
@@ -125,15 +125,15 @@ router.post("/get-articles", async (req, res) => {
       keywordsOr,
       keywordsNot
     );
-  // console.log("includeWebsiteDomainObjArray:", includeWebsiteDomainObjArray);
+  // logger.info("includeWebsiteDomainObjArray:", includeWebsiteDomainObjArray);
 
   // if (Array.isArray(includeWebsiteDomainObjArray)) {
   //   const includeSourcesArrayNames = includeWebsiteDomainObjArray.map(
   //     (obj) => obj.name
   //   );
-  //   console.log("includeSourcesArrayNames:", includeSourcesArrayNames);
+  //   logger.info("includeSourcesArrayNames:", includeSourcesArrayNames);
   // } else {
-  //   console.log(
+  //   logger.info(
   //     "includeWebsiteDomainObjArray is not an array:",
   //     includeWebsiteDomainObjArray
   //   );
@@ -141,11 +141,11 @@ router.post("/get-articles", async (req, res) => {
 
   if (process.env.ACTIVATE_API_REQUESTS_TO_OUTSIDE_SOURCES === "true") {
     if (requestResponseData.articles) {
-      console.log("- articles count: ", requestResponseData.articles.length);
+      logger.info("- articles count: ", requestResponseData.articles.length);
       // Step 4: store articles to db
       await storeNewsApiArticles(requestResponseData, newsApiRequest, null);
     } else {
-      console.log("--- > there was no articles element in the response ???/");
+      logger.info("--- > there was no articles element in the response ???/");
       return res.status(400).json({
         status: requestResponseData?.status || "error",
         result: false,

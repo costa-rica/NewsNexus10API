@@ -14,8 +14,8 @@
  *   res.download(safePath);
  */
 
-const path = require('path');
-const fs = require('fs');
+const path = require("path");
+const fs = require("fs");
 
 /**
  * Safely resolve and validate a file path
@@ -29,24 +29,24 @@ const fs = require('fs');
  */
 function safeFilePath(baseDirectory, filename, options = {}) {
   const {
-    allowedExtensions = ['.xlsx', '.xls', '.zip', '.pdf'],
+    allowedExtensions = [".xlsx", ".xls", ".zip", ".pdf"],
     maxFilenameLength = 255,
   } = options;
 
   // Validate inputs
-  if (!baseDirectory || typeof baseDirectory !== 'string') {
-    console.warn('[FILE SECURITY] Invalid base directory');
+  if (!baseDirectory || typeof baseDirectory !== "string") {
+    logger.warn("[FILE SECURITY] Invalid base directory");
     return null;
   }
 
-  if (!filename || typeof filename !== 'string') {
-    console.warn('[FILE SECURITY] Invalid filename');
+  if (!filename || typeof filename !== "string") {
+    logger.warn("[FILE SECURITY] Invalid filename");
     return null;
   }
 
   // Check filename length
   if (filename.length > maxFilenameLength) {
-    console.warn(`[FILE SECURITY] Filename too long: ${filename.length} chars`);
+    logger.warn(`[FILE SECURITY] Filename too long: ${filename.length} chars`);
     return null;
   }
 
@@ -57,20 +57,24 @@ function safeFilePath(baseDirectory, filename, options = {}) {
   // Validate characters - only allow alphanumeric, dash, underscore, dot, space
   // This is stricter than necessary but safe
   if (!/^[a-zA-Z0-9_\-\.\s]+$/.test(sanitizedFilename)) {
-    console.warn(`[FILE SECURITY] Invalid characters in filename: ${sanitizedFilename}`);
+    logger.warn(
+      `[FILE SECURITY] Invalid characters in filename: ${sanitizedFilename}`
+    );
     return null;
   }
 
   // Validate file extension
   const ext = path.extname(sanitizedFilename).toLowerCase();
   if (!allowedExtensions.includes(ext)) {
-    console.warn(`[FILE SECURITY] Disallowed file extension: ${ext}`);
+    logger.warn(`[FILE SECURITY] Disallowed file extension: ${ext}`);
     return null;
   }
 
   // Prevent hidden files (starting with .)
-  if (sanitizedFilename.startsWith('.')) {
-    console.warn(`[FILE SECURITY] Hidden files not allowed: ${sanitizedFilename}`);
+  if (sanitizedFilename.startsWith(".")) {
+    logger.warn(
+      `[FILE SECURITY] Hidden files not allowed: ${sanitizedFilename}`
+    );
     return null;
   }
 
@@ -83,11 +87,14 @@ function safeFilePath(baseDirectory, filename, options = {}) {
 
   // CRITICAL: Verify the resolved path is still within the base directory
   // This prevents path traversal even if symlinks or other tricks are used
-  if (!resolvedPath.startsWith(resolvedBase + path.sep) && resolvedPath !== resolvedBase) {
-    console.warn(`[FILE SECURITY] Path traversal attempt detected!`);
-    console.warn(`  Requested: ${filename}`);
-    console.warn(`  Resolved:  ${resolvedPath}`);
-    console.warn(`  Base:      ${resolvedBase}`);
+  if (
+    !resolvedPath.startsWith(resolvedBase + path.sep) &&
+    resolvedPath !== resolvedBase
+  ) {
+    logger.warn(`[FILE SECURITY] Path traversal attempt detected!`);
+    logger.warn(`  Requested: ${filename}`);
+    logger.warn(`  Resolved:  ${resolvedPath}`);
+    logger.warn(`  Base:      ${resolvedBase}`);
     return null;
   }
 
@@ -110,7 +117,7 @@ function safeFileExists(baseDirectory, filename, options = {}) {
     return {
       valid: false,
       path: null,
-      error: 'Invalid filename or path traversal attempt detected',
+      error: "Invalid filename or path traversal attempt detected",
     };
   }
 
@@ -120,7 +127,7 @@ function safeFileExists(baseDirectory, filename, options = {}) {
       return {
         valid: false,
         path: safePath,
-        error: 'File not found',
+        error: "File not found",
       };
     }
 
@@ -130,7 +137,7 @@ function safeFileExists(baseDirectory, filename, options = {}) {
       return {
         valid: false,
         path: safePath,
-        error: 'Path is not a file',
+        error: "Path is not a file",
       };
     }
 
@@ -140,13 +147,12 @@ function safeFileExists(baseDirectory, filename, options = {}) {
       path: safePath,
       error: null,
     };
-
   } catch (error) {
-    console.error('[FILE SECURITY] Error checking file:', error.message);
+    logger.error("[FILE SECURITY] Error checking file:", error.message);
     return {
       valid: false,
       path: safePath,
-      error: 'Error accessing file',
+      error: "Error accessing file",
     };
   }
 }
@@ -159,11 +165,11 @@ function safeFileExists(baseDirectory, filename, options = {}) {
  * @returns {object} - { valid: boolean, path: string|null, error: string|null }
  */
 function safeDirExists(baseDirectory, dirName) {
-  if (!dirName || typeof dirName !== 'string') {
+  if (!dirName || typeof dirName !== "string") {
     return {
       valid: false,
       path: null,
-      error: 'Invalid directory name',
+      error: "Invalid directory name",
     };
   }
 
@@ -175,7 +181,7 @@ function safeDirExists(baseDirectory, dirName) {
     return {
       valid: false,
       path: null,
-      error: 'Invalid characters in directory name',
+      error: "Invalid characters in directory name",
     };
   }
 
@@ -184,12 +190,15 @@ function safeDirExists(baseDirectory, dirName) {
   const resolvedBase = path.resolve(baseDirectory);
 
   // Verify within base directory
-  if (!resolvedPath.startsWith(resolvedBase + path.sep) && resolvedPath !== resolvedBase) {
-    console.warn(`[FILE SECURITY] Directory path traversal attempt: ${dirName}`);
+  if (
+    !resolvedPath.startsWith(resolvedBase + path.sep) &&
+    resolvedPath !== resolvedBase
+  ) {
+    logger.warn(`[FILE SECURITY] Directory path traversal attempt: ${dirName}`);
     return {
       valid: false,
       path: null,
-      error: 'Invalid directory path',
+      error: "Invalid directory path",
     };
   }
 
@@ -198,7 +207,7 @@ function safeDirExists(baseDirectory, dirName) {
       return {
         valid: false,
         path: resolvedPath,
-        error: 'Directory not found',
+        error: "Directory not found",
       };
     }
 
@@ -207,7 +216,7 @@ function safeDirExists(baseDirectory, dirName) {
       return {
         valid: false,
         path: resolvedPath,
-        error: 'Path is not a directory',
+        error: "Path is not a directory",
       };
     }
 
@@ -216,13 +225,12 @@ function safeDirExists(baseDirectory, dirName) {
       path: resolvedPath,
       error: null,
     };
-
   } catch (error) {
-    console.error('[FILE SECURITY] Error checking directory:', error.message);
+    logger.error("[FILE SECURITY] Error checking directory:", error.message);
     return {
       valid: false,
       path: resolvedPath,
-      error: 'Error accessing directory',
+      error: "Error accessing directory",
     };
   }
 }
