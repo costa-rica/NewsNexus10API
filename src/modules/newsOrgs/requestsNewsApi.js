@@ -10,6 +10,7 @@ const {
 const { writeResponseDataFromNewsAggregator } = require("../common");
 const fs = require("fs");
 const path = require("path");
+const logger = require("../logger");
 
 // Make a single requuest to the News API API
 async function makeNewsApiRequest(

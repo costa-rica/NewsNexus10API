@@ -1,4 +1,5 @@
 const { sequelize } = require("newsnexus10db");
+const logger = require("./logger");
 
 async function sqlQueryArticlesSummaryStatistics() {
   // ------ NOTE -----------------------------------

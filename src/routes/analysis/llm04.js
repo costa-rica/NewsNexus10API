@@ -9,6 +9,7 @@ const {
   ArticleApproved,
   ArticleIsRelevant,
 } = require("newsnexus10db");
+const logger = require("../../modules/logger");
 
 // 🔹 GET /analysis/llm04/approved
 router.get("/approved", authenticateToken, async (req, res) => {

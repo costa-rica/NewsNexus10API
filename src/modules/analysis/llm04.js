@@ -87,7 +87,8 @@ async function sqlQueryArticlesApprovedChatGptWithStatesApprovedReportContract()
         entityWhoFoundArticleId,
         newsApiRequestId,
         newsRssRequestId,
-        ArticleApprovedsIsApproved: humanIsApproved !== undefined ? humanIsApproved : null,
+        ArticleApprovedsIsApproved:
+          humanIsApproved !== undefined ? humanIsApproved : null,
         States: [],
         ArticlesApproved02: [],
       });

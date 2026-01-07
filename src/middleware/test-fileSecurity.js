@@ -12,6 +12,7 @@ const {
   safeFileExists,
   safeDirExists,
 } = require("./fileSecurity");
+const logger = require("../modules/logger");
 
 logger.info("🧪 Testing File Security Utilities\n");
 logger.info("=".repeat(70));

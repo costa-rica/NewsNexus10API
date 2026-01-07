@@ -3,6 +3,7 @@ var router = express.Router();
 const { State, ArticleStateContract } = require("newsnexus10db");
 const { checkBodyReturnMissing } = require("../modules/common");
 const { authenticateToken } = require("../modules/userAuthentication");
+const logger = require("../modules/logger");
 
 // 🔹 GET /states: Get API
 router.get("/", async (req, res) => {

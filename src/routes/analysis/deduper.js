@@ -10,6 +10,7 @@ const {
   createDeduperAnalysis,
 } = require("../../modules/analysis/deduper");
 const axios = require("axios");
+const logger = require("../../modules/logger");
 
 // 🔹 POST /deduper/report-checker-table
 router.post("/report-checker-table", authenticateToken, async (req, res) => {

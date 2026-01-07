@@ -11,6 +11,7 @@ const {
   registerLimiter,
   passwordResetLimiter,
 } = require("../middleware/rateLimiting");
+const logger = require("../modules/logger");
 
 /* GET users listing. */
 router.get("/", function (req, res, next) {

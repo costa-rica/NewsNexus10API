@@ -2,6 +2,7 @@ const { User, EntityWhoFoundArticle } = require("newsnexus10db");
 
 const bcrypt = require("bcrypt");
 const fs = require("fs");
+const logger = require("./logger");
 
 async function onStartUpCreateEnvUsers() {
   if (!process.env.ADMIN_EMAIL_CREATE_ON_STARTUP) {

@@ -10,6 +10,7 @@ const {
   ArticleEntityWhoCategorizedArticleContracts02,
 } = require("newsnexus10db");
 const { authenticateToken } = require("../../modules/userAuthentication");
+const logger = require("../../modules/logger");
 
 // 🔹 GET /analysis/llm02/no-article-approved-rows
 router.get("/no-article-approved-rows", authenticateToken, async (req, res) => {

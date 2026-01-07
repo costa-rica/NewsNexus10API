@@ -7,6 +7,7 @@ const {
 } = require("newsnexus10db");
 const ExcelJS = require("exceljs");
 const path = require("path");
+const logger = require("../logger");
 
 /**
  * Creates a dictionary of article data from the ArticleApproveds table

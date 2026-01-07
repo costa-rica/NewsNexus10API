@@ -29,6 +29,7 @@ const {
   sqlQueryArticlesIsRelevant,
   sqlQueryArticlesAndAiScores,
 } = require("../modules/queriesSql");
+const logger = require("../modules/logger");
 
 // NOTE: ---- > will need to refactor because sqlQueryArticles is changed
 // 🔹 POST /articles: filtered list of articles

@@ -1,6 +1,7 @@
 const ExcelJS = require("exceljs");
 const path = require("path");
 const fs = require("fs");
+const logger = require("./logger");
 
 async function createSpreadsheetFromArray(array, outputFilePath = null) {
   if (!array || array.length === 0) {

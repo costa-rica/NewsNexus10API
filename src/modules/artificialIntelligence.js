@@ -3,6 +3,7 @@ const {
   Article,
   ArticleApproved,
 } = require("newsnexus10db");
+const logger = require("./logger");
 async function createFilteredArticlesArray(entityWhoCategorizesId) {
   // Step 1: Find all existing articleId values for this entityWhoCategorizesId
   const existingContracts =

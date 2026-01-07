@@ -6,6 +6,7 @@ const { safeFileExists } = require("../middleware/fileSecurity");
 const { fileOperationLimiter } = require("../middleware/rateLimiting");
 const path = require("path");
 const fs = require("fs");
+const logger = require("../modules/logger");
 
 // 🔹 FORMERLY: GET /analysis/download-excel-file/:excelFileName - Download existing Excel file
 // 🔹 NOW: GET /downloads/utilities/download-excel-file/:excelFileName - Download existing Excel file

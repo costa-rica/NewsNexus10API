@@ -7,7 +7,7 @@ const {
 } = require("../../modules/newsOrgs/requestsGNews");
 const { checkBodyReturnMissing } = require("../../modules/common");
 const { NewsArticleAggregatorSource } = require("newsnexus10db");
-
+const logger = require("../../modules/logger");
 // POST /gnews/request
 router.post("/request", async (req, res) => {
   // logger.info("- starting request-gnews");

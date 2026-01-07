@@ -10,6 +10,7 @@ const {
   sanitizeFilename,
   deepSanitize,
 } = require("./globalSecurity");
+const logger = require("../modules/logger");
 
 logger.info("🧪 Testing Global Security Sanitization\n");
 logger.info("=".repeat(60));

@@ -3,6 +3,7 @@ var router = express.Router();
 const { Article, State, ArticleApproved } = require("newsnexus10db");
 const { authenticateToken } = require("../../modules/userAuthentication");
 const { getDateOfLastSubmittedReport } = require("../../modules/reports");
+const logger = require("../../modules/logger");
 
 // 🔹 GET /analysis/approved-articles/by-state
 router.get("/by-state", authenticateToken, async (req, res) => {

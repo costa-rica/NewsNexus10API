@@ -8,6 +8,7 @@ const { convertJavaScriptDateToTimezoneString } = require("./common");
 // const { Op } = require("sequelize");
 const { Report } = require("newsnexus10db");
 // const { DateTime } = require("luxon");
+const logger = require("./logger");
 
 async function createXlsxForReport(dataArray, excelFilename = false) {
   logger.info(` 🔹 createXlsxForReport`);

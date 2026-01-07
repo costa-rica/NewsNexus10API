@@ -12,6 +12,7 @@ const { checkBodyReturnMissing } = require("../modules/common");
 const { authenticateToken } = require("../modules/userAuthentication");
 const { sqlQueryRequestsFromApi } = require("../modules/queriesSql");
 const { DateTime } = require("luxon");
+const logger = require("../modules/logger");
 
 // 🔹 POST /news-aggregators/add-aggregator
 router.post("/add-aggregator", authenticateToken, async (req, res) => {

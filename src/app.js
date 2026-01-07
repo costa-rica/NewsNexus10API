@@ -3,7 +3,8 @@ const { initModels, sequelize } = require("newsnexus10db");
 var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
-var logger = require("morgan");
+var morgan = require("morgan");
+const logger = require("./modules/logger");
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -36,7 +37,7 @@ app.use(
   })
 );
 
-app.use(logger("dev"));
+app.use(morgan("dev"));
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: "10mb" })); // adjust as needed

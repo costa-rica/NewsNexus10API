@@ -4,15 +4,10 @@
 require("dotenv").config();
 
 // Initialize Winston logger (after env vars are loaded)
-// This sets up console.* method overrides and file logging
-require("./modules/logger");
+const logger = require("./modules/logger");
 
 const app = require("./app"); // Import the configured app
 const PORT = process.env.PORT || 8001;
-
-// Note: logger.info and logger.error are now handled by Winston logger
-// Winston also handles uncaughtException and unhandledRejection
-// See src/modules/logger.js for configuration
 
 // Start the server
 app.listen(PORT, "0.0.0.0", () => {

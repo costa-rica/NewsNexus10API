@@ -14,7 +14,7 @@
  *   const { globalSecurityMiddleware } = require('./middleware/globalSecurity');
  *   app.use(globalSecurityMiddleware);
  */
-
+const logger = require("../modules/logger");
 /**
  * Main middleware function - automatically sanitizes all request data
  */

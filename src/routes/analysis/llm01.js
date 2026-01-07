@@ -11,7 +11,7 @@ const fs = require("fs").promises;
 const path = require("path");
 const { scrapeArticle } = require("../../modules/analysis/scraper");
 const { authenticateToken } = require("../../modules/userAuthentication");
-
+const logger = require("../../modules/logger");
 /**
  * Helper function to save AI response to file (optional/precautionary)
  * Errors are logged but don't affect the main flow

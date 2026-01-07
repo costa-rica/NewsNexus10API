@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("newsnexus10db");
+const logger = require("./logger");
 
 async function authenticateToken(req, res, next) {
   if (process.env.AUTHENTIFICATION_TURNED_OFF === "true") {

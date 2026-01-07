@@ -7,7 +7,7 @@ const {
   storeNewsDataIoArticles,
   makeNewsDataIoRequest,
 } = require("../../modules/newsOrgs/requestsNewsDataIo");
-
+const logger = require("../../modules/logger");
 // parameters for NewsDataIo
 // country: `country=us`
 // language: `language=en`

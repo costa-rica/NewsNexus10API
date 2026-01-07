@@ -2,6 +2,7 @@ const csvParser = require("csv-parser");
 const fs = require("fs");
 const path = require("path");
 // const sequelize = require("../models/_connection"); // Import Sequelize instance
+const logger = require("./logger");
 
 // Import models directly
 const {

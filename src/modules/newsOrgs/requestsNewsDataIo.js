@@ -8,6 +8,7 @@ const {
   NewsApiRequestWebsiteDomainContract,
 } = require("newsnexus10db");
 const { writeResponseDataFromNewsAggregator } = require("../common");
+const logger = require("../logger");
 
 async function storeNewsDataIoArticles(
   requestResponseData,

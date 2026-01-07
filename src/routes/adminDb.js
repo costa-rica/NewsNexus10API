@@ -78,6 +78,7 @@ const unzipper = require("unzipper");
 const upload = multer({
   dest: path.join(process.env.PATH_PROJECT_RESOURCES, "uploads-delete-ok/"),
 }); // Temporary storage for file uploads
+const logger = require("../modules/logger");
 
 router.get(
   "/table/:tableName",

@@ -4,6 +4,7 @@ const { authenticateToken } = require("../modules/userAuthentication");
 const {
   sqlQueryArticlesApprovedForComponent,
 } = require("../modules/queriesSql");
+const logger = require("../modules/logger");
 
 // 🔹 GET /articles-approveds/for-component
 router.get("/for-component", authenticateToken, async (req, res) => {

@@ -9,6 +9,7 @@ const {
   makeNewsApiRequestDetailed,
   // makeNewsApiRequestDetailed02,
 } = require("../../modules/newsOrgs/requestsNewsApi");
+const logger = require("../../modules/logger");
 
 // 🔹 POST news-api/request
 router.post("/request", async (req, res) => {

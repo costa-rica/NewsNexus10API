@@ -8,6 +8,7 @@ const {
   ArticleApproved,
 } = require("newsnexus10db");
 const { Op } = require("sequelize");
+const logger = require("./logger");
 /**
  * Returns article metadata with the max keywordRating and its keyword,
  * filtered by a specific entityWhoCategorizesId.

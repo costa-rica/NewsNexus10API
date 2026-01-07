@@ -7,6 +7,7 @@ const {
 const { writeResponseDataFromNewsAggregator } = require("../common");
 const fs = require("fs");
 const path = require("path");
+const logger = require("../logger");
 
 // Make a single request to the API
 async function makeGNewsRequest(

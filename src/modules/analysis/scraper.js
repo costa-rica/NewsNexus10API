@@ -1,6 +1,7 @@
 // modules/analysis/scraper.js
 const axios = require("axios");
 const cheerio = require("cheerio");
+const logger = require("../logger");
 
 /**
  * Fetches article content from a URL and returns the visible text.

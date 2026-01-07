@@ -1,5 +1,5 @@
 const { sequelize } = require("newsnexus10db");
-
+const logger = require("./logger");
 // These are examples of how to create SQL queries using Sequelize
 
 async function sqlQueryArticles() {

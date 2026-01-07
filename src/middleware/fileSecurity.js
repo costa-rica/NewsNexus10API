@@ -16,6 +16,7 @@
 
 const path = require("path");
 const fs = require("fs");
+const logger = require("../modules/logger");
 
 /**
  * Safely resolve and validate a file path

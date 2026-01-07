@@ -3,6 +3,7 @@ var router = express.Router();
 const { WebsiteDomain } = require("newsnexus10db");
 const { checkBodyReturnMissing } = require("../modules/common");
 const { authenticateToken } = require("../modules/userAuthentication");
+const logger = require("../modules/logger");
 
 // GET /website-domains
 router.get("/", authenticateToken, async (req, res) => {

@@ -2,6 +2,7 @@
 const nodemailer = require("nodemailer");
 const fs = require("fs");
 const path = require("path");
+const logger = require("./logger");
 
 // Create a transporter for Microsoft 365 (Office 365) SMTP
 const transporter = nodemailer.createTransport({

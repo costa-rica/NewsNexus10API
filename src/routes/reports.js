@@ -23,6 +23,7 @@ const fs = require("fs");
 const path = require("path");
 const { Op } = require("sequelize");
 const { DateTime } = require("luxon");
+const logger = require("../modules/logger");
 
 // 🔹 GET /reports/table
 router.get("/table", authenticateToken, async (req, res) => {

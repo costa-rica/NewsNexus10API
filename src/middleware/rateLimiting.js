@@ -15,6 +15,7 @@
  */
 
 const rateLimit = require("express-rate-limit");
+const logger = require("../modules/logger");
 
 /**
  * Global API rate limiter

@@ -10,6 +10,7 @@ const { authenticateToken } = require("../modules/userAuthentication");
 const {
   createFilteredArticlesArray,
 } = require("../modules/artificialIntelligence");
+const logger = require("../modules/logger");
 
 // 🔹 POST /artificial-intelligence/add-entity
 router.post("/add-entity", authenticateToken, async (req, res) => {

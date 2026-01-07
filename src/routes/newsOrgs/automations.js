@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path");
 
 const multer = require("multer");
+const logger = require("../../modules/logger");
 
 const excelFilesDir = process.env.PATH_TO_AUTOMATION_EXCEL_FILES;
 const storage = multer.diskStorage({
