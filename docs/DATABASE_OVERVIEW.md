@@ -34,6 +34,78 @@ NewsNexus10Db/
 └── package.json                 # Project configuration
 ```
 
+### Using This Package in Your Application
+
+**IMPORTANT: Models must be initialized before use.**
+
+When consuming this package in a microservice or application, you MUST call `initModels()` at the very start of your application, before importing any other modules that use the database models.
+
+#### Initialization Pattern
+
+```javascript
+require("dotenv").config();
+
+// Step 1: Initialize models FIRST, before any other imports
+const { initModels, sequelize } = require("newsnexus10db");
+initModels();
+
+// Step 2: Now import other modules that use the models
+const { myFunction } = require("./modules/myModule");
+const { anotherFunction } = require("./modules/anotherModule");
+
+// Step 3: (Optional) Sync database schema if tables don't exist
+async function main() {
+  await sequelize.sync(); // Creates tables if they don't exist
+
+  // Your application logic here
+}
+
+main();
+```
+
+#### Why This Order Matters
+
+- `initModels()` calls all model initialization functions (e.g., `initArticle()`, `initUser()`, etc.)
+- It then calls `applyAssociations()` to set up all model relationships
+- Models are unusable until this initialization completes
+- If you try to use models before calling `initModels()`, you'll get errors like:
+  - `TypeError: Cannot read properties of undefined (reading 'constructor')`
+  - `TypeError: Cannot read properties of undefined (reading 'sequelize')`
+
+#### Environment Variables
+
+The package inherits environment variables from the consuming application. No `.env` file is needed in the package itself.
+
+Required environment variables:
+
+- `PATH_DATABASE`: Directory path for the database file (e.g., `/Users/nick/_databases/NewsNexus10/`)
+- `NAME_DB`: Database filename (e.g., `newsnexus10.db`)
+
+#### Creating Database Schema
+
+If your database is new or missing tables, use `sequelize.sync()`:
+
+```javascript
+// Creates all tables based on model definitions
+await sequelize.sync();
+
+// Or with options:
+await sequelize.sync({ alter: true }); // Updates existing tables to match models
+await sequelize.sync({ force: true }); // WARNING: Drops all tables first
+```
+
+#### Using Models
+
+After initialization, import and use models normally:
+
+```javascript
+const { Article, NewsApiRequest, User } = require("newsnexus10db");
+
+// Query examples
+const articles = await Article.findAll({ limit: 10 });
+const request = await NewsApiRequest.findOne({ where: { id: 1 } });
+```
+
 ## Template (copy for each new model)
 
 ```ts
@@ -379,6 +451,19 @@ AI models and systems configuration.
 | createdAt            | DATE    | NOT NULL                    | Timestamp                   |
 | updatedAt            | DATE    | NOT NULL                    | Timestamp                   |
 
+### Prompts
+
+**Model:** `Prompt`
+
+AI prompt storage for categorization and approval workflows.
+
+| Field            | Type    | Constraints                 | Description                    |
+| ---------------- | ------- | --------------------------- | ------------------------------ |
+| id               | INTEGER | PRIMARY KEY, AUTO_INCREMENT | Unique prompt identifier       |
+| promptInMarkdown | TEXT    | NOT NULL                    | Prompt text in markdown format |
+| createdAt        | DATE    | NOT NULL                    | Timestamp                      |
+| updatedAt        | DATE    | NOT NULL                    | Timestamp                      |
+
 ### NewsArticleAggregatorSources
 
 **Model:** `NewsArticleAggregatorSource`
@@ -411,6 +496,26 @@ Many-to-many relationship between Articles and States.
 | stateId   | INTEGER | FK, NOT NULL                | Reference to state   |
 | createdAt | DATE    | NOT NULL                    | Timestamp            |
 | updatedAt | DATE    | NOT NULL                    | Timestamp            |
+
+### ArticleStateContracts02
+
+**Model:** `ArticleStateContract02`
+
+Enhanced article-state relationship tracking with AI agent metadata. Stores AI-assigned article-state categorizations including which entity categorized the article, which prompt was used, human approval status, and error tracking.
+
+| Field                  | Type    | Constraints                 | Description                                              |
+| ---------------------- | ------- | --------------------------- | -------------------------------------------------------- |
+| id                     | INTEGER | PRIMARY KEY, AUTO_INCREMENT | Unique contract ID                                       |
+| articleId              | INTEGER | FK, NOT NULL                | Reference to article                                     |
+| stateId                | INTEGER | FK, NULLABLE                | Reference to state                                       |
+| entityWhoCategorizesId | INTEGER | FK, NOT NULL                | Reference to categorizing entity                         |
+| promptId               | INTEGER | FK, NOT NULL                | Reference to prompt used for categorization              |
+| isHumanApproved        | BOOLEAN | DEFAULT false               | Human approval status of AI categorization               |
+| isDeterminedToBeError  | BOOLEAN | DEFAULT false               | Error flag for categorization                            |
+| occuredInTheUS         | BOOLEAN | NULLABLE                    | Flag indicating AI failed to assign a state or not in US |
+| reasoning              | STRING  | NULLABLE                    | Reasoning for categorization                             |
+| createdAt              | DATE    | NOT NULL                    | Timestamp                                                |
+| updatedAt              | DATE    | NOT NULL                    | Timestamp                                                |
 
 ### ArticleReportContracts
 
@@ -500,6 +605,7 @@ The following relationships are defined in `src/models/_associations.ts` and est
 #### Article Core Relationships
 
 - **Article → ArticleStateContract** (1:Many): Articles can be associated with multiple states
+- **Article → ArticleStateContract02** (1:Many): Articles can be associated with multiple states with AI agent metadata
 - **Article → ArticleKeywordContract** (1:Many): Articles can have multiple keywords/categorizations
 - **Article → ArticleEntityWhoCategorizedArticleContract** (1:Many): Articles can be categorized with keyword and rating data
 - **Article → ArticleEntityWhoCategorizedArticleContracts02** (1:Many): Articles can be categorized with flexible key-value metadata
@@ -532,12 +638,21 @@ The following relationships are defined in `src/models/_associations.ts` and est
 - **EntityWhoCategorizedArticle → ArticleKeywordContract** (1:Many): Categorizers can assign multiple keywords
 - **EntityWhoCategorizedArticle → ArticleEntityWhoCategorizedArticleContract** (1:Many): Categorizers can assign keyword and rating data
 - **EntityWhoCategorizedArticle → ArticleEntityWhoCategorizedArticleContracts02** (1:Many): Categorizers can assign flexible key-value metadata
+- **EntityWhoCategorizedArticle → ArticleStateContract02** (1:Many): Categorizers can assign article-state relationships with AI metadata
+
+### Prompt Relationships
+
+- **Prompt → ArticleStateContract02** (1:Many): Prompts can be used for multiple article-state categorizations
 
 ### Many-to-Many Relationships
 
 #### Article ↔ State (through ArticleStateContract)
 
 Articles can be associated with multiple states, and states can have multiple articles.
+
+#### Article ↔ State (through ArticleStateContract02)
+
+Articles can be associated with multiple states with AI agent metadata tracking, and states can have multiple articles. This enhanced relationship includes which entity categorized the article-state relationship, which prompt was used, human approval status, and error tracking.
 
 #### Article ↔ EntityWhoCategorizedArticle (through ArticleEntityWhoCategorizedArticleContract)
 
@@ -563,6 +678,7 @@ News sources can be filtered by multiple states, and states can filter multiple 
 ### Contract/Junction Table Details
 
 - **ArticleStateContract**: Links articles to US states with timestamps
+- **ArticleStateContract02**: Links articles to US states with AI agent metadata including categorizing entity, prompt used, human approval status, and error tracking
 - **ArticleReportContract**: Links articles to reports with reference numbers and CPSC acceptance status
 - **ArticleEntityWhoCategorizedArticleContract**: Links articles to categorizers with keyword and rating data (unique index on articleId, entityWhoCategorizesId, keyword)
 - **ArticleEntityWhoCategorizedArticleContracts02**: Links articles to categorizers with flexible key-value storage supporting string, numeric, and boolean values (unique index on articleId, entityWhoCategorizesId, key)

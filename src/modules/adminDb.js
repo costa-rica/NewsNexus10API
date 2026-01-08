@@ -32,6 +32,8 @@ const {
   ArticleEntityWhoCategorizedArticleContract,
   ArticleEntityWhoCategorizedArticleContracts02,
   ArticlesApproved02,
+  ArticleStateContract02,
+  Prompt,
 } = require("newsnexus10db");
 
 const { promisify } = require("util");
@@ -66,6 +68,8 @@ const models = {
   ArticleEntityWhoCategorizedArticleContract,
   ArticleEntityWhoCategorizedArticleContracts02,
   ArticlesApproved02,
+  ArticleStateContract02,
+  Prompt,
 };
 
 async function readAndAppendDbTables(backupFolderPath) {
