@@ -48,7 +48,49 @@ function validateStateAssignerRequest(body) {
   return { isValid: true };
 }
 
+/**
+ * Validate request parameters for human-verify endpoint
+ * @param {Object} body - Request body
+ * @returns {Object} Object with isValid and error properties
+ */
+function validateHumanVerifyRequest(body) {
+  const { action, stateId } = body;
+
+  // action is required and must be "approve" or "reject"
+  if (!action) {
+    return {
+      isValid: false,
+      error: "action field is required",
+    };
+  }
+
+  if (action !== "approve" && action !== "reject") {
+    return {
+      isValid: false,
+      error: 'action must be either "approve" or "reject"',
+    };
+  }
+
+  // stateId is required and must be a number
+  if (stateId === undefined || stateId === null) {
+    return {
+      isValid: false,
+      error: "stateId field is required",
+    };
+  }
+
+  if (typeof stateId !== "number" || isNaN(stateId)) {
+    return {
+      isValid: false,
+      error: "stateId must be a valid number",
+    };
+  }
+
+  return { isValid: true };
+}
+
 module.exports = {
   formatArticlesWithStateAssignments,
   validateStateAssignerRequest,
+  validateHumanVerifyRequest,
 };
