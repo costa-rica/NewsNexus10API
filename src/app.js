@@ -27,6 +27,7 @@ var analysisLlm01Router = require("./routes/analysis/llm01");
 var analysisLlm02Router = require("./routes/analysis/llm02");
 var downloadsRouter = require("./routes/downloads");
 var analysisLlm04Router = require("./routes/analysis/llm04");
+var analysisStateAssignerRouter = require("./routes/analysis/state-assigner");
 
 var app = express();
 const cors = require("cors");
@@ -72,6 +73,7 @@ app.use("/analysis/llm01", analysisLlm01Router);
 app.use("/analysis/llm02", analysisLlm02Router);
 app.use("/downloads", downloadsRouter);
 app.use("/analysis/llm04", analysisLlm04Router);
+app.use("/analysis/state-assigner", analysisStateAssignerRouter);
 
 initModels();
 
