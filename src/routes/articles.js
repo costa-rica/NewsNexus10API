@@ -16,6 +16,7 @@ const { authenticateToken } = require("../modules/userAuthentication");
 const {
   createNewsApiRequestsArray,
   createArticlesApprovedArray,
+  formatArticleDetails,
 } = require("../modules/articles");
 const { getLastThursdayAt20hInNyTimeZone } = require("../modules/common");
 
@@ -28,6 +29,7 @@ const {
   sqlQueryArticlesReport,
   sqlQueryArticlesIsRelevant,
   sqlQueryArticlesAndAiScores,
+  sqlQueryArticleDetails,
 } = require("../modules/queriesSql");
 const logger = require("../modules/logger");
 
@@ -1033,6 +1035,62 @@ router.get("/test-sql", authenticateToken, async (req, res) => {
   });
 
   res.json({ articlesArrayModified });
+});
+
+// 🔹 GET /articles/article-details/:articleId
+router.get("/article-details/:articleId", authenticateToken, async (req, res) => {
+  logger.info("- in GET /articles/article-details/:articleId");
+
+  try {
+    const { articleId } = req.params;
+    logger.info(`articleId: ${articleId}`);
+
+    // Validate articleId is a number
+    if (!articleId || isNaN(parseInt(articleId))) {
+      return res.status(400).json({
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Invalid article ID provided",
+          details: "Article ID must be a valid number",
+          status: 400,
+        },
+      });
+    }
+
+    // Query database for article details
+    const rawResults = await sqlQueryArticleDetails(parseInt(articleId));
+
+    // Format results using helper function
+    const articleDetails = formatArticleDetails(rawResults);
+
+    // If no article found, return 404
+    if (!articleDetails) {
+      return res.status(404).json({
+        error: {
+          code: "NOT_FOUND",
+          message: "Article not found",
+          details: `No article exists with ID ${articleId}`,
+          status: 404,
+        },
+      });
+    }
+
+    logger.info(`Successfully retrieved article details for ID ${articleId}`);
+
+    // Return successful response
+    res.status(200).json(articleDetails);
+  } catch (error) {
+    logger.error("Error in GET /articles/article-details/:articleId:", error);
+    res.status(500).json({
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "Failed to retrieve article details",
+        details:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
+        status: 500,
+      },
+    });
+  }
 });
 
 module.exports = router;

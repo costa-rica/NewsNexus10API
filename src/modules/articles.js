@@ -159,8 +159,66 @@ async function createArticlesApprovedArray(dateRequestsLimit) {
   return { requestIdArray, manualFoundCount };
 }
 
+/**
+ * Format article details from SQL query results
+ * Handles multiple human-approved states and single AI-approved state
+ * @param {Array} rawResults - Raw SQL query results from sqlQueryArticleDetails
+ * @returns {Object|null} Formatted article object or null if no article found
+ */
+function formatArticleDetails(rawResults) {
+  if (!rawResults || rawResults.length === 0) {
+    return null;
+  }
+
+  const firstRow = rawResults[0];
+
+  // Build base article data
+  const articleData = {
+    articleId: firstRow.articleId,
+    title: firstRow.title,
+    description: firstRow.description,
+    url: firstRow.url,
+  };
+
+  // Add content if exists
+  if (firstRow.articleContent) {
+    articleData.content = firstRow.articleContent;
+  }
+
+  // Build stateHumanApprovedArray from all rows with human state assignments
+  const humanStatesMap = new Map();
+  for (const row of rawResults) {
+    if (row.humanStateId && !humanStatesMap.has(row.humanStateId)) {
+      humanStatesMap.set(row.humanStateId, {
+        id: row.humanStateId,
+        name: row.humanStateName,
+      });
+    }
+  }
+
+  if (humanStatesMap.size > 0) {
+    articleData.stateHumanApprovedArray = Array.from(humanStatesMap.values());
+  }
+
+  // Build stateAiApproved from first row with AI state assignment
+  if (firstRow.aiStateId) {
+    articleData.stateAiApproved = {
+      promptId: firstRow.aiPromptId,
+      isHumanApproved: firstRow.aiIsHumanApproved,
+      reasoning: firstRow.aiReasoning,
+      state: {
+        id: firstRow.aiStateId,
+        name: firstRow.aiStateName,
+      },
+    };
+  }
+
+  return articleData;
+}
+
 module.exports = {
   createArticlesArrayWithSqlForSemanticKeywordsRating,
   createNewsApiRequestsArray,
   createArticlesApprovedArray,
+  formatArticleDetails,
 };

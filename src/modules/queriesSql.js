@@ -725,6 +725,38 @@ async function sqlQueryArticlesApprovedForComponent(userId) {
   return results;
 }
 
+async function sqlQueryArticleDetails(articleId) {
+  const sql = `
+    SELECT
+      a.id AS "articleId",
+      a.title,
+      a.description,
+      a.url,
+      ac.content AS "articleContent",
+      asc."stateId" AS "humanStateId",
+      s1.name AS "humanStateName",
+      asc2."stateId" AS "aiStateId",
+      s2.name AS "aiStateName",
+      asc2."promptId" AS "aiPromptId",
+      asc2."isHumanApproved" AS "aiIsHumanApproved",
+      asc2."reasoning" AS "aiReasoning"
+    FROM "Articles" a
+    LEFT JOIN "ArticleContents" ac ON ac."articleId" = a.id
+    LEFT JOIN "ArticleStateContracts" asc ON asc."articleId" = a.id
+    LEFT JOIN "States" s1 ON s1.id = asc."stateId"
+    LEFT JOIN "ArticleStateContracts02" asc2 ON asc2."articleId" = a.id
+    LEFT JOIN "States" s2 ON s2.id = asc2."stateId"
+    WHERE a.id = :articleId;
+  `;
+
+  const results = await sequelize.query(sql, {
+    replacements: { articleId },
+    type: sequelize.QueryTypes.SELECT,
+  });
+
+  return results;
+}
+
 module.exports = {
   sqlQueryArticles,
   sqlQueryArticlesOld,
@@ -740,4 +772,5 @@ module.exports = {
   sqlQueryArticlesApprovedForComponent,
   // sqlQueryArticlesForWithRatingsRouteNoAi,
   sqlQueryArticlesAndAiScores,
+  sqlQueryArticleDetails,
 };
