@@ -4,7 +4,7 @@ const { authenticateToken } = require("../../modules/userAuthentication");
 const logger = require("../../modules/logger");
 const {
   ArticleStateContract,
-  ArticleStateContracts02,
+  ArticleStateContract02,
 } = require("newsnexus10db");
 const {
   sqlQueryArticlesWithStateAssignments,
@@ -19,7 +19,7 @@ const { formatArticleDetails } = require("../../modules/articles");
 
 /**
  * POST /analysis/state-assigner/
- * Returns articles with their AI-assigned state data from ArticleStateContracts02
+ * Returns articles with their AI-assigned state data from ArticleStateContract02
  *
  * Request body:
  * {
@@ -156,8 +156,8 @@ router.post(
 
       const parsedArticleId = parseInt(articleId);
 
-      // Check if ArticleStateContracts02 row exists for this articleId and stateId
-      const aiStateRow = await ArticleStateContracts02.findOne({
+      // Check if ArticleStateContract02 row exists for this articleId and stateId
+      const aiStateRow = await ArticleStateContract02.findOne({
         where: {
           articleId: parsedArticleId,
           stateId: stateId,
@@ -176,8 +176,8 @@ router.post(
       }
 
       if (action === "approve") {
-        // Update ArticleStateContracts02 to set isHumanApproved = true
-        await ArticleStateContracts02.update(
+        // Update ArticleStateContract02 to set isHumanApproved = true
+        await ArticleStateContract02.update(
           { isHumanApproved: true },
           {
             where: {
@@ -216,8 +216,8 @@ router.post(
           `Article ${parsedArticleId} state ${stateId} approved by human`
         );
       } else if (action === "reject") {
-        // Update ArticleStateContracts02 to set isHumanApproved = false
-        await ArticleStateContracts02.update(
+        // Update ArticleStateContract02 to set isHumanApproved = false
+        await ArticleStateContract02.update(
           { isHumanApproved: false },
           {
             where: {
