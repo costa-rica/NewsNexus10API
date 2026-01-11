@@ -48,10 +48,10 @@ router.post("/", authenticateToken, async (req, res) => {
   logger.info("- in POST /analysis/state-assigner/");
 
   try {
-    const { includeNullState } = req.body;
+    const { includeNullState } = req.body || {};
 
     // Validate request parameters
-    const validation = validateStateAssignerRequest(req.body);
+    const validation = validateStateAssignerRequest(req.body || {});
     if (!validation.isValid) {
       return res.status(400).json({
         result: false,
