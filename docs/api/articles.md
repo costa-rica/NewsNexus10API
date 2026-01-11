@@ -1363,3 +1363,272 @@ curl -X POST http://localhost:8001/articles/add-article \
 - **Use Case**: Intended for manually found articles not captured by automated NewsAPI/RSS feeds
 
 ---
+
+## GET /articles/article-details/:articleId
+
+Retrieves comprehensive details for a specific article including base article data, article content, human-approved states, and AI-approved state information with metadata. Provides a complete view of the article and all associated state assignments.
+
+**Authentication:** Required (JWT token)
+
+**URL Parameters:**
+
+| Parameter | Type   | Required | Description                           |
+| --------- | ------ | -------- | ------------------------------------- |
+| articleId | number | Yes      | ID of the article to retrieve details |
+
+**Request Body:** None
+
+**Description:**
+
+This endpoint provides a comprehensive view of an article by combining data from multiple tables: Articles, ArticleContents, ArticleStateContracts (human-approved states), ArticleStateContracts02 (AI-approved states), and States. It returns all relevant information needed for detailed article analysis and review.
+
+**Process Flow:**
+
+1. Validates articleId parameter is a valid number
+2. Executes SQL query joining multiple tables:
+   - Articles (base article data)
+   - ArticleContents (scraped article content)
+   - ArticleStateContracts + States (human-approved state assignments)
+   - ArticleStateContracts02 + States (AI-approved state assignment with metadata)
+3. Formats results to handle multiple human-approved states
+4. Returns 404 if article doesn't exist
+5. Returns comprehensive article object with all associated data
+
+**Response (200 OK - Complete Data):**
+
+```json
+{
+  "articleId": 12345,
+  "title": "Fire hazard reported in consumer electronics",
+  "description": "Investigation reveals safety concerns with popular device",
+  "url": "https://example.com/article/12345",
+  "content": "Full scraped article content text goes here...",
+  "stateHumanApprovedArray": [
+    {
+      "id": 5,
+      "name": "California"
+    },
+    {
+      "id": 33,
+      "name": "New York"
+    }
+  ],
+  "stateAiApproved": {
+    "promptId": 5,
+    "isHumanApproved": false,
+    "reasoning": "Article mentions specific location in California and describes product safety incident occurring within state boundaries",
+    "state": {
+      "id": 5,
+      "name": "California"
+    }
+  }
+}
+```
+
+**Response (200 OK - Minimal Data):**
+
+If article exists but has no content or state assignments:
+
+```json
+{
+  "articleId": 12346,
+  "title": "Product recall announced",
+  "description": "Company issues recall for defective items",
+  "url": "https://example.com/article/12346"
+}
+```
+
+**Response (400 Bad Request - Invalid ID):**
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid article ID provided",
+    "details": "Article ID must be a valid number",
+    "status": 400
+  }
+}
+```
+
+**Response (404 Not Found - Article Doesn't Exist):**
+
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Article not found",
+    "details": "No article exists with ID 99999",
+    "status": 404
+  }
+}
+```
+
+**Response (500 Internal Server Error):**
+
+```json
+{
+  "error": {
+    "code": "INTERNAL_ERROR",
+    "message": "Failed to retrieve article details",
+    "details": "Database connection error",
+    "status": 500
+  }
+}
+```
+
+**Response (401 Unauthorized - Missing Token):**
+
+```json
+{
+  "message": "Token is required"
+}
+```
+
+**Response (403 Forbidden - Invalid Token):**
+
+```json
+{
+  "message": "Invalid token"
+}
+```
+
+**Example:**
+
+```bash
+curl -X GET http://localhost:8001/articles/article-details/12345 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Response Fields:**
+
+| Field                    | Type   | Optional | Description                                                       |
+| ------------------------ | ------ | -------- | ----------------------------------------------------------------- |
+| articleId                | number | No       | Unique article identifier                                         |
+| title                    | string | No       | Article headline                                                  |
+| description              | string | No       | Article summary or excerpt                                        |
+| url                      | string | No       | Full URL to the article source                                    |
+| content                  | string | Yes      | Full scraped article content from ArticleContents table           |
+| stateHumanApprovedArray  | array  | Yes      | Array of human-approved state objects from ArticleStateContracts  |
+| stateAiApproved          | object | Yes      | AI-approved state with metadata from ArticleStateContracts02      |
+
+**stateHumanApprovedArray Objects:**
+
+| Field | Type   | Description        |
+| ----- | ------ | ------------------ |
+| id    | number | State ID           |
+| name  | string | Full state name    |
+
+**stateAiApproved Object:**
+
+| Field           | Type    | Description                                           |
+| --------------- | ------- | ----------------------------------------------------- |
+| promptId        | number  | ID of the prompt used for AI analysis                 |
+| isHumanApproved | boolean | Whether a human has approved this AI state assignment |
+| reasoning       | string  | AI's explanation for the state assignment             |
+| state           | object  | State object with id and name fields                  |
+
+**Optional Fields Behavior:**
+
+- **content**: Only included if article has entry in ArticleContents table
+- **stateHumanApprovedArray**: Only included if article has entries in ArticleStateContracts table
+- **stateAiApproved**: Only included if article has entry in ArticleStateContracts02 table with non-null stateId
+
+**Use Cases:**
+
+1. **Article Review**: Get complete article information for manual review and analysis
+2. **State Assignment Verification**: Compare human-approved vs AI-approved state assignments
+3. **Content Analysis**: View full article content alongside metadata for quality assessment
+4. **AI Performance Evaluation**: Review AI reasoning and compare with human assignments
+5. **Article Details Display**: Show comprehensive article information in UI
+
+**Integration Example:**
+
+```javascript
+// Fetch complete article details
+const getArticleDetails = async (articleId) => {
+  const response = await fetch(
+    `http://localhost:8001/articles/article-details/${articleId}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    logger.error("Failed to fetch article:", error.error.message);
+    return null;
+  }
+
+  const article = await response.json();
+
+  // Display article information
+  logger.info(`Title: ${article.title}`);
+  logger.info(`URL: ${article.url}`);
+
+  if (article.content) {
+    logger.info(`Content length: ${article.content.length} characters`);
+  }
+
+  if (article.stateHumanApprovedArray) {
+    logger.info(
+      `Human-approved states: ${article.stateHumanApprovedArray.map((s) => s.name).join(", ")}`
+    );
+  }
+
+  if (article.stateAiApproved) {
+    logger.info(`AI-approved state: ${article.stateAiApproved.state.name}`);
+    logger.info(`AI reasoning: ${article.stateAiApproved.reasoning}`);
+  }
+
+  return article;
+};
+```
+
+**Data Deduplication:**
+
+- **Multiple Human States**: If an article has multiple ArticleStateContracts entries for the same state, only one entry per unique stateId is returned in stateHumanApprovedArray
+- **Single AI State**: ArticleStateContracts02 should have only one entry per article; only the first entry is returned
+
+**Important Notes:**
+
+- All authenticated users can access this endpoint (no admin restriction)
+- Follows ERROR_REQUIREMENTS.md standard for error responses with code, message, details, and status fields
+- Returns 404 with structured error object if article doesn't exist
+- Returns 400 with validation error if articleId is not a valid number
+- Content field may be quite large (full article text); consider pagination or truncation for UI display
+- State assignments from human review (ArticleStateContracts) and AI analysis (ArticleStateContracts02) are kept separate
+- The endpoint uses a single optimized SQL query with multiple LEFT JOINs for performance
+
+**Performance Notes:**
+
+- Single SQL query with multiple LEFT JOINs
+- Efficient for retrieving all related data in one database round trip
+- Typical response time: < 100ms for single article lookup
+- Content field can be large (10-50KB for full article text)
+
+**Error Handling Standards:**
+
+This endpoint follows the ERROR_REQUIREMENTS.md standards:
+
+- **400 errors**: Structured error object with VALIDATION_ERROR code
+- **404 errors**: Structured error object with NOT_FOUND code
+- **500 errors**: Structured error object with INTERNAL_ERROR code
+- **Development mode**: Includes error.message in details field
+- **Production mode**: Omits sensitive error details
+
+**Related Files:**
+
+- Route Implementation: `src/routes/articles.js:1040-1094`
+- SQL Query: `src/modules/queriesSql.js` - `sqlQueryArticleDetails()`
+- Formatting Helper: `src/modules/articles.js` - `formatArticleDetails()`
+- Related Tables: Articles, ArticleContents, ArticleStateContracts, ArticleStateContracts02, States
+
+**Related Endpoints:**
+
+- `POST /articles` - Get filtered list of articles
+- `GET /articles/approved` - Get only approved articles
+- `POST /analysis/state-assigner` - Get articles with AI state assignments for analysis
+- `GET /articles/get-approved/:articleId` - Get approval information for article
+
+---
