@@ -5,6 +5,8 @@ const logger = require("../../modules/logger");
 const {
   ArticleStateContract,
   ArticleStateContract02,
+  ArtificialIntelligence,
+  EntityWhoCategorizedArticle,
 } = require("newsnexus10db");
 const {
   sqlQueryArticlesWithStateAssignments,
@@ -14,12 +16,16 @@ const {
   validateStateAssignerRequest,
   validateHumanVerifyRequest,
 } = require("../../modules/analysis/state-assigner");
-const { sqlQueryArticleDetails } = require("../../modules/queriesSql");
+const {
+  sqlQueryArticleDetails,
+  sqlQueryArticlesAndAiScores,
+} = require("../../modules/queriesSql");
 const { formatArticleDetails } = require("../../modules/articles");
 
 /**
  * POST /analysis/state-assigner/
  * Returns articles with their AI-assigned state data from ArticleStateContract02
+ * and semantic rating scores from NewsNexusSemanticScorer02
  *
  * Request body:
  * {
@@ -38,6 +44,8 @@ const { formatArticleDetails } = require("../../modules/articles");
  *       description: string,
  *       url: string,
  *       createdAt: date,
+ *       semanticRatingMax: number (nullable) - Highest semantic similarity score (0-1 range),
+ *       semanticRatingMaxLabel: string (nullable) - Keyword with highest semantic similarity score,
  *       stateAssignment: {
  *         promptId: number,
  *         isHumanApproved: boolean,
@@ -82,12 +90,67 @@ router.post("/", authenticateToken, async (req, res) => {
       `Successfully retrieved ${formattedArticles.length} articles with state assignments`
     );
 
+    // Fetch semantic scores for articles
+    let articlesWithSemanticScores = formattedArticles;
+    if (formattedArticles.length > 0) {
+      try {
+        // Look up the semantic scorer AI entity (hardcoded)
+        const semanticScorerEntity = await ArtificialIntelligence.findOne({
+          where: { name: "NewsNexusSemanticScorer02" },
+          include: [EntityWhoCategorizedArticle],
+        });
+
+        if (
+          semanticScorerEntity &&
+          semanticScorerEntity.EntityWhoCategorizedArticles?.length
+        ) {
+          const entityWhoCategorizedArticleId =
+            semanticScorerEntity.EntityWhoCategorizedArticles[0].id;
+
+          // Extract article IDs
+          const articleIds = formattedArticles.map((article) => article.id);
+
+          // Fetch AI scores
+          const aiScores = await sqlQueryArticlesAndAiScores(
+            articleIds,
+            entityWhoCategorizedArticleId
+          );
+
+          // Map scores back to articles
+          articlesWithSemanticScores = formattedArticles.map((article) => {
+            const aiScore = aiScores.find(
+              (score) => score.articleId === article.id
+            );
+            return {
+              ...article,
+              semanticRatingMax: aiScore?.keywordRating || null,
+              semanticRatingMaxLabel: aiScore?.keyword || null,
+            };
+          });
+
+          logger.info(
+            `Added semantic scores for ${articlesWithSemanticScores.length} articles`
+          );
+        } else {
+          logger.warn(
+            "NewsNexusSemanticScorer02 AI entity not found or has no EntityWhoCategorizedArticle"
+          );
+        }
+      } catch (scoreError) {
+        logger.error(
+          "Error fetching semantic scores, returning articles without scores:",
+          scoreError
+        );
+        // Continue with articles without scores rather than failing the entire request
+      }
+    }
+
     // Return successful response
     res.status(200).json({
       result: true,
       message: "Successfully retrieved articles with state assignments",
-      count: formattedArticles.length,
-      articles: formattedArticles,
+      count: articlesWithSemanticScores.length,
+      articles: articlesWithSemanticScores,
     });
   } catch (error) {
     logger.error("Error in POST /analysis/state-assigner/:", error);
