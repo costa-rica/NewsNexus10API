@@ -732,13 +732,11 @@ router.post("/with-ratings", authenticateToken, async (req, res) => {
     returnOnlyThisPublishedDateOrAfter,
     returnOnlyThisCreatedAtDateOrAfter,
     semanticScorerEntityName,
-    zeroShotScorerEntityName,
     returnOnlyIsNotApproved,
     returnOnlyIsRelevant,
   } = req.body;
 
   let semanticScorerEntityId;
-  let zeroShotScorerEntityId;
 
   if (semanticScorerEntityName) {
     const semanticScorerEntityObj = await ArtificialIntelligence.findOne({
@@ -747,12 +745,6 @@ router.post("/with-ratings", authenticateToken, async (req, res) => {
     semanticScorerEntityId = semanticScorerEntityObj.id;
   }
 
-  if (zeroShotScorerEntityName) {
-    const zeroShotScorerEntityObj = await ArtificialIntelligence.findOne({
-      where: { name: zeroShotScorerEntityName },
-    });
-    zeroShotScorerEntityId = zeroShotScorerEntityObj.id;
-  }
   // try {
   // 🔹 Step 1: Get full list of articles as base array
   const whereClause = {};
@@ -1038,59 +1030,63 @@ router.get("/test-sql", authenticateToken, async (req, res) => {
 });
 
 // 🔹 GET /articles/article-details/:articleId
-router.get("/article-details/:articleId", authenticateToken, async (req, res) => {
-  logger.info("- in GET /articles/article-details/:articleId");
+router.get(
+  "/article-details/:articleId",
+  authenticateToken,
+  async (req, res) => {
+    logger.info("- in GET /articles/article-details/:articleId");
 
-  try {
-    const { articleId } = req.params;
-    logger.info(`articleId: ${articleId}`);
+    try {
+      const { articleId } = req.params;
+      logger.info(`articleId: ${articleId}`);
 
-    // Validate articleId is a number
-    if (!articleId || isNaN(parseInt(articleId))) {
-      return res.status(400).json({
+      // Validate articleId is a number
+      if (!articleId || isNaN(parseInt(articleId))) {
+        return res.status(400).json({
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Invalid article ID provided",
+            details: "Article ID must be a valid number",
+            status: 400,
+          },
+        });
+      }
+
+      // Query database for article details
+      const rawResults = await sqlQueryArticleDetails(parseInt(articleId));
+
+      // Format results using helper function
+      const articleDetails = formatArticleDetails(rawResults);
+
+      // If no article found, return 404
+      if (!articleDetails) {
+        return res.status(404).json({
+          error: {
+            code: "NOT_FOUND",
+            message: "Article not found",
+            details: `No article exists with ID ${articleId}`,
+            status: 404,
+          },
+        });
+      }
+
+      logger.info(`Successfully retrieved article details for ID ${articleId}`);
+
+      // Return successful response
+      res.status(200).json(articleDetails);
+    } catch (error) {
+      logger.error("Error in GET /articles/article-details/:articleId:", error);
+      res.status(500).json({
         error: {
-          code: "VALIDATION_ERROR",
-          message: "Invalid article ID provided",
-          details: "Article ID must be a valid number",
-          status: 400,
+          code: "INTERNAL_ERROR",
+          message: "Failed to retrieve article details",
+          details:
+            process.env.NODE_ENV === "development" ? error.message : undefined,
+          status: 500,
         },
       });
     }
-
-    // Query database for article details
-    const rawResults = await sqlQueryArticleDetails(parseInt(articleId));
-
-    // Format results using helper function
-    const articleDetails = formatArticleDetails(rawResults);
-
-    // If no article found, return 404
-    if (!articleDetails) {
-      return res.status(404).json({
-        error: {
-          code: "NOT_FOUND",
-          message: "Article not found",
-          details: `No article exists with ID ${articleId}`,
-          status: 404,
-        },
-      });
-    }
-
-    logger.info(`Successfully retrieved article details for ID ${articleId}`);
-
-    // Return successful response
-    res.status(200).json(articleDetails);
-  } catch (error) {
-    logger.error("Error in GET /articles/article-details/:articleId:", error);
-    res.status(500).json({
-      error: {
-        code: "INTERNAL_ERROR",
-        message: "Failed to retrieve article details",
-        details:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-        status: 500,
-      },
-    });
   }
-});
+);
 
 module.exports = router;
