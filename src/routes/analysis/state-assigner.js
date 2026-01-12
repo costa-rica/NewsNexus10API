@@ -24,8 +24,9 @@ const { formatArticleDetails } = require("../../modules/articles");
 
 /**
  * POST /analysis/state-assigner/
- * Returns articles with their AI-assigned state data from ArticleStateContract02
- * and semantic rating scores from NewsNexusSemanticScorer02
+ * Returns articles with their AI-assigned state data from ArticleStateContract02,
+ * semantic rating scores from NewsNexusSemanticScorer02, and location classifier
+ * scores from NewsNexusClassifierLocationScorer01
  *
  * Request body:
  * {
@@ -46,6 +47,8 @@ const { formatArticleDetails } = require("../../modules/articles");
  *       createdAt: date,
  *       semanticRatingMax: number (nullable) - Highest semantic similarity score (0-1 range),
  *       semanticRatingMaxLabel: string (nullable) - Keyword with highest semantic similarity score,
+ *       locationClassifierScore: number (nullable) - Location classifier confidence score (0-1 range),
+ *       locationClassifierScoreLabel: string (nullable) - State name identified by location classifier,
  *       stateAssignment: {
  *         promptId: number,
  *         isHumanApproved: boolean,
@@ -145,12 +148,71 @@ router.post("/", authenticateToken, async (req, res) => {
       }
     }
 
+    // Fetch location classifier scores for articles
+    let articlesWithAllAiScores = articlesWithSemanticScores;
+    if (articlesWithSemanticScores.length > 0) {
+      try {
+        // Look up the location classifier AI entity (hardcoded)
+        const locationClassifierEntity = await ArtificialIntelligence.findOne({
+          where: { name: "NewsNexusClassifierLocationScorer01" },
+          include: [EntityWhoCategorizedArticle],
+        });
+
+        if (
+          locationClassifierEntity &&
+          locationClassifierEntity.EntityWhoCategorizedArticles?.length
+        ) {
+          const entityWhoCategorizedArticleId =
+            locationClassifierEntity.EntityWhoCategorizedArticles[0].id;
+
+          // Extract article IDs
+          const articleIds = articlesWithSemanticScores.map(
+            (article) => article.id
+          );
+
+          // Fetch location classifier scores
+          const locationScores = await sqlQueryArticlesAndAiScores(
+            articleIds,
+            entityWhoCategorizedArticleId
+          );
+
+          // Map scores back to articles
+          articlesWithAllAiScores = articlesWithSemanticScores.map(
+            (article) => {
+              const locationScore = locationScores.find(
+                (score) => score.articleId === article.id
+              );
+              return {
+                ...article,
+                locationClassifierScore: locationScore?.keywordRating || null,
+                locationClassifierScoreLabel: locationScore?.keyword || null,
+              };
+            }
+          );
+
+          logger.info(
+            `Added location classifier scores for ${articlesWithAllAiScores.length} articles`
+          );
+        } else {
+          logger.warn(
+            "NewsNexusClassifierLocationScorer01 AI entity not found or has no EntityWhoCategorizedArticle"
+          );
+        }
+      } catch (scoreError) {
+        logger.error(
+          "Error fetching location classifier scores, returning articles without location scores:",
+          scoreError
+        );
+        // Continue with articles without location scores rather than failing the entire request
+      }
+    }
+
     // Return successful response
     res.status(200).json({
       result: true,
       message: "Successfully retrieved articles with state assignments",
-      count: articlesWithSemanticScores.length,
-      articles: articlesWithSemanticScores,
+      count: articlesWithAllAiScores.length,
+      articles: articlesWithAllAiScores,
     });
   } catch (error) {
     logger.error("Error in POST /analysis/state-assigner/:", error);
