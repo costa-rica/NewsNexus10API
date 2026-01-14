@@ -31,6 +31,7 @@ const { formatArticleDetails } = require("../../modules/articles");
  * Request body:
  * {
  *   includeNullState: boolean (optional) - If true, return articles with null stateId
+ *   targetArticleThresholdDaysOld: number (optional) - Filter articles published within the last N days
  * }
  *
  * Response:
@@ -45,6 +46,7 @@ const { formatArticleDetails } = require("../../modules/articles");
  *       description: string,
  *       url: string,
  *       createdAt: date,
+ *       publishedDate: date,
  *       semanticRatingMax: number (nullable) - Highest semantic similarity score (0-1 range),
  *       semanticRatingMaxLabel: string (nullable) - Keyword with highest semantic similarity score,
  *       locationClassifierScore: number (nullable) - Location classifier confidence score (0-1 range),
@@ -66,7 +68,7 @@ router.post("/", authenticateToken, async (req, res) => {
   logger.info("- in POST /analysis/state-assigner/");
 
   try {
-    const { includeNullState } = req.body || {};
+    const { includeNullState, targetArticleThresholdDaysOld } = req.body || {};
 
     // Validate request parameters
     const validation = validateStateAssignerRequest(req.body || {});
@@ -78,12 +80,13 @@ router.post("/", authenticateToken, async (req, res) => {
     }
 
     logger.info(
-      `Request parameters - includeNullState: ${includeNullState ?? false}`
+      `Request parameters - includeNullState: ${includeNullState ?? false}, targetArticleThresholdDaysOld: ${targetArticleThresholdDaysOld ?? "not provided"}`
     );
 
     // Query database for articles with state assignments
     const rawResults = await sqlQueryArticlesWithStateAssignments({
       includeNullState: includeNullState ?? false,
+      targetArticleThresholdDaysOld,
     });
 
     // Format results for frontend

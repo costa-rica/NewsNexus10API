@@ -5,9 +5,13 @@ const logger = require("../logger");
  * Query articles with their state assignments from ArticleStateContracts02
  * @param {Object} params - Query parameters
  * @param {boolean} params.includeNullState - If true, return articles with null stateId; if false, return only non-null
+ * @param {number} params.targetArticleThresholdDaysOld - Filter articles published within the last N days
  * @returns {Promise<Array>} Array of articles with state assignment data
  */
-async function sqlQueryArticlesWithStateAssignments({ includeNullState }) {
+async function sqlQueryArticlesWithStateAssignments({
+  includeNullState,
+  targetArticleThresholdDaysOld,
+}) {
   const replacements = {};
   const whereClauses = [];
 
@@ -16,6 +20,16 @@ async function sqlQueryArticlesWithStateAssignments({ includeNullState }) {
     whereClauses.push(`asc02."stateId" IS NULL`);
   } else {
     whereClauses.push(`asc02."stateId" IS NOT NULL`);
+  }
+
+  // Filter based on targetArticleThresholdDaysOld parameter
+  if (
+    targetArticleThresholdDaysOld !== undefined &&
+    targetArticleThresholdDaysOld !== null
+  ) {
+    whereClauses.push(
+      `a."publishedDate" > date('now', '-${targetArticleThresholdDaysOld} days')`
+    );
   }
 
   const whereString =
@@ -28,6 +42,7 @@ async function sqlQueryArticlesWithStateAssignments({ includeNullState }) {
       a.description,
       a.url,
       a."createdAt",
+      a."publishedDate",
       asc02."promptId",
       asc02."isHumanApproved",
       asc02."isDeterminedToBeError",
@@ -43,7 +58,7 @@ async function sqlQueryArticlesWithStateAssignments({ includeNullState }) {
   `;
 
   logger.info(
-    `Executing sqlQueryArticlesWithStateAssignments with includeNullState: ${includeNullState}`
+    `Executing sqlQueryArticlesWithStateAssignments with includeNullState: ${includeNullState}, targetArticleThresholdDaysOld: ${targetArticleThresholdDaysOld ?? "not provided"}`
   );
 
   const results = await sequelize.query(sql, {

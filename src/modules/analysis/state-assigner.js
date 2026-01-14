@@ -14,6 +14,7 @@ function formatArticlesWithStateAssignments(rawResults) {
     description: row.description,
     url: row.url,
     createdAt: row.createdAt,
+    publishedDate: row.publishedDate,
     stateAssignment: {
       promptId: row.promptId,
       isHumanApproved: row.isHumanApproved,
@@ -32,7 +33,7 @@ function formatArticlesWithStateAssignments(rawResults) {
  * @returns {Object} Object with isValid and error properties
  */
 function validateStateAssignerRequest(body) {
-  const { includeNullState } = body;
+  const { includeNullState, targetArticleThresholdDaysOld } = body;
 
   // includeNullState is optional, but if provided it should be boolean
   if (
@@ -43,6 +44,26 @@ function validateStateAssignerRequest(body) {
       isValid: false,
       error: "includeNullState must be a boolean value if provided",
     };
+  }
+
+  // targetArticleThresholdDaysOld is optional, but if provided it should be a number
+  if (targetArticleThresholdDaysOld !== undefined) {
+    if (
+      typeof targetArticleThresholdDaysOld !== "number" ||
+      isNaN(targetArticleThresholdDaysOld)
+    ) {
+      return {
+        isValid: false,
+        error: "targetArticleThresholdDaysOld must be a valid number if provided",
+      };
+    }
+
+    if (targetArticleThresholdDaysOld < 0) {
+      return {
+        isValid: false,
+        error: "targetArticleThresholdDaysOld must be a non-negative number",
+      };
+    }
   }
 
   return { isValid: true };

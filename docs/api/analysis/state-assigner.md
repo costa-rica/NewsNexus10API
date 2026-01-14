@@ -17,6 +17,7 @@ Retrieves articles with their AI-assigned state data from the ArticleStateContra
 ### Sample Request
 
 **Without includeNullState (default behavior - returns articles with assigned states):**
+
 ```bash
 curl -X POST http://localhost:8001/analysis/state-assigner/ \
   -H "Authorization: Bearer <jwt_token>" \
@@ -25,6 +26,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/ \
 ```
 
 **With includeNullState=false (explicitly exclude null states):**
+
 ```bash
 curl -X POST http://localhost:8001/analysis/state-assigner/ \
   -H "Authorization: Bearer <jwt_token>" \
@@ -35,6 +37,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/ \
 ```
 
 **With includeNullState=true (return only articles without assigned states):**
+
 ```bash
 curl -X POST http://localhost:8001/analysis/state-assigner/ \
   -H "Authorization: Bearer <jwt_token>" \
@@ -44,11 +47,35 @@ curl -X POST http://localhost:8001/analysis/state-assigner/ \
   }'
 ```
 
+**With targetArticleThresholdDaysOld (return only articles published in last 7 days):**
+
+```bash
+curl -X POST http://localhost:8001/analysis/state-assigner/ \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "targetArticleThresholdDaysOld": 7
+  }'
+```
+
+**Combined parameters (articles without state assigned, published in last 30 days):**
+
+```bash
+curl -X POST http://localhost:8001/analysis/state-assigner/ \
+  -H "Authorization: Bearer <jwt_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "includeNullState": true,
+    "targetArticleThresholdDaysOld": 180
+  }'
+```
+
 ### Request Body Fields
 
-| Field | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| includeNullState | boolean | No | false | If true, returns articles with null stateId; if false, returns only articles with non-null stateId |
+| Field                         | Type    | Required | Default | Description                                                                                                        |
+| ----------------------------- | ------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| includeNullState              | boolean | No       | false   | If true, returns articles with null stateId; if false, returns only articles with non-null stateId                 |
+| targetArticleThresholdDaysOld | number  | No       | none    | Filter to return only articles whose publishedDate is after (current date - N days). Must be a non-negative number |
 
 ### Success Response (200)
 
@@ -64,6 +91,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/ \
       "description": "Investigation reveals safety concerns with popular device",
       "url": "https://example.com/article/1234",
       "createdAt": "2026-01-10T14:30:00.000Z",
+      "publishedDate": "2026-01-09T08:00:00.000Z",
       "semanticRatingMax": 0.89,
       "semanticRatingMaxLabel": "fire hazard",
       "locationClassifierScore": 0.92,
@@ -84,6 +112,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/ \
       "description": "Choking hazard leads to nationwide recall",
       "url": "https://example.com/article/1235",
       "createdAt": "2026-01-09T10:15:00.000Z",
+      "publishedDate": "2026-01-08T12:30:00.000Z",
       "semanticRatingMax": 0.92,
       "semanticRatingMaxLabel": "recall",
       "locationClassifierScore": 0.88,
@@ -113,6 +142,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/ \
   - **description**: Article description
   - **url**: Article URL
   - **createdAt**: Timestamp when article was added to database
+  - **publishedDate**: Timestamp when article was originally published by the news source
   - **semanticRatingMax**: Highest semantic similarity score (0-1 range) from NewsNexusSemanticScorer02 (null if not available)
   - **semanticRatingMaxLabel**: Keyword with highest semantic similarity score (null if not available)
   - **locationClassifierScore**: Location classifier confidence score (0-1 range) from NewsNexusClassifierLocationScorer01 (null if not available)
@@ -128,7 +158,8 @@ curl -X POST http://localhost:8001/analysis/state-assigner/ \
 
 ### Error Responses
 
-**Invalid parameter type (400)**
+**Invalid includeNullState parameter type (400)**
+
 ```json
 {
   "result": false,
@@ -136,7 +167,26 @@ curl -X POST http://localhost:8001/analysis/state-assigner/ \
 }
 ```
 
+**Invalid targetArticleThresholdDaysOld parameter type (400)**
+
+```json
+{
+  "result": false,
+  "message": "targetArticleThresholdDaysOld must be a valid number if provided"
+}
+```
+
+**Invalid targetArticleThresholdDaysOld parameter value (400)**
+
+```json
+{
+  "result": false,
+  "message": "targetArticleThresholdDaysOld must be a non-negative number"
+}
+```
+
 **Internal server error (500)**
+
 ```json
 {
   "result": false,
@@ -152,7 +202,12 @@ curl -X POST http://localhost:8001/analysis/state-assigner/ \
 - Sorted by newest first (createdAt DESC)
 - When `includeNullState=false` or not provided: returns articles with assigned states (stateId IS NOT NULL)
 - When `includeNullState=true`: returns articles without assigned states (stateId IS NULL)
+- When `targetArticleThresholdDaysOld` is provided: filters articles to only those where publishedDate > (current date - N days)
+  - Uses SQLite `date('now', '-N days')` for date calculation
+  - Example: `targetArticleThresholdDaysOld: 7` returns articles published in the last 7 days
+  - Can be combined with `includeNullState` for more specific filtering
 - Joins Article, ArticleStateContracts02, and State tables
+- Includes `publishedDate` from Articles table in response
 - Fetches semantic rating scores from NewsNexusSemanticScorer02 AI entity (hardcoded)
 - Fetches location classifier scores from NewsNexusClassifierLocationScorer01 AI entity (hardcoded)
 - If either AI entity is not found or fails, articles are returned without those scores (graceful degradation)
@@ -168,20 +223,21 @@ Approve or reject an AI-assigned state for an article. Updates ArticleStateContr
 
 ### URL Parameters
 
-| Parameter | Type   | Required | Description                     |
-|-----------|--------|----------|---------------------------------|
-| articleId | number | Yes      | ID of the article to verify     |
+| Parameter | Type   | Required | Description                 |
+| --------- | ------ | -------- | --------------------------- |
+| articleId | number | Yes      | ID of the article to verify |
 
 ### Request Body Fields
 
-| Field   | Type   | Required | Description                                                    |
-|---------|--------|----------|----------------------------------------------------------------|
-| action  | string | Yes      | Action to perform: "approve" or "reject"                       |
-| stateId | number | Yes      | ID of the state to approve/reject from AI assignment           |
+| Field   | Type   | Required | Description                                          |
+| ------- | ------ | -------- | ---------------------------------------------------- |
+| action  | string | Yes      | Action to perform: "approve" or "reject"             |
+| stateId | number | Yes      | ID of the state to approve/reject from AI assignment |
 
 ### Sample Request
 
 **Approve AI-assigned state:**
+
 ```bash
 curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
   -H "Authorization: Bearer <jwt_token>" \
@@ -193,6 +249,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 ```
 
 **Reject AI-assigned state:**
+
 ```bash
 curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
   -H "Authorization: Bearer <jwt_token>" \
@@ -206,6 +263,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 ### Success Response (200)
 
 **Approve action:**
+
 ```json
 {
   "status": "Article state approved successfully",
@@ -228,6 +286,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 ```
 
 **Reject action:**
+
 ```json
 {
   "status": "Article state rejected successfully",
@@ -246,15 +305,16 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 
 ### Response Fields
 
-| Field                    | Type   | Description                                                               |
-|--------------------------|--------|---------------------------------------------------------------------------|
-| status                   | string | Success message indicating whether state was approved or rejected         |
-| stateHumanApprovedArray  | array  | Array of human-approved states from ArticleStateContracts (same as GET /articles/article-details/:articleId) |
-| stateAiApproved          | object | AI-approved state data from ArticleStateContracts02 (same as GET /articles/article-details/:articleId) |
+| Field                   | Type   | Description                                                                                                  |
+| ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
+| status                  | string | Success message indicating whether state was approved or rejected                                            |
+| stateHumanApprovedArray | array  | Array of human-approved states from ArticleStateContracts (same as GET /articles/article-details/:articleId) |
+| stateAiApproved         | object | AI-approved state data from ArticleStateContracts02 (same as GET /articles/article-details/:articleId)       |
 
 ### Error Responses
 
 **Invalid article ID (400)**
+
 ```json
 {
   "error": {
@@ -267,6 +327,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 ```
 
 **Missing or invalid action (400)**
+
 ```json
 {
   "error": {
@@ -278,6 +339,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 ```
 
 **Missing or invalid stateId (400)**
+
 ```json
 {
   "error": {
@@ -289,6 +351,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 ```
 
 **AI state assignment not found (404)**
+
 ```json
 {
   "error": {
@@ -301,6 +364,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 ```
 
 **State already approved (409)**
+
 ```json
 {
   "error": {
@@ -313,6 +377,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 ```
 
 **Internal server error (500)**
+
 ```json
 {
   "error": {
@@ -327,6 +392,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 ### Behavior
 
 **Approve Action:**
+
 1. Updates ArticleStateContracts02: Sets `isHumanApproved = true` for the row matching both `articleId` AND `stateId`
 2. Checks if row already exists in ArticleStateContracts with same `articleId` and `stateId`
    - If exists: Returns 409 CONFLICT error
@@ -335,6 +401,7 @@ curl -X POST http://localhost:8001/analysis/state-assigner/human-verify/1234 \
 4. Returns updated `stateHumanApprovedArray` and `stateAiApproved`
 
 **Reject Action:**
+
 1. Updates ArticleStateContracts02: Sets `isHumanApproved = false` for the row matching both `articleId` AND `stateId`
 2. Deletes row from ArticleStateContracts where `articleId` AND `stateId` match
    - If row doesn't exist, deletion is skipped (no error)
