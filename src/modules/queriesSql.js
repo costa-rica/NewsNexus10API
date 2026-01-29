@@ -476,7 +476,16 @@ async function sqlQueryArticlesForWithRatingsRoute(
 
       ar.id AS "ArticleReviewed.id",
       ar."userId" AS "ArticleReviewed.userId",
-      ar."articleId" AS "ArticleReviewed.articleId"
+      ar."articleId" AS "ArticleReviewed.articleId",
+
+      -- AI State Assignment fields from ArticleStateContracts02
+      asc02."promptId" AS "StateAssignment.promptId",
+      asc02."isHumanApproved" AS "StateAssignment.isHumanApproved",
+      asc02."isDeterminedToBeError" AS "StateAssignment.isDeterminedToBeError",
+      asc02."occuredInTheUS" AS "StateAssignment.occuredInTheUS",
+      asc02."reasoning" AS "StateAssignment.reasoning",
+      asc02."stateId" AS "StateAssignment.stateId",
+      s2.name AS "StateAssignment.stateName"
 
     FROM "Articles" a
     LEFT JOIN "ArticleIsRelevants" air ON air."articleId" = a.id
@@ -488,6 +497,10 @@ async function sqlQueryArticlesForWithRatingsRoute(
     LEFT JOIN "NewsArticleAggregatorSources" nas ON nas.id = nar."newsArticleAggregatorSourceId"
 
     LEFT JOIN "ArticleRevieweds" ar ON ar."articleId" = a.id
+
+    -- Join AI state assignments from ArticleStateContracts02
+    LEFT JOIN "ArticleStateContracts02" asc02 ON asc02."articleId" = a.id
+    LEFT JOIN "States" s2 ON s2.id = asc02."stateId"
     ${whereClause}
     ORDER BY a.id;
   `;
@@ -529,6 +542,15 @@ async function sqlQueryArticlesForWithRatingsRoute(
       "States.abbreviation": stateAbbr,
       "States.createdAt": stateCreatedAt,
       "States.updatedAt": stateUpdatedAt,
+
+      // AI State Assignment from ArticleStateContracts02
+      "StateAssignment.promptId": saPromptId,
+      "StateAssignment.isHumanApproved": saIsHumanApproved,
+      "StateAssignment.isDeterminedToBeError": saIsDeterminedToBeError,
+      "StateAssignment.occuredInTheUS": saOccuredInTheUS,
+      "StateAssignment.reasoning": saReasoning,
+      "StateAssignment.stateId": saStateId,
+      "StateAssignment.stateName": saStateName,
     } = row;
 
     if (!articleMap[id]) {
@@ -558,6 +580,16 @@ async function sqlQueryArticlesForWithRatingsRoute(
         ArticleIsRelevants: [],
         ArticleApproveds: [],
         ArticleRevieweds: [],
+        // Add StateAssignment object if data exists
+        StateAssignment: saPromptId !== null && saPromptId !== undefined ? {
+          promptId: saPromptId,
+          isHumanApproved: Boolean(saIsHumanApproved), // Convert 0/1 to boolean
+          isDeterminedToBeError: Boolean(saIsDeterminedToBeError), // Convert 0/1 to boolean
+          occuredInTheUS: Boolean(saOccuredInTheUS), // Convert 0/1 to boolean
+          reasoning: saReasoning,
+          stateId: saStateId,
+          stateName: saStateName,
+        } : null,
       };
     }
 

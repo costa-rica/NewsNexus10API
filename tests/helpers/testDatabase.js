@@ -33,6 +33,7 @@ async function seedArticlesWithRatingsData() {
     ArticleApproved,
     ArticleIsRelevant,
     ArticleStateContract,
+    ArticleStateContract02,
     NewsApiRequest,
     NewsArticleAggregatorSource,
     EntityWhoFoundArticle,
@@ -41,6 +42,7 @@ async function seedArticlesWithRatingsData() {
     ArticleEntityWhoCategorizedArticleContract,
     ArticleReviewed,
     User,
+    Prompt,
   } = require("newsnexus10db");
 
   // Create a test user
@@ -123,6 +125,14 @@ async function seedArticlesWithRatingsData() {
     name: "LocationScorerEntity",
   });
 
+  // Create a Prompt for AI state assignments
+  const prompt = await Prompt.create({
+    id: 5,
+    name: "State Assignment Prompt",
+    prompt: "Determine which US state this article is about",
+    promptInMarkdown: "Determine which US state this article is about",
+  });
+
   // Create Article 1 - Approved with 2 states
   const article1 = await Article.create({
     id: 1,
@@ -164,6 +174,19 @@ async function seedArticlesWithRatingsData() {
     keywordRating: 0.91,
   });
 
+  // Add AI state assignment for article 1
+  // Using a state assigner AI entity (we'll use the semantic scorer entity as a placeholder)
+  await ArticleStateContract02.create({
+    articleId: article1.id,
+    promptId: prompt.id,
+    stateId: california.id,
+    entityWhoCategorizesId: entitySemanticScorer.id,
+    isHumanApproved: false,
+    isDeterminedToBeError: false,
+    occuredInTheUS: true,
+    reasoning: "Article mentions specific location in California and describes product safety incident",
+  });
+
   // Create Article 2 - Not relevant, not approved
   const article2 = await Article.create({
     id: 2,
@@ -197,7 +220,19 @@ async function seedArticlesWithRatingsData() {
     keywordRating: 0.65,
   });
 
-  // Create Article 3 - One state, not approved
+  // Add AI state assignment for article 2
+  await ArticleStateContract02.create({
+    articleId: article2.id,
+    promptId: prompt.id,
+    stateId: texas.id,
+    entityWhoCategorizesId: entitySemanticScorer.id,
+    isHumanApproved: true,
+    isDeterminedToBeError: false,
+    occuredInTheUS: true,
+    reasoning: "Article reports incident in Texas with product recall",
+  });
+
+  // Create Article 3 - One state, not approved (no AI state assignment to test null case)
   const article3 = await Article.create({
     id: 3,
     title: "Test Article 3",

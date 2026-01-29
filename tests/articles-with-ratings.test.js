@@ -230,6 +230,14 @@ describe("POST /articles/with-ratings (Real Data)", () => {
           }
         });
       });
+
+      test("stateAssignment should be object or null", () => {
+        articlesArray.forEach((article) => {
+          if (article.stateAssignment !== undefined && article.stateAssignment !== null) {
+            expect(typeof article.stateAssignment).toBe("object");
+          }
+        });
+      });
     });
 
     describe("States Array Structure Validation", () => {
@@ -242,6 +250,40 @@ describe("POST /articles/with-ratings (Real Data)", () => {
               expect(state).toHaveProperty("name");
               expect(typeof state.name).toBe("string");
             });
+          }
+        });
+      });
+    });
+
+    describe("State Assignment Structure Validation", () => {
+      test("when stateAssignment exists, it should have all required properties", () => {
+        articlesArray.forEach((article) => {
+          if (article.stateAssignment) {
+            expect(article.stateAssignment).toHaveProperty("promptId");
+            expect(article.stateAssignment).toHaveProperty("isHumanApproved");
+            expect(article.stateAssignment).toHaveProperty("isDeterminedToBeError");
+            expect(article.stateAssignment).toHaveProperty("occuredInTheUS");
+            expect(article.stateAssignment).toHaveProperty("reasoning");
+            expect(article.stateAssignment).toHaveProperty("stateId");
+            expect(article.stateAssignment).toHaveProperty("stateName");
+          }
+        });
+      });
+
+      test("stateAssignment properties should have correct types when present", () => {
+        articlesArray.forEach((article) => {
+          if (article.stateAssignment) {
+            expect(typeof article.stateAssignment.promptId).toBe("number");
+            expect(typeof article.stateAssignment.isHumanApproved).toBe("boolean");
+            expect(typeof article.stateAssignment.isDeterminedToBeError).toBe("boolean");
+            expect(typeof article.stateAssignment.occuredInTheUS).toBe("boolean");
+            expect(typeof article.stateAssignment.reasoning).toBe("string");
+            if (article.stateAssignment.stateId !== null) {
+              expect(typeof article.stateAssignment.stateId).toBe("number");
+            }
+            if (article.stateAssignment.stateName !== null) {
+              expect(typeof article.stateAssignment.stateName).toBe("string");
+            }
           }
         });
       });
@@ -354,6 +396,30 @@ describe("POST /articles/with-ratings (Real Data)", () => {
     test("second article should have correct nameOfOrg", () => {
       const article = articlesArray[1];
       expect(article.nameOfOrg).toBe("GNews");
+    });
+
+    test("first article should have stateAssignment with California", () => {
+      const article = articlesArray[0];
+      expect(article.stateAssignment).not.toBeNull();
+      expect(article.stateAssignment.stateId).toBe(1);
+      expect(article.stateAssignment.stateName).toBe("California");
+      expect(article.stateAssignment.promptId).toBe(5);
+      expect(article.stateAssignment.isHumanApproved).toBe(false);
+      expect(article.stateAssignment.occuredInTheUS).toBe(true);
+      expect(article.stateAssignment.reasoning).toContain("California");
+    });
+
+    test("second article should have stateAssignment with Texas and human approved", () => {
+      const article = articlesArray[1];
+      expect(article.stateAssignment).not.toBeNull();
+      expect(article.stateAssignment.stateId).toBe(2);
+      expect(article.stateAssignment.stateName).toBe("Texas");
+      expect(article.stateAssignment.isHumanApproved).toBe(true);
+    });
+
+    test("third article should have null stateAssignment (no AI assignment)", () => {
+      const article = articlesArray[2];
+      expect(article.stateAssignment).toBeNull();
     });
   });
 });

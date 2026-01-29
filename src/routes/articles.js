@@ -911,6 +911,7 @@ router.post("/with-ratings", authenticateToken, async (req, res) => {
       locationClassifierScoreLabel: article.locationClassifierScoreLabel,
       locationClassifierScore: article.locationClassifierScore,
       isBeingReviewed,
+      stateAssignment: article.StateAssignment, // Add AI state assignment data
     };
   });
 
